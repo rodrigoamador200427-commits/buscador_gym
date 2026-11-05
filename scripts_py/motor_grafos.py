@@ -1,3 +1,4 @@
+import random
 import sys
 import json
 import unicodedata
@@ -85,12 +86,35 @@ class MotorGrafoConocimiento:
             }
         }
         
-        # RANDOM WALK (Fallback): Si buscan algo genérico como "rutina" o "fuerza"
-        self.salto_generico = {
-            "arbol_destino": "Recuperación y Sueño",
-            "razon": "Cualquier rutina falla si no hay recuperación. La clave de la hipertrofia ocurre mientras duermes.",
-            "query_teorica": "sueno recuperacion hormona crecimiento cortisol descanso reparacion rendimiento"
-        }
+        # POOL DE SERENDIPIA DINÁMICA (Random Walk)
+        # Si la búsqueda no activa un músculo, el motor salta aleatoriamente a uno de estos universos:
+        self.pool_saltos_genericos = [
+            {
+                "arbol_destino": "Recuperación y Sueño",
+                "razon": "El músculo no crece en el gimnasio, crece en la cama. Prioriza tu descanso.",
+                "query_teorica": "sueno melatonina ritmo circadiano descanso"
+            },
+            {
+                "arbol_destino": "Nutrición y Metabolismo",
+                "razon": "El entrenamiento es solo el estímulo, pero la comida es el material de construcción.",
+                "query_teorica": "superavit deficit calorias macros proteina"
+            },
+            {
+                "arbol_destino": "Suplementación Científica",
+                "razon": "Potencia tu esfuerzo físico con suplementos que tienen evidencia comprobada.",
+                "query_teorica": "creatina monohidrato cafeina rendimiento suplemento"
+            },
+            {
+                "arbol_destino": "Prevención y Movilidad",
+                "razon": "Un atleta lesionado no progresa. No ignores el calentamiento y la movilidad.",
+                "query_teorica": "movilidad estiramiento calentamiento flexibilidad prevencion"
+            },
+            {
+                "arbol_destino": "Fisiología del Esfuerzo",
+                "razon": "Entender cómo funciona la fatiga te ayudará a programar mejores entrenamientos.",
+                "query_teorica": "sistema nervioso central fatiga sobreentrenamiento volumen"
+            }
+        ]
 
     def extraer_salto_semantico(self, query):
         tokens = query.split()
@@ -103,7 +127,8 @@ class MotorGrafoConocimiento:
                     return datos_salto # Retorna el primer salto encontrado
         
         # Si no hubo match anatómico, devolvemos el salto genérico (Serendipia garantizada)
-        return self.salto_generico
+       # Si no hubo match anatómico, inyectamos serendipia aleatoria controlada
+        return random.choice(self.pool_saltos_genericos)
 
 if __name__ == "__main__":
     query_usuario = normalizar_texto(sys.argv[1]) if len(sys.argv) > 1 else ""

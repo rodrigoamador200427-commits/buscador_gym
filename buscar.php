@@ -30,7 +30,7 @@ try {
         $palabras_clave = explode(" ", $tags_teoricos);
         $condiciones_sql = [];
         foreach ($palabras_clave as $palabra) {
-            $condiciones_sql[] = "etiquetas LIKE '%" . $conexion->quote(trim($palabra)) . "%'";
+            $condiciones_sql[] = "etiquetas LIKE " . $conexion->quote("%" . trim($palabra) . "%");
         }
         
         // Hacemos una búsqueda EXCLUSIVA en tu tabla de artículos cruzando el conocimiento
@@ -101,7 +101,8 @@ try {
             $is_liked = $check_like->fetch() ? true : false;
 
             if ($origen === 'ejercicios') {
-                $s = $conexion->query("SELECT nombre_es, equipamiento, descripcion_es FROM ejercicios WHERE id = $id");
+                $s = $conexion->prepare("SELECT nombre_es, equipamiento, descripcion_es FROM ejercicios WHERE id = ?");
+                $s->execute([$id]);
                 $data = $s->fetch(PDO::FETCH_ASSOC);
                 if($data) {
                     $resultados_finales[] = [
@@ -117,7 +118,8 @@ try {
                 }
             } 
             elseif ($origen === 'articulos') {
-                $s = $conexion->query("SELECT titulo, etiquetas, contenido FROM articulos WHERE id = $id");
+                $s = $conexion->prepare("SELECT titulo, etiquetas, contenido FROM articulos WHERE id = ?");
+                $s->execute([$id]);
                 $data = $s->fetch(PDO::FETCH_ASSOC);
                 if($data) {
                     $resultados_finales[] = [
@@ -133,7 +135,8 @@ try {
                 }
             } 
             elseif ($origen === 'alimentos') {
-                $s = $conexion->query("SELECT nombre_es, calorias_kcal FROM alimentos WHERE id = $id");
+                $s = $conexion->prepare("SELECT nombre_es, calorias_kcal FROM alimentos WHERE id = ?");
+                $s->execute([$id]);
                 $data = $s->fetch(PDO::FETCH_ASSOC);
                 if($data) {
                     $resultados_finales[] = [

@@ -83,6 +83,12 @@
         .status-msg { padding: 40px; text-align: center; color: var(--text-muted); font-size: 1.1rem; border: 2px dashed var(--border); border-radius: 16px; }
         .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--accent); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Tarjeta de Serendipia / Grafo de Conocimiento */
+        .serendipity-card { background: linear-gradient(145deg, #fffbeb, #fef3c7); border: 2px solid #fbbf24; border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 10px 20px -5px rgba(251, 191, 36, 0.3); }
+        .serendipity-header { display: flex; align-items: center; gap: 8px; color: #d97706; font-weight: 800; font-size: 1.1rem; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .serendipity-path { font-family: monospace; font-size: 0.85rem; background: #fef08a; color: #854d0e; padding: 8px 12px; border-radius: 8px; display: inline-block; margin-bottom: 16px; border: 1px dashed #ca8a04; }
+        .serendipity-reason { font-style: italic; color: #92400e; font-size: 0.95rem; margin-bottom: 16px; border-left: 4px solid #fbbf24; padding-left: 12px; line-height: 1.5; }
     </style>
 </head>
 <body>
@@ -132,7 +138,9 @@
                 <h2 id="sectionTitle" class="section-title">Para Ti</h2>
                 <div id="statsBar" class="stats">Cargando motor...</div>
             </div>
-            
+
+            <div id="discoveryZone"></div>
+
             <div id="resultsGrid" class="results-grid">
                 <!-- Se llena vía JS -->
                 <div class="status-msg"><div class="loader"></div> Calculando distancias vectoriales...</div>
@@ -268,10 +276,18 @@
             fetch(`buscar.php?q=${encodeURIComponent(query)}`)
                 .then(res => res.json())
                 .then(data => {
-                    currentData = data;
+                    if (data.status === 'error') throw new Error(data.mensaje);
+                    
+                    // 1. Guardar SOLO el arreglo de ejercicios para los filtros
+                    currentData = data.resultados || [];
+                    
+                    // 2. Dibujar la tarjeta del Grafo de Conocimiento si existe
+                    renderDescubrimiento(data.descubrimiento);
+                    
+                    // 3. Renderizar la cuadrícula normal de ejercicios
                     renderCards();
                 })
-                .catch(err => showError(err));
+                .catch(err => showError(err.message));
         }, 300); // Debounce de 300ms
     });
 
@@ -357,6 +373,46 @@
     function showError(msg) {
         resultsGrid.innerHTML = `<div class="status-msg" style="color:var(--like)">Error de conexión con el motor: ${msg}</div>`;
         statsBar.textContent = 'Error crítico';
+    }
+
+    function renderDescubrimiento(descubrimiento) {
+        const discoveryZone = document.getElementById('discoveryZone');
+        
+        // Si no hay salto semántico, limpiamos la zona y salimos
+        if (!descubrimiento) {
+            discoveryZone.innerHTML = '';
+            return;
+        }
+
+        // Construimos la tarjeta dorada
+        discoveryZone.innerHTML = `
+            <div class="serendipity-card">
+                <div class="serendipity-header">
+                    <span> Recomendacion diferente </span>
+                </div>
+                
+                <div class="serendipity-path">
+                    Grafo: [${descubrimiento.arbol_origen}] 🔗 cruzado con 🔗 [${descubrimiento.arbol_destino}]
+                </div>
+                
+                <div class="serendipity-reason">
+                    <strong>Razón Algorítmica:</strong> ${descubrimiento.razon_algoritmica}
+                </div>
+                
+                <div class="card-header">
+                    <h4 class="card-title" style="color: #92400e;">${descubrimiento.titulo}</h4>
+                </div>
+                <p class="card-snippet" style="color: #78350f;">${descubrimiento.snippet}</p>
+                
+                <div class="card-footer" style="border-top-color: #fcd34d;">
+                    <div class="meta-tags">
+                        <span class="badge badge-Teoría">${descubrimiento.tipo}</span>
+                        <span class="badge badge-info">${descubrimiento.tags}</span>
+                    </div>
+                    <span class="score" style="background:#fef08a; color:#b45309;">${descubrimiento.score}</span>
+                </div>
+            </div>
+        `;
     }
 </script>
 
