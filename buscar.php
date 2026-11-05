@@ -13,59 +13,50 @@ try {
     }
 
     // =========================================================================
-    // NUEVA CAPA: EXTRACCIÓN DEL GRAFO DE CONOCIMIENTO (EL EFECTO DISNEY)
+    // UNA SOLA LLAMADA A PYTHON: raíces de la consulta + descubrimiento por árboles
+    // (reemplaza motor_grafos.py y stem_query.py; ya no hay random ni LIKE ... LIMIT 1)
     // =========================================================================
-    // Aquí es donde Python busca la Serendipia y los saltos hacia la Teoría
-    $comando_grafo = "python scripts_py/motor_grafos.py " . escapeshellarg($busquedaBruta);
-    $respuesta_grafo = json_decode(shell_exec($comando_grafo), true);
+    $salida = shell_exec("python scripts_py/motor_arboles.py " . escapeshellarg($busquedaBruta));
+    $motor = json_decode($salida ?? '', true);
 
-    $articulo_serendipia = null; // Aquí guardaremos el artículo teórico recomendado
-
-    if (isset($respuesta_grafo['status']) && $respuesta_grafo['status'] === 'success') {
-        $datos_salto = $respuesta_grafo['salto_semantico'];
-        // Leemos 'query_teorica' que es como lo definimos en Python
-        $tags_teoricos = $datos_salto['query_teorica'];
-        
-        // Convertimos los tags en un array para buscar en la base de datos de artículos
-        $palabras_clave = explode(" ", $tags_teoricos);
-        $condiciones_sql = [];
-        foreach ($palabras_clave as $palabra) {
-            $condiciones_sql[] = "etiquetas LIKE " . $conexion->quote("%" . trim($palabra) . "%");
-        }
-        
-        // Hacemos una búsqueda EXCLUSIVA en tu tabla de artículos cruzando el conocimiento
-        // Unimos con OR para traer el artículo que más encaje con el salto
-        $sql_teoria = "SELECT id, titulo, contenido, etiquetas FROM articulos WHERE " . implode(" OR ", $condiciones_sql) . " LIMIT 1";
-        $stmt_teoria = $conexion->query($sql_teoria);
-        $articulo_db = $stmt_teoria->fetch(PDO::FETCH_ASSOC);
-        
-        if ($articulo_db) {
-            $articulo_serendipia = [
-                'arbol_origen' => "Práctico/Anatomía",
-                'arbol_destino' => $datos_salto['arbol_destino'],
-                'razon_algoritmica' => $datos_salto['razon'],
-                'doc_id' => $articulo_db['id'],
-                'origen' => 'articulos',
-                'tipo' => 'Teoría',
-                'titulo' => $articulo_db['titulo'],
-                'snippet' => substr($articulo_db['contenido'], 0, 150) . "...",
-                'tags' => explode(',', $articulo_db['etiquetas'])[0],
-                // Como es una sugerencia directa del grafo, no tiene un score matemático como tal, 
-                // le ponemos uno simbólico alto o lo indicamos como 'Serendipia'
-                'score' => 'Salto Semántico' 
-            ];
-        }
+    $raices = [];
+    $articulo_serendipia = null;
+    $debug_motor = null;
+    if (!is_array($motor) || ($motor['status'] ?? '') !== 'success') {
+        // Si Python falla, lo vemos en la respuesta en vez de quedarnos con 0 resultados mudos
+        $debug_motor = is_array($motor) ? ($motor['mensaje'] ?? 'error') : ('salida no JSON: ' . substr((string)$salida, 0, 300));
     }
 
+    if (is_array($motor) && ($motor['status'] ?? '') === 'success') {
+        $raices = $motor['raices'] ?? [];
+        $d = $motor['descubrimiento'] ?? [];
+        $doc = $d['documentos'][0] ?? null;   // ya viene ordenado y es determinista
+
+        if ($doc && $doc['origen'] === 'articulos') {
+            $stmt_teoria = $conexion->prepare("SELECT id, titulo, contenido, etiquetas FROM articulos WHERE id = ?");
+            $stmt_teoria->execute([(int)$doc['doc_id']]);
+            $articulo_db = $stmt_teoria->fetch(PDO::FETCH_ASSOC);
+            if ($articulo_db) {
+                $articulo_serendipia = [
+                    'via' => $d['via'],
+                    'arbol_origen' => $d['origen']['ruta_texto'] ?? '',
+                    'arbol_destino' => $d['destino']['ruta_texto'] ?? '',
+                    'razon_algoritmica' => $d['razon'],
+                    'doc_id' => $articulo_db['id'],
+                    'origen' => 'articulos',
+                    'tipo' => 'Teoría',
+                    'titulo' => $articulo_db['titulo'],
+                    'snippet' => mb_substr($articulo_db['contenido'], 0, 150) . "...",
+                    'tags' => explode(',', $articulo_db['etiquetas'])[0],
+                    'score' => 'Salto Semántico'
+                ];
+            }
+        }
+    }
 
     // =========================================================================
     // CAPA ORIGINAL: MOTOR TF-IDF (Búsqueda Exacta en Índice Inverso)
     // =========================================================================
-
-    // 2. Ejecutar script de Python para obtener las raíces (Stemming) de la búsqueda original
-    $comando_stem = "python scripts_py/stem_query.py " . escapeshellarg($busquedaBruta);
-    $raicesString = shell_exec($comando_stem);
-    $raices = array_filter(explode(' ', trim($raicesString)));
 
     $resultados_finales = [];
 
@@ -161,7 +152,8 @@ try {
     echo json_encode([
         'status' => 'success',
         'resultados' => $resultados_finales,     // Lista normal para tu index.html
-        'descubrimiento' => $articulo_serendipia // La recomendación sorpresa del Grafo
+        'descubrimiento' => $articulo_serendipia, // La recomendación sorpresa del Grafo
+        'debug_motor' => $debug_motor
     ]);
 
 } catch(Exception $e) {
