@@ -40,6 +40,10 @@ class Aristas:
     def docs(self, id_musculo, id_tema):
         return list(self._docs.get((id_musculo, id_tema), []))
 
+    def items(self):
+        """[((id_musculo, id_tema), [doc_id])] ordenado (determinista)."""
+        return sorted((k, sorted(v)) for k, v in self._docs.items())
+
     def total(self):
         return len(self._docs)
 

@@ -22,6 +22,9 @@ def normalizar_consulta(texto):
 
 def raices_de(consulta, vocabulario, stemmer, stop_words, tesauro, esqueleto):
     """-> lista de raíces (sin repetir, en orden). `esqueleto` = strip_vowels de stem_query."""
+    # Las stopwords de NLTK traen acentos ("más", "está") y la consulta ya viene sin ellos:
+    # se normalizan igual para que coincidan.
+    stop_words = {normalizar_consulta(w) for w in stop_words}
     mapa = {}
     for termino in sorted(vocabulario):
         mapa.setdefault(esqueleto(termino), termino)

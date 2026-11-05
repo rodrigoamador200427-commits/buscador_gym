@@ -156,3 +156,36 @@ def temas_del_articulo(etiquetas):
     if not temas and musculos_de_etiquetas(etiquetas):
         temas = [TEMA_POR_DEFECTO_ANATOMICO]
     return temas
+
+
+# ---------------------------------------------------------------------------
+# STOPWORDS DE CONSULTA, en capas (solo afectan a lo que ESCRIBE el usuario; el índice no se toca)
+#   1. Gramaticales: las de NLTK (nlp_processor.stop_words), se aplican igual que en el indexador.
+#   2. Intención/pregunta: palabras que piden algo pero no describen el tema ("quiero", "como").
+#   3. Objetivo (PROTEGIDAS): palabras con significado de dominio. NUNCA se eliminan.
+#      El stopwords.txt original mezclaba estas con las gramaticales (fuerza, hipertrofia, masa, peso...):
+#      por eso no se puede usar tal cual.
+# ---------------------------------------------------------------------------
+PALABRAS_INTENCION = {
+    "quiero", "quisiera", "necesito", "busco", "puedo", "podria", "hacer", "hago", "hacerlo",
+    "dame", "dime", "ayuda", "ayudame", "como", "cual", "cuales", "donde", "cuando", "porque",
+    "tips", "consejos", "consejo",
+}
+
+OBJETIVO_PROTEGIDO = {
+    "fuerza", "fuerte", "hipertrofia", "masa", "muscular", "musculo", "peso", "grasa", "volumen",
+    "ganar", "bajar", "subir", "perder", "definicion", "resistencia", "dieta", "proteina", "calorias",
+    "rutina", "ejercicio", "ejercicios", "entrenamiento", "entrenar", "recuperacion", "descanso",
+}
+
+# Expansión de consulta: cuando el usuario expresa un objetivo con SUS palabras, se añade el
+# vocabulario con el que los documentos hablan de ese tema (lo que de verdad está en el índice).
+EXPANSION_TEMA = {
+    "Fuerza": ["fuerza", "potencia"],
+    "Hipertrofia": ["hipertrofia", "volumen"],
+    "Resistencia": ["resistencia", "aerobico", "cardio"],
+    "Alimentación": ["dieta", "calorias", "nutricion"],
+    "Recuperación": ["recuperacion", "sueno", "descanso"],
+    "Prevención y movilidad": ["movilidad", "prevencion", "lesiones"],
+    "Planificación": ["planificacion", "progresion"],
+}

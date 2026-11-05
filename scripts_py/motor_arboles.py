@@ -22,6 +22,7 @@ def main():
     from arboles.consulta import raices_de, recuperar
     from arboles.fuentes import articulos_desde_mysql, ejercicios_desde_mysql
     from arboles.motor import MotorArboles
+    from arboles.taxonomia import PALABRAS_INTENCION
 
     con = get_connection()
     if not con:
@@ -36,14 +37,17 @@ def main():
     cur.execute("SELECT termino FROM diccionario")
     vocabulario = {f["termino"] for f in cur.fetchall()}
 
-    raices = raices_de(consulta, vocabulario, stemmer, stop_words, THESAURUS, strip_vowels)
-    descubrimiento = motor.descubrir(raices, recuperar(cur, raices))
+    raices = raices_de(consulta, vocabulario, stemmer, set(stop_words) | PALABRAS_INTENCION,
+                       THESAURUS, strip_vowels)
+    prep = motor.preparar_consulta(raices)          # qué raíces se usan para recuperar
+    descubrimiento = motor.descubrir(raices, recuperar(cur, prep["raices"]))
+    descubrimiento["traza"]["consulta_preparada"] = prep
     cur.close()
     con.close()
 
     # ensure_ascii=True (por defecto): solo ASCII, así PHP lo decodifica sin importar la
     # codificación de consola de Windows (cp1252 vs UTF-8).
-    print(json.dumps({"status": "success", "raices": raices, "descubrimiento": descubrimiento}))
+    print(json.dumps({"status": "success", "raices": prep["raices"], "raices_consulta": raices, "descubrimiento": descubrimiento}))
 
 
 if __name__ == "__main__":

@@ -18,6 +18,9 @@
             --like: #f43f5e;
         }
 
+        .tab-btn { padding:10px 18px; border:1px solid var(--border); background:#fff; border-radius:999px; font-weight:600; cursor:pointer; color:var(--text-muted); }
+        .tab-btn.activa { background:var(--accent); color:#fff; border-color:var(--accent); }
+        [hidden] { display:none !important; }
         * { box-sizing: border-box; }
         body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text-main); margin: 0; padding-bottom: 50px;}
 
@@ -102,13 +105,18 @@
         <input type="text" id="searchInput" class="search-input" placeholder="Explora rutinas, biomecánica o escribe un objetivo..." autocomplete="off">
     </div>
 
+    <nav id="tabs" style="max-width:1300px; margin:16px auto 20px; padding:0 20px; display:flex; gap:8px;">
+        <button class="tab-btn" id="tabBusqueda" data-vista="vistaBusqueda">Búsqueda y recomendaciones</button>
+        <button class="tab-btn" id="tabArboles" data-vista="vistaArboles">Explorar por árboles (A + B)</button>
+    </nav>
+
     <!-- Panel de gráfico dinámico (Se oculta en búsquedas TF-IDF) -->
     <div class="panel" id="chartPanel" style="max-width: 1300px; margin: 0 auto 20px; display: none;">
         <h3> Posicionamiento Algorítmico </h3>
         <canvas id="recommendationsChart" width="400" height="120"></canvas>
     </div>
 
-    <main class="container">
+    <main class="container" id="vistaBusqueda">
         <!-- Sidebar -->
         <aside>
             <div class="panel">
@@ -139,6 +147,7 @@
                 <div id="statsBar" class="stats">Cargando motor...</div>
             </div>
 
+
             <div id="discoveryZone"></div>
 
             <div id="resultsGrid" class="results-grid">
@@ -146,6 +155,24 @@
                 <div class="status-msg"><div class="loader"></div> Calculando distancias vectoriales...</div>
             </div>
         </section>
+    </main>
+
+    <!-- Vista aparte: solo se ve cuando el usuario elige la pestaña -->
+    <main id="vistaArboles" style="max-width:1300px; margin:0 auto; padding:0 20px;" hidden>
+        <div class="panel">
+            <h3 style="margin-top:0">Explorar por árboles</h3>
+            <p style="color:var(--text-muted); font-size:.9rem; margin:12px 0;">
+                    Elige un nodo del árbol de Anatomía (A) y uno del árbol de Temas (B): el sistema muestra los artículos que unen ambos árboles. Si no hay ninguno, lo dice.
+                </p>
+                <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:end;">
+                    <label style="flex:1; min-width:200px; font-size:.8rem; font-weight:600;">A · Músculo (Anatomía)
+                        <select id="menuA" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:10px; margin-top:4px;"></select></label>
+                    <label style="flex:1; min-width:200px; font-size:.8rem; font-weight:600;">B · Tema (Conocimiento)
+                        <select id="menuB" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:10px; margin-top:4px;"></select></label>
+                    <button id="btnAB" style="padding:10px 20px; border:0; border-radius:10px; background:var(--accent); color:#fff; font-weight:600; cursor:pointer;">Combinar A + B</button>
+                </div>
+                <div id="resultadoAB" style="margin-top:16px;"></div>
+        </div>
     </main>
 
 <script>
@@ -375,45 +402,156 @@
         statsBar.textContent = 'Error crítico';
     }
 
-    function renderDescubrimiento(descubrimiento) {
-        const discoveryZone = document.getElementById('discoveryZone');
-        
-        // Si no hay salto semántico, limpiamos la zona y salimos
-        if (!descubrimiento) {
-            discoveryZone.innerHTML = '';
+    function esc(t) {
+        return String(t ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    // Dibuja una rama del árbol: raíz > ... > nodo (el último, resaltado)
+    function renderRama(ruta, etiqueta, color) {
+        if (!ruta || !ruta.length) return '';
+        const nodos = ruta.map((n, i) => {
+            const esUltimo = i === ruta.length - 1;
+            return `<div style="margin-left:${i * 18}px; display:flex; align-items:center; gap:6px; margin-top:4px;">
+                        <span style="color:#b45309">${i === 0 ? '●' : '└'}</span>
+                        <span style="padding:2px 10px; border-radius:999px; font-size:.85rem;
+                              ${esUltimo ? `background:${color}; color:#fff; font-weight:700;` : 'background:#fef3c7; color:#78350f;'}">${esc(n)}</span>
+                    </div>`;
+        }).join('');
+        return `<div style="flex:1; min-width:220px">
+                    <div style="font-size:.75rem; text-transform:uppercase; letter-spacing:.05em; color:#92400e; font-weight:700">${esc(etiqueta)}</div>
+                    ${nodos}
+                </div>`;
+    }
+
+    const NOMBRE_ARBOL = { anatomia: 'Árbol de Anatomía', temas: 'Árbol de Temas' };
+    const TITULO_VIA = {
+        interseccion: 'Cruce de dos árboles',
+        concepto: 'Salto entre árboles',
+        recuperacion: 'Salto desde los resultados',
+        concepto_local: 'Recomendación dentro del tema',
+        sin_interseccion: 'Sin relación entre ambos conceptos',
+        ninguno: 'Sin relación'
+    };
+
+    function renderDescubrimiento(d) {
+        const zona = document.getElementById('discoveryZone');
+        if (!d) { zona.innerHTML = ''; return; }
+
+        const titulo = TITULO_VIA[d.via] || 'Recomendación';
+        const razon = `<div class="serendipity-reason"><strong>Razón algorítmica:</strong> ${esc(d.razon_algoritmica)}</div>`;
+
+        if (d.sin_documento) {      // el sistema declara que no hay relación, en vez de inventarla
+            zona.innerHTML = `<div class="serendipity-card"><div class="serendipity-header"><span>${esc(titulo)}</span></div>${razon}</div>`;
             return;
         }
 
-        // Construimos la tarjeta dorada
-        discoveryZone.innerHTML = `
+        const local = d.via === 'concepto_local';
+        let arboles = renderRama(d.origen_ruta, NOMBRE_ARBOL[d.origen_arbol] || 'Origen', '#d97706');
+        if (!local) {
+            const lift = d.lift ? `lift ${Number(d.lift).toFixed(1)}` : 'artículos puente';
+            arboles += `<div style="align-self:center; text-align:center; color:#b45309; font-weight:700; padding:0 8px">
+                            ⟷<div style="font-size:.7rem; font-weight:600">${esc(lift)}</div></div>`;
+            arboles += renderRama(d.destino_ruta, NOMBRE_ARBOL[d.destino_arbol] || 'Destino', '#92400e');
+        }
+
+        zona.innerHTML = `
             <div class="serendipity-card">
-                <div class="serendipity-header">
-                    <span> Recomendacion diferente </span>
+                <div class="serendipity-header"><span>${esc(titulo)}</span></div>
+                <div class="serendipity-path" style="display:flex; flex-wrap:wrap; gap:12px; align-items:flex-start; font-family:inherit">
+                    ${arboles}
                 </div>
-                
-                <div class="serendipity-path">
-                    Grafo: [${descubrimiento.arbol_origen}] 🔗 cruzado con 🔗 [${descubrimiento.arbol_destino}]
-                </div>
-                
-                <div class="serendipity-reason">
-                    <strong>Razón Algorítmica:</strong> ${descubrimiento.razon_algoritmica}
-                </div>
-                
-                <div class="card-header">
-                    <h4 class="card-title" style="color: #92400e;">${descubrimiento.titulo}</h4>
-                </div>
-                <p class="card-snippet" style="color: #78350f;">${descubrimiento.snippet}</p>
-                
-                <div class="card-footer" style="border-top-color: #fcd34d;">
+                ${razon}
+                <div class="card-header"><h4 class="card-title" style="color:#92400e;">${esc(d.titulo)}</h4></div>
+                <p class="card-snippet" style="color:#78350f;">${esc(d.snippet)}</p>
+                <div class="card-footer" style="border-top-color:#fcd34d;">
                     <div class="meta-tags">
-                        <span class="badge badge-Teoría">${descubrimiento.tipo}</span>
-                        <span class="badge badge-info">${descubrimiento.tags}</span>
+                        <span class="badge badge-Teoría">${esc(d.tipo)}</span>
+                        <span class="badge badge-info">${esc(d.tags)}</span>
                     </div>
-                    <span class="score" style="background:#fef08a; color:#b45309;">${descubrimiento.score}</span>
+                    <span class="score" style="background:#fef08a; color:#b45309;">${esc(d.score)}</span>
                 </div>
-            </div>
-        `;
+            </div>`;
     }
+
+    // ==========================================
+    // MENÚS A + B  (dos árboles unidos por los artículos que comparten)
+    // ==========================================
+    let catalogoAB = null;
+    const menuA = document.getElementById('menuA'), menuB = document.getElementById('menuB');
+
+    function opcionesB() {
+        const gid = menuA.value;
+        const previo = menuB.value;
+        menuB.innerHTML = catalogoAB.temas.map(t => {
+            const n = (catalogoAB.puentes[`${gid}|${t.nombre}`] || []).length;
+            return `<option value="${esc(t.nombre)}">${esc(t.nombre)} — ${n ? n + ' artículo(s) puente' : 'sin relación'}</option>`;
+        }).join('');
+        if (previo) menuB.value = previo;
+    }
+
+    function cargarCatalogoAB() {
+        fetch('menus.php?accion=catalogo').then(r => r.json()).then(c => {
+            if (c.status !== 'success') throw new Error(c.mensaje || 'error');
+            catalogoAB = c;
+            menuA.innerHTML = c.musculos.map(m =>
+                `<option value="${m.gid}">${esc(m.nombre)} (${m.n_ejercicios} ejercicios)</option>`).join('');
+            opcionesB();
+        }).catch(e => {
+            document.getElementById('resultadoAB').innerHTML =
+                `<div style="color:var(--like)">No se pudo cargar el catálogo: ${esc(e.message)}</div>`;
+        });
+    }
+    menuA.addEventListener('change', opcionesB);
+
+    function tarjetaMini(d, color) {
+        return `<div class="card" style="padding:16px; border-left:4px solid ${color};">
+                    <div style="font-weight:700;">${esc(d.titulo)}</div>
+                    <div style="font-size:.85rem; color:var(--text-muted); margin:6px 0;">${esc(d.snippet)}</div>
+                    <span class="badge badge-info">${esc(d.tipo)} · ${esc(d.tags)}</span></div>`;
+    }
+
+    document.getElementById('btnAB').addEventListener('click', () => {
+        if (!catalogoAB) return;
+        const out = document.getElementById('resultadoAB');
+        const m = catalogoAB.musculos.find(x => String(x.gid) === menuA.value);
+        const t = catalogoAB.temas.find(x => x.nombre === menuB.value);
+        const ids = catalogoAB.puentes[`${m.gid}|${t.nombre}`] || [];
+
+        const ramas = renderRama(['Cuerpo humano', m.region, m.nombre], 'Árbol de Anatomía', '#d97706')
+            + `<div style="align-self:center; text-align:center; color:${ids.length ? '#b45309' : '#94a3b8'}; font-weight:700; padding:0 8px">
+                   ${ids.length ? '⟷' : '✕'}<div style="font-size:.7rem">${ids.length} artículo(s)</div></div>`
+            + renderRama(['Conocimiento', t.rama, t.nombre], 'Árbol de Temas', '#92400e');
+        const cabecera = `<div class="serendipity-path" style="display:flex; flex-wrap:wrap; gap:12px; align-items:flex-start; font-family:inherit">${ramas}</div>`;
+
+        if (!ids.length) {
+            const alt = catalogoAB.temas
+                .map(x => [x.nombre, (catalogoAB.puentes[`${m.gid}|${x.nombre}`] || []).length])
+                .filter(a => a[1]).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 3)
+                .map(a => `${esc(a[0])} (${a[1]})`).join(', ');
+            out.innerHTML = cabecera + `<p><strong>Ningún artículo relaciona «${esc(m.nombre)}» con «${esc(t.nombre)}».</strong>
+                El sistema no inventa una relación.${alt ? ' Temas que sí se relacionan con ese músculo: ' + alt + '.' : ''}</p>`;
+            return;
+        }
+        out.innerHTML = cabecera + '<div class="status-msg"><div class="loader"></div></div>';
+        fetch(`menus.php?accion=docs&m=${m.gid}&ids=${ids.join(',')}`).then(r => r.json()).then(d => {
+            if (d.status !== 'success') throw new Error(d.mensaje);
+            out.innerHTML = cabecera
+                + `<h4 style="margin:16px 0 8px">Artículos que unen ambos árboles</h4><div class="results-grid">${d.articulos.map(a => tarjetaMini(a, '#d97706')).join('')}</div>`
+                + `<h4 style="margin:16px 0 8px">Ejercicios de «${esc(m.nombre)}»</h4><div class="results-grid">${d.ejercicios.map(a => tarjetaMini(a, '#4f46e5')).join('')}</div>`;
+        }).catch(e => { out.innerHTML = cabecera + `<div style="color:var(--like)">Error: ${esc(e.message)}</div>`; });
+    });
+    cargarCatalogoAB();
+
+    // Pestañas: la vista de árboles solo aparece si el usuario la elige
+    function mostrarVista(id) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('activa', b.dataset.vista === id));
+        document.getElementById('vistaBusqueda').hidden = id !== 'vistaBusqueda';
+        document.getElementById('vistaArboles').hidden = id !== 'vistaArboles';
+    }
+    document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => mostrarVista(b.dataset.vista)));
+    searchInput.addEventListener('input', () => mostrarVista('vistaBusqueda'));   // escribir vuelve a la búsqueda
+    searchInput.addEventListener('focus', () => mostrarVista('vistaBusqueda'));
+    mostrarVista('vistaBusqueda');
 </script>
 
 </body>

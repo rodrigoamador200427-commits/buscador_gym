@@ -18,7 +18,8 @@ Política de decisión (cada respuesta declara cuál nivel la produjo en `via`):
 from collections import Counter
 
 from .recorridos import acumular_posorden, preorden
-from .taxonomia import (ALIAS_MUSCULO, ETIQUETA_A_MUSCULO, SINONIMOS_TEMA, TEMAS, normalizar)
+from .taxonomia import (ALIAS_MUSCULO, EXPANSION_TEMA, ETIQUETA_A_MUSCULO, SINONIMOS_TEMA, TEMAS,
+                        normalizar)
 
 
 def _frase_a_raices(frase, stem):
@@ -40,10 +41,45 @@ class MotorArboles:
         self._idx_tema = []
         for _, tema, tags in TEMAS:
             self._idx_tema += [(tema, _frase_a_raices(t, stem)) for t in tags]
+        self._idx_sinonimo = []     # (tema, raíces de la frase): vocabulario del usuario
         for tema, frases in SINONIMOS_TEMA.items():
-            self._idx_tema += [(tema, _frase_a_raices(f, stem)) for f in frases]
+            self._idx_sinonimo += [(tema, _frase_a_raices(f, stem)) for f in frases]
+        self._idx_tema_etiquetas = list(self._idx_tema)
+        self._idx_tema += self._idx_sinonimo
 
     # ------------------------------------------------------------------ API
+    def preparar_consulta(self, raices):
+        """Raíces que se usarán para RECUPERAR en el índice TF-IDF (la detección de conceptos sigue
+        usando las raíces completas). Dos reglas, ambas basadas en la taxonomía:
+          * frase de intención (>= 2 palabras, p. ej. «bajar peso»): sus raíces se sustituyen por el
+            vocabulario del tema, porque por separado son ambiguas ('baj' choca con «baja», 'pes' con
+            «peso muerto»). Las raíces que también nombran un músculo o una etiqueta se conservan.
+          * palabra suelta de usuario (p. ej. «masa»): se conserva y se añade el vocabulario del tema.
+        -> {"raices": [...], "descartadas": [...], "expandidas": [...]}"""
+        consulta = set(raices)
+        protegidas = set()
+        for _, r in self._idx_musculo + self._idx_tema_etiquetas:
+            if r and r <= consulta:
+                protegidas |= r
+        descartar, temas = set(), []
+        for tema, r in self._idx_sinonimo:
+            if r and r <= consulta:
+                if tema not in temas:
+                    temas.append(tema)
+                if len(r) >= 2:
+                    descartar |= (r - protegidas)
+        base = [x for x in raices if x not in descartar]
+        extra = []
+        for tema in temas:
+            for palabra in EXPANSION_TEMA.get(tema, []):
+                raiz = self.stem(palabra)
+                if raiz not in base and raiz not in extra:
+                    extra.append(raiz)
+        final = base + extra
+        return {"raices": final or list(raices),
+                "descartadas": sorted(d for d in descartar if d not in final),
+                "expandidas": extra}
+
     def descubrir(self, raices, recuperados=()):
         """raices: raíces de la consulta. recuperados: [(origen, doc_id, score)] del índice TF-IDF."""
         consulta = set(raices)

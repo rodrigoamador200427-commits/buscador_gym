@@ -14,11 +14,15 @@ buscador_gym/
 │   │   ├── enlaces.py            aristas cruzadas músculo<->tema (peso y lift) derivadas de los artículos
 │   │   ├── fuentes.py            cargadores: MySQL (real) y CSV (pruebas)
 │   │   ├── motor.py              MotorArboles: consulta -> nodos -> salto entre árboles (campo `via`)
+│   │   ├── catalogo.py           músculos, temas y artículos puente para los menús A+B
 │   │   └── consulta.py           raíces de la consulta (ñ->n, determinista) y recuperación TF-IDF
+│   ├── catalogo_arboles.py       CLI de los menús A+B (catálogo + puentes, JSON)
 │   ├── motor_arboles.py          ENTRADA ÚNICA para PHP (JSON: raices + descubrimiento)
 │   ├── tests/test_arboles.py     18 pruebas
 │   ├── tests/test_motor.py       15 pruebas del motor
 │   └── demo_arboles.py           imprime árboles, recorridos y enlaces (para el avance)
+├── menus.php                     NUEVO: catálogo y artículos para los menús A+B
+├── index.html                    REEMPLAZADO: tarjeta con árboles + panel A+B
 ├── buscar.php                    PARCHADO: una llamada a Python, sin LIKE...LIMIT 1 ni random
 └── sql/esquema_arboles.sql       tablas nodos, doc_nodo, aristas_cruzadas (aún sin ejecutar)
 ```
@@ -53,6 +57,17 @@ Las pruebas con datos reales se activan con las variables de entorno CSV_EJERCIC
 interseccion > sin_interseccion (se dice, no se inventa) > concepto > concepto_local > recuperacion > ninguno.
 Determinista: la misma consulta devuelve siempre lo mismo.
 
+## Stopwords en capas (solo consulta; el índice NO se toca, no hay que reindexar)
+
+1. Gramaticales: las de NLTK, normalizadas (sin acentos) para que coincidan con la consulta.
+2. Intención (`PALABRAS_INTENCION` en taxonomia.py): quiero, necesito, como, hacer...
+3. Objetivo (`OBJETIVO_PROTEGIDO`): fuerza, peso, masa, grasa... jamás se eliminan (hay prueba que lo exige).
+`stopwords.txt` del proyecto original NO se usa: mezclaba las tres capas.
+
+`MotorArboles.preparar_consulta` ajusta las raíces con que se recupera del índice: una frase de intención
+("bajar peso") se sustituye por el vocabulario del tema (dieta, calorías, nutrición); una palabra suelta
+("masa") se conserva y se expande. La respuesta JSON trae `raices` (para recuperar) y `raices_consulta`.
+
 ## Probar la integración (en tu máquina)
 
 ```
@@ -65,5 +80,5 @@ Debe imprimir un JSON con `"status": "success"`. Luego abre el buscador y prueba
 ## Siguientes fases
 
 2. Cargador a MySQL (nodos, doc_nodo, aristas_cruzadas) — opcional.
-6. Panel visual del árbol y menús A+B en `index.html`.
-7. Separar stopwords gramaticales de palabras-objetivo (`stopwords.txt`).
+6. (hecho) Panel visual del árbol y menús A+B en `index.html`.
+7. (hecho) Stopwords en capas y preparación de consulta (ver abajo).

@@ -147,3 +147,67 @@ def test_real_diversidad_y_documentos(motor_real):
 @reales
 def test_real_determinista(motor_real):
     assert len({str(motor_real.descubrir(raices("ganar fuerza"))) for _ in range(5)}) == 1
+
+
+# ---------------- catálogo A+B ----------------
+def test_catalogo_puentes(motor):
+    from arboles.catalogo import catalogo
+    c = catalogo(motor.A, motor.T, motor.E)
+    assert c["puentes"]["1|Fuerza"] == [10, 11]
+    assert c["puentes"]["4|Hipertrofia"] == [12, 13]
+    assert "1|Hipertrofia" not in c["puentes"]          # sin relación: no se inventa
+    assert {m["gid"] for m in c["musculos"]} >= {1, 4, 6}
+    assert next(m for m in c["musculos"] if m["gid"] == 1)["n_ejercicios"] == 1
+    assert next(t for t in c["temas"] if t["nombre"] == "Fuerza")["n_articulos"] == 2
+
+
+# ---------------- stopwords en capas y preparación de consulta ----------------
+from arboles.taxonomia import OBJETIVO_PROTEGIDO, PALABRAS_INTENCION
+
+
+def test_capas_de_stopwords_no_se_pisan():
+    assert not (PALABRAS_INTENCION & OBJETIVO_PROTEGIDO)
+
+
+def test_palabras_objetivo_sobreviven_a_las_stopwords():
+    q = " ".join(sorted(OBJETIVO_PROTEGIDO))
+    r = raices_de(q, set(), st, STOP | PALABRAS_INTENCION, {}, lambda w: w)
+    assert len(r) == len({st.stem(w) for w in OBJETIVO_PROTEGIDO})
+
+
+def test_palabras_de_intencion_se_quitan():
+    r = raices_de("quiero saber como hacer fuerza", set(), st, STOP | PALABRAS_INTENCION, {}, lambda w: w)
+    assert r == [st.stem("saber"), st.stem("fuerza")]
+
+
+def test_stopwords_con_acento_coinciden():
+    assert raices_de("está más fuerza", set(), st, {"está", "más"}, {}, lambda w: w) == [st.stem("fuerza")]
+
+
+def test_frase_de_intencion_se_sustituye_por_vocabulario_del_tema(motor):
+    r = raices("como bajar de peso")
+    p = motor.preparar_consulta(r)
+    assert st.stem("bajar") not in p["raices"] and st.stem("peso") not in p["raices"]
+    assert {st.stem("dieta"), st.stem("calorias"), st.stem("nutricion")} <= set(p["raices"])
+    assert set(p["descartadas"]) == {st.stem("bajar"), st.stem("peso")}
+
+
+def test_palabra_suelta_se_conserva_y_se_expande(motor):
+    p = motor.preparar_consulta(raices("masa"))
+    assert st.stem("masa") in p["raices"] and st.stem("hipertrofia") in p["raices"]
+    assert p["descartadas"] == []
+
+
+def test_consulta_con_etiquetas_no_cambia(motor):
+    r = raices("pecho fuerza")
+    assert motor.preparar_consulta(r)["raices"] == r
+
+
+def test_musculo_nombrado_no_se_descarta(motor):
+    p = motor.preparar_consulta(raices("bajar peso pecho"))
+    assert st.stem("pecho") in p["raices"]
+
+
+def test_preparar_consulta_nunca_devuelve_vacio(motor):
+    assert motor.preparar_consulta([]) ["raices"] == []
+    assert motor.preparar_consulta(raices("zzz"))["raices"] == raices("zzz")

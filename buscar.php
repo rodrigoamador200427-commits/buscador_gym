@@ -41,6 +41,11 @@ try {
                     'via' => $d['via'],
                     'arbol_origen' => $d['origen']['ruta_texto'] ?? '',
                     'arbol_destino' => $d['destino']['ruta_texto'] ?? '',
+                    'origen_ruta' => $d['origen']['ruta'] ?? [],
+                    'destino_ruta' => $d['destino']['ruta'] ?? [],
+                    'origen_arbol' => $d['origen']['arbol'] ?? '',
+                    'destino_arbol' => $d['destino']['arbol'] ?? '',
+                    'lift' => $d['lift'] ?? null,
                     'razon_algoritmica' => $d['razon'],
                     'doc_id' => $articulo_db['id'],
                     'origen' => 'articulos',
@@ -51,6 +56,11 @@ try {
                     'score' => 'Salto Semántico'
                 ];
             }
+        }
+
+        // Sin documento que recomendar (sin_interseccion / ninguno): se muestra solo la explicación
+        if ($articulo_serendipia === null && !empty($d['razon'])) {
+            $articulo_serendipia = ['via' => $d['via'], 'razon_algoritmica' => $d['razon'], 'sin_documento' => true];
         }
     }
 
