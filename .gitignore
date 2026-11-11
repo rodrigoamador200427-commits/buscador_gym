@@ -11,3 +11,7 @@ Thumbs.db
 *.docx
 unirdataset/*.csv
 articulos.csv
+
+# Configuración con secretos (credenciales BD y clave AES) — nunca a Git
+config/config.local.ini.php
+config/config.test.ini.php

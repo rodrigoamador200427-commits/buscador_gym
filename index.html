@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Motor Semántico & Sistema de Recomendación</title>
@@ -92,6 +92,26 @@
         .serendipity-header { display: flex; align-items: center; gap: 8px; color: #d97706; font-weight: 800; font-size: 1.1rem; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
         .serendipity-path { font-family: monospace; font-size: 0.85rem; background: #fef08a; color: #854d0e; padding: 8px 12px; border-radius: 8px; display: inline-block; margin-bottom: 16px; border: 1px dashed #ca8a04; }
         .serendipity-reason { font-style: italic; color: #92400e; font-size: 0.95rem; margin-bottom: 16px; border-left: 4px solid #fbbf24; padding-left: 12px; line-height: 1.5; }
+
+        /* Cuentas y perfiles */
+        .barra-sesion { max-width: 1300px; margin: 12px auto 0; padding: 0 20px; display: flex; justify-content: flex-end; align-items: center; gap: 12px; font-size: .9rem; color: var(--text-muted); flex-wrap: wrap; }
+        .barra-sesion strong { color: var(--primary); }
+        .btn-link { background: none; border: 1px solid var(--border); border-radius: 999px; padding: 6px 14px; cursor: pointer; font-weight: 600; color: var(--text-main); }
+        .btn-link:hover { border-color: var(--accent); color: var(--accent); }
+        .acceso { max-width: 440px; margin: 40px auto; padding: 0 20px; }
+        .acceso form { display: grid; gap: 12px; }
+        .acceso label { display: grid; gap: 4px; font-size: .85rem; font-weight: 600; }
+        .acceso input { padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 1rem; }
+        .btn-primario { padding: 12px; border: 0; border-radius: 10px; background: var(--accent); color: #fff; font-weight: 700; cursor: pointer; font-size: 1rem; }
+        .btn-primario:hover { background: var(--accent-hover); }
+        .acceso-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+        .msg-error { color: #b91c1c; font-size: .9rem; min-height: 1.2em; }
+        .lista-perfiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .perfil-item { border: 1px solid var(--border); border-radius: 14px; padding: 18px 12px; text-align: center; background: #fff; position: relative; }
+        .perfil-item .elegir { background: none; border: 0; cursor: pointer; font-size: 1rem; font-weight: 700; color: var(--primary); width: 100%; }
+        .perfil-item .elegir:hover { color: var(--accent); }
+        .perfil-item .borrar { position: absolute; top: 6px; right: 8px; background: none; border: 0; cursor: pointer; color: #94a3b8; font-size: .8rem; }
+        .perfil-item .borrar:hover { color: #b91c1c; }
     </style>
 </head>
 <body>
@@ -100,6 +120,51 @@
         <h1>Inteligencia Deportiva</h1>
         <p>Motor de Recomendación Semántica y Búsqueda Vectorial</p>
     </header>
+
+    <!-- ACCESO: registro / inicio de sesión -->
+    <section id="pantallaAcceso" class="acceso" hidden>
+        <div class="panel">
+            <div class="acceso-tabs">
+                <button class="tab-btn activa" id="tabLogin" type="button">Iniciar sesión</button>
+                <button class="tab-btn" id="tabRegistro" type="button">Crear cuenta</button>
+            </div>
+            <form id="formLogin">
+                <label>Correo <input type="email" name="correo" autocomplete="username" required maxlength="254"></label>
+                <label>Contraseña <input type="password" name="contrasena" autocomplete="current-password" required maxlength="72"></label>
+                <div class="msg-error" id="errLogin"></div>
+                <button class="btn-primario" type="submit">Entrar</button>
+            </form>
+            <form id="formRegistro" hidden>
+                <label>Nombre completo <input name="nombre_completo" autocomplete="name" required maxlength="100"></label>
+                <label>Fecha de nacimiento <input type="date" name="fecha_nacimiento" required></label>
+                <label>Correo <input type="email" name="correo" autocomplete="username" required maxlength="254"></label>
+                <label>Contraseña (10+ caracteres, letras y números) <input type="password" name="contrasena" autocomplete="new-password" required minlength="10" maxlength="72"></label>
+                <div class="msg-error" id="errRegistro"></div>
+                <button class="btn-primario" type="submit">Crear cuenta</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- SELECTOR DE PERFIL (máximo 4 por cuenta) -->
+    <section id="pantallaPerfiles" class="acceso" style="max-width:720px" hidden>
+        <div class="panel">
+            <h3>¿Quién está entrenando?</h3>
+            <div id="listaPerfiles" class="lista-perfiles"></div>
+            <form id="formPerfil" style="grid-template-columns:1fr auto; align-items:end">
+                <label>Nuevo perfil <input name="nombre" required maxlength="40" placeholder="Ej. Pierna"></label>
+                <button class="btn-primario" type="submit">Crear</button>
+            </form>
+            <div class="msg-error" id="errPerfiles"></div>
+            <div style="text-align:right; margin-top:8px"><button class="btn-link" type="button" data-accion="logout">Cerrar sesión</button></div>
+        </div>
+    </section>
+
+    <div id="app" hidden>
+    <div class="barra-sesion">
+        <span>Perfil: <strong id="nombrePerfil"></strong> · <span id="correoCuenta"></span></span>
+        <button class="btn-link" type="button" id="btnCambiarPerfil">Cambiar perfil</button>
+        <button class="btn-link" type="button" data-accion="logout">Cerrar sesión</button>
+    </div>
 
     <div class="search-wrapper">
         <input type="text" id="searchInput" class="search-input" placeholder="Explora rutinas, biomecánica o escribe un objetivo..." autocomplete="off">
@@ -174,6 +239,7 @@
                 <div id="resultadoAB" style="margin-top:16px;"></div>
         </div>
     </main>
+    </div><!-- /#app -->
 
 <script>
     const searchInput = document.getElementById('searchInput');
@@ -249,17 +315,16 @@
     // ==========================================
     // 1. INICIALIZACIÓN (Cold Start o Perfil)
     // ==========================================
-    document.addEventListener('DOMContentLoaded', loadRecommendations);
-
     function loadRecommendations() {
         currentMode = 'recommendations';
         sectionTitle.textContent = "Recomendado para tu perfil";
         statsBar.textContent = "Calculando Coseno Vectorial...";
         chartPanel.style.display = 'block'; // Mostrar gráfico en modo recomendación
-        
-        fetch('recomendaciones.php')
-            .then(res => res.json())
+        const gen = generacion;
+
+        api('recomendaciones.php')
             .then(data => {
+                if (gen !== generacion) return;      // respuesta de un perfil anterior: se descarta
                 if(data.status === 'error') throw new Error(data.mensaje);
                 
                 if(data.status === 'cold_start') {
@@ -271,13 +336,13 @@
                 }
 
                 // Renderizar Tags Semánticos
-                semanticProfile.innerHTML = data.perfil_semantico.map(tag => `<span class="s-tag">${tag}</span>`).join('');
-                
+                semanticProfile.innerHTML = data.perfil_semantico.map(tag => `<span class="s-tag">${esc(tag)}</span>`).join('');
+
                 currentData = data.recomendaciones;
                 renderCards();
                 updateRecommendationGraph(currentData);
             })
-            .catch(err => showError(err.message));
+            .catch(manejarError);
     }
 
     // ==========================================
@@ -300,9 +365,10 @@
             chartPanel.style.display = 'none'; // Ocultar gráfico de cosenos al buscar
             resultsGrid.innerHTML = '<div class="status-msg"><div class="loader"></div> Calculando TF-IDF...</div>';
 
-            fetch(`buscar.php?q=${encodeURIComponent(query)}`)
-                .then(res => res.json())
+            const gen = generacion;
+            api(`buscar.php?q=${encodeURIComponent(query)}`)
                 .then(data => {
+                    if (gen !== generacion) return;
                     if (data.status === 'error') throw new Error(data.mensaje);
                     
                     // 1. Guardar SOLO el arreglo de ejercicios para los filtros
@@ -314,7 +380,7 @@
                     // 3. Renderizar la cuadrícula normal de ejercicios
                     renderCards();
                 })
-                .catch(err => showError(err.message));
+                .catch(manejarError);
         }, 300); // Debounce de 300ms
     });
 
@@ -337,27 +403,28 @@
         let html = '';
         filteredData.forEach(item => {
             const isRec = item.score.toString().includes('%'); 
-            const docId = item.doc_id || item.id; 
+            const docId = Number(item.doc_id || item.id) || 0;
             const origen = item.tipo === 'Ejercicios' ? 'ejercicios' : 'articulos';
-            
-            // Persistencia del botón visual
-            const likedClass = item.liked ? 'liked' : ''; 
 
+            // Persistencia del botón visual
+            const likedClass = item.liked ? 'liked' : '';
+
+            // Todo texto que viene del servidor pasa por esc() (evita XSS)
             html += `
                 <article class="card">
                     <button class="like-btn ${likedClass}" onclick="toggleLike(this, ${docId}, '${origen}')" title="Me gusta / Entrenar algoritmo">
                         <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                     </button>
                     <div class="card-header">
-                        <h4 class="card-title">${item.titulo}</h4>
+                        <h4 class="card-title">${esc(item.titulo)}</h4>
                     </div>
-                    <p class="card-snippet">${item.snippet}</p>
+                    <p class="card-snippet">${esc(item.snippet)}</p>
                     <div class="card-footer">
                         <div class="meta-tags">
-                            <span class="badge badge-${item.tipo}">${item.tipo}</span>
-                            <span class="badge badge-info">${item.tags}</span>
+                            <span class="badge badge-${esc(item.tipo)}">${esc(item.tipo)}</span>
+                            <span class="badge badge-info">${esc(item.tags)}</span>
                         </div>
-                        <span class="score" title="${isRec ? 'Similitud del Coseno' : 'Peso TF-IDF'}">${item.score}</span>
+                        <span class="score" title="${isRec ? 'Similitud del Coseno' : 'Peso TF-IDF'}">${esc(item.score)}</span>
                     </div>
                 </article>
             `;
@@ -372,17 +439,12 @@
         // Animación optimista
         btn.classList.toggle('liked');
 
-        fetch('registrar_interaccion.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ doc_id: docId, origen: origen })
-        })
-        .then(res => res.json())
+        // Solo doc_id y origen: el perfil lo pone el servidor desde la sesión
+        api('registrar_interaccion.php', { doc_id: docId, origen: origen })
         .then(data => {
             if (data.status === 'error') {
                 btn.classList.toggle('liked'); // Revertir visualmente el botón
-                alert("Error SQL o PHP: " + (data.mensaje || "Revisa la consola"));
-                console.error("Detalle del servidor:", data);
+                alert("No se pudo guardar: " + (data.mensaje || "error"));
             } else {
                 // Si está en modo recomendaciones, actualizamos el gráfico
                 if(currentMode === 'recommendations') {
@@ -392,15 +454,166 @@
         })
         .catch(error => {
             btn.classList.toggle('liked');
-            alert("Error de red o el JSON está roto. Revisa la consola.");
-            console.error("Fetch error:", error);
+            if (!(error instanceof SesionRequerida)) alert("Error de red. Intenta de nuevo.");
         });
     }
 
     function showError(msg) {
-        resultsGrid.innerHTML = `<div class="status-msg" style="color:var(--like)">Error de conexión con el motor: ${msg}</div>`;
+        resultsGrid.innerHTML = `<div class="status-msg" style="color:var(--like)">Error de conexión con el motor: ${esc(msg)}</div>`;
         statsBar.textContent = 'Error crítico';
     }
+
+    function manejarError(err) {
+        if (!(err instanceof SesionRequerida)) showError(err.message);
+    }
+
+    // ==========================================
+    // 5. CUENTAS Y PERFILES
+    // ==========================================
+    // generacion cambia al entrar con un perfil o salir: las respuestas que lleguen
+    // tarde de otro perfil se descartan y nunca se pintan sobre el perfil actual.
+    let generacion = 0;
+    let correoActual = '';
+    class SesionRequerida extends Error {}
+
+    async function api(url, cuerpo) {
+        const opts = { credentials: 'same-origin', headers: {} };
+        if (cuerpo !== undefined) {
+            opts.method = 'POST';
+            opts.headers['Content-Type'] = 'application/json';
+            opts.body = JSON.stringify(cuerpo);
+        }
+        const res = await fetch(url, opts);
+        let data;
+        try { data = await res.json(); } catch { data = { status: 'error', mensaje: 'Respuesta inválida del servidor' }; }
+        if (res.status === 401 && url !== 'login.php') { salirAlAcceso(); throw new SesionRequerida(); }
+        if (res.status === 409 && data.requiere === 'perfil') { mostrarPerfiles(); throw new SesionRequerida(); }
+        return data;
+    }
+
+    function mostrarPantalla(id) {
+        ['pantallaAcceso', 'pantallaPerfiles', 'app'].forEach(p => document.getElementById(p).hidden = p !== id);
+    }
+
+    function limpiarVistaPerfil() {
+        generacion++;
+        currentData = [];
+        resultsGrid.innerHTML = '';
+        semanticProfile.innerHTML = '';
+        document.getElementById('discoveryZone').innerHTML = '';
+        searchInput.value = '';
+        chartPanel.style.display = 'none';
+        if (recChart) { recChart.destroy(); recChart = null; }
+    }
+
+    function salirAlAcceso() {
+        limpiarVistaPerfil();
+        correoActual = '';
+        document.querySelectorAll('#pantallaAcceso form').forEach(f => f.reset());
+        mostrarPantalla('pantallaAcceso');
+    }
+
+    async function mostrarPerfiles() {
+        limpiarVistaPerfil();
+        mostrarPantalla('pantallaPerfiles');
+        try { renderPerfiles(await api('perfiles.php')); } catch (e) { /* ya redirigido */ }
+    }
+
+    function renderPerfiles(d) {
+        const err = document.getElementById('errPerfiles');
+        if (d.status !== 'success') { err.textContent = d.mensaje || 'Error'; return; }
+        err.textContent = '';
+        const lista = document.getElementById('listaPerfiles');
+        lista.innerHTML = d.perfiles.length ? d.perfiles.map(p => `
+            <div class="perfil-item">
+                <button class="borrar" type="button" data-borrar="${Number(p.id)}" title="Eliminar perfil y su historial">✕</button>
+                <button class="elegir" type="button" data-elegir="${Number(p.id)}">${esc(p.nombre)}</button>
+            </div>`).join('')
+            : '<p class="s-tag-empty">Crea tu primer perfil para empezar.</p>';
+        document.getElementById('formPerfil').hidden = d.perfiles.length >= d.maximo;
+    }
+
+    function entrarApp(perfil) {
+        limpiarVistaPerfil();
+        document.getElementById('nombrePerfil').textContent = perfil.nombre;
+        document.getElementById('correoCuenta').textContent = correoActual;
+        mostrarPantalla('app');
+        mostrarVista('vistaBusqueda');
+        loadRecommendations();
+    }
+
+    async function iniciar() {
+        try {
+            const s = await api('sesion.php');
+            if (!s.autenticado) return salirAlAcceso();
+            correoActual = s.correo;
+            if (!s.perfil_activo) return mostrarPerfiles();
+            entrarApp(s.perfil_activo);
+        } catch (e) {
+            if (!(e instanceof SesionRequerida)) salirAlAcceso();
+        }
+    }
+
+    function datosForm(form) { return Object.fromEntries(new FormData(form).entries()); }
+
+    function tabAcceso(registro) {
+        document.getElementById('formLogin').hidden = registro;
+        document.getElementById('formRegistro').hidden = !registro;
+        document.getElementById('tabLogin').classList.toggle('activa', !registro);
+        document.getElementById('tabRegistro').classList.toggle('activa', registro);
+    }
+    document.getElementById('tabLogin').addEventListener('click', () => tabAcceso(false));
+    document.getElementById('tabRegistro').addEventListener('click', () => tabAcceso(true));
+
+    document.getElementById('formLogin').addEventListener('submit', async e => {
+        e.preventDefault();
+        const err = document.getElementById('errLogin');
+        err.textContent = '';
+        const d = await api('login.php', datosForm(e.target)).catch(() => ({ mensaje: 'Error de red' }));
+        if (d.status === 'success') { e.target.reset(); iniciar(); } else { err.textContent = d.mensaje; }
+    });
+
+    document.getElementById('formRegistro').addEventListener('submit', async e => {
+        e.preventDefault();
+        const err = document.getElementById('errRegistro');
+        err.textContent = '';
+        const d = await api('registro.php', datosForm(e.target)).catch(() => ({ mensaje: 'Error de red' }));
+        if (d.status === 'success') { e.target.reset(); iniciar(); }
+        else { err.textContent = d.errores ? Object.values(d.errores).join(' · ') : d.mensaje; }
+    });
+
+    document.getElementById('formPerfil').addEventListener('submit', async e => {
+        e.preventDefault();
+        const d = await api('perfiles.php', { accion: 'crear', ...datosForm(e.target) }).catch(() => null);
+        if (!d) return;
+        if (d.status === 'success') { e.target.reset(); renderPerfiles(d); }
+        else renderPerfilesConError(d.mensaje);
+    });
+
+    async function renderPerfilesConError(mensaje) {
+        renderPerfiles(await api('perfiles.php'));
+        document.getElementById('errPerfiles').textContent = mensaje;
+    }
+
+    document.getElementById('listaPerfiles').addEventListener('click', async e => {
+        const elegir = e.target.closest('[data-elegir]'), borrar = e.target.closest('[data-borrar]');
+        try {
+            if (elegir) {
+                const d = await api('seleccionar_perfil.php', { perfil_id: Number(elegir.dataset.elegir) });
+                if (d.status === 'success') entrarApp(d.perfil_activo);
+                else document.getElementById('errPerfiles').textContent = d.mensaje;
+            } else if (borrar && confirm('¿Eliminar este perfil y todo su historial de likes? No se puede deshacer.')) {
+                const d = await api('perfiles.php', { accion: 'eliminar', perfil_id: Number(borrar.dataset.borrar) });
+                if (d.status === 'success') renderPerfiles(d); else renderPerfilesConError(d.mensaje);
+            }
+        } catch (err) { /* SesionRequerida: ya redirigido */ }
+    });
+
+    document.getElementById('btnCambiarPerfil').addEventListener('click', mostrarPerfiles);
+    document.querySelectorAll('[data-accion="logout"]').forEach(b => b.addEventListener('click', async () => {
+        await api('logout.php', {}).catch(() => null);
+        salirAlAcceso();
+    }));
 
     function esc(t) {
         return String(t ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -552,6 +765,7 @@
     searchInput.addEventListener('input', () => mostrarVista('vistaBusqueda'));   // escribir vuelve a la búsqueda
     searchInput.addEventListener('focus', () => mostrarVista('vistaBusqueda'));
     mostrarVista('vistaBusqueda');
+    iniciar();
 </script>
 
 </body>
