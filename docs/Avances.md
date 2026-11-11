@@ -112,9 +112,10 @@ luego "Pierna", y comparar.
 
 ## 6. Pendientes / observaciones
 
-- En el dataset, `ejercicios.grupo_id` no corresponde al músculo (el grupo "Pecho" contiene
-  ejercicios de tríceps). Afecta al menú A de "Explorar por árboles". La demo elige los
-  ejercicios por nombre.
+- **Corregido:** la tabla `grupos_musculares` tenía los nombres desalineados con los IDs (el id 1,
+  que tiene los 262 ejercicios de *Chest*, decía "Cuádriceps"). `ejercicios.grupo_id` y los
+  árboles siempre estuvieron bien. Se corrigieron solo los nombres
+  (`sql/corregir_grupos_musculares.sql`), y los 11 conteos coinciden con el dataset original.
 - No hay endpoint para eliminar la cuenta (el borrado en cascada sí existe en la BD y está
   probado). Tampoco hay recuperación de contraseña: quedó fuera del alcance.
 - En local la cookie no lleva `Secure` (no hay HTTPS). En un servidor con HTTPS se activa sola.

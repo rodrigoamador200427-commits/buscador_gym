@@ -70,7 +70,9 @@ php herramientas/crear_demo.php        # imprime la contraseña demo una sola ve
 
 ## Avisos
 
-- `ejercicios.grupo_id` NO corresponde al músculo en el dataset (el grupo 5 "Pecho" contiene
-  tríceps). La demo elige ejercicios por nombre. El menú A de los árboles filtra por `grupo_id`.
+- Los IDs de músculo (`ejercicios.grupo_id`) son los de `unirdataset/limpiar_ejercicios.py` y
+  `taxonomia.MUSCULOS` (1=Pecho … 11=Antebrazos). La tabla `grupos_musculares` tenía los nombres
+  desalineados; se corrigió con `sql/corregir_grupos_musculares.sql`. Ningún código la lee: la
+  fuente de verdad es `taxonomia.py`.
 - No existe la tabla `alimentos`. `postings.origen` solo tiene `ejercicios` y `articulos`.
 - Avances del proyecto: `docs/Avances.md`. Estructura de los árboles: `ESTRUCTURA.md`.

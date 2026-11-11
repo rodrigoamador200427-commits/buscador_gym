@@ -6,8 +6,8 @@
 //
 // - "Pecho":  likes en ejercicios cuyo nombre dice "press de banca" / "aperturas"
 // - "Pierna": likes en "sentadilla" / "zancada" / "prensa de piernas"
-// Se elige por nombre y no por ejercicios.grupo_id porque ese campo NO corresponde
-// al músculo en el dataset (el grupo 5 "Pecho" contiene ejercicios de tríceps).
+// Se elige por nombre y no por grupo_id para que los likes sean ejercicios típicos
+// del perfil: un grupo muscular completo incluye muchas variantes con bandas o máquinas.
 // Es idempotente: si la cuenta demo existe, la borra (cascada) y la vuelve a crear.
 // La contraseña se toma de DEMO_CONTRASENA o se genera al azar y se imprime UNA vez en
 // la consola (no se escribe en ningún archivo ni log).
