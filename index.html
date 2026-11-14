@@ -349,11 +349,16 @@
     // 2. MOTOR DE BÚSQUEDA EXPLÍCITA
     // ==========================================
     let timeoutId;
+    // Cada búsqueda lanzada recibe un número; solo se pinta la respuesta de la ÚLTIMA.
+    // Sin esto, la respuesta lenta de un prefijo ("trice") podía llegar después de la de
+    // la palabra completa ("triceps") y reemplazar sus resultados.
+    let busquedaActual = 0;
     searchInput.addEventListener('keyup', (e) => {
         clearTimeout(timeoutId);
         const query = e.target.value.trim();
 
         if (query.length < 2) {
+            busquedaActual++;               // invalida búsquedas en vuelo
             if(currentMode !== 'recommendations') loadRecommendations();
             return;
         }
@@ -366,9 +371,10 @@
             resultsGrid.innerHTML = '<div class="status-msg"><div class="loader"></div> Calculando TF-IDF...</div>';
 
             const gen = generacion;
+            const id = ++busquedaActual;
             api(`buscar.php?q=${encodeURIComponent(query)}`)
                 .then(data => {
-                    if (gen !== generacion) return;
+                    if (gen !== generacion || id !== busquedaActual) return;   // respuesta vieja
                     if (data.status === 'error') throw new Error(data.mensaje);
                     
                     // 1. Guardar SOLO el arreglo de ejercicios para los filtros
