@@ -22,7 +22,7 @@ if SCRIPTS_PY not in sys.path:
 
 import db_config  # noqa: E402
 
-TABLAS = ["interacciones", "intentos_login", "perfiles", "cuentas",
+TABLAS = ["eventos", "consultas", "interacciones", "intentos_login", "perfiles", "cuentas",
           "postings", "diccionario", "ejercicios", "articulos"]
 
 
@@ -80,7 +80,7 @@ def ejecutar_script_sql(cur, texto):
 
 
 def preparar_bd(conn):
-    """Borra todo en la BD de pruebas y la recrea: contenido sintético + esquema de cuentas."""
+    """Borra todo en la BD de pruebas y la recrea: contenido sintético + esquemas de cuentas y estadísticas."""
     cur = conn.cursor()
     cur.execute("SELECT DATABASE()")
     if not cur.fetchone()[0].endswith("_test"):           # última barrera antes de borrar nada
@@ -91,8 +91,9 @@ def preparar_bd(conn):
     cur.execute("SET FOREIGN_KEY_CHECKS = 1")
     with open(os.path.join(AQUI, "fixtures", "contenido_test.sql"), encoding="utf-8") as f:
         ejecutar_script_sql(cur, f.read())
-    with open(os.path.join(RAIZ, "sql", "esquema_cuentas.sql"), encoding="utf-8") as f:
-        ejecutar_script_sql(cur, f.read())
+    for esquema in ("esquema_cuentas.sql", "esquema_estadisticas.sql"):
+        with open(os.path.join(RAIZ, "sql", esquema), encoding="utf-8") as f:
+            ejecutar_script_sql(cur, f.read())
     conn.commit()
     cur.close()
 
