@@ -12,11 +12,42 @@ un entero positivo.
 """
 import json
 import math
+import re
 import sys
 from collections import defaultdict
 
 UMBRAL_SIMILITUD = 0.05      # similitud mínima del 5 %
-TOP_TERMINOS_PERFIL = 5
+TOP_TERMINOS_PERFIL = 8
+_ACENTOS = str.maketrans("áéíóúüñ", "aeiouun")
+
+
+def palabras_visibles(cursor, vistos, raices):
+    """{raíz: palabra completa} para mostrar el perfil ('pech' -> 'pecho').
+
+    Toma la palabra más frecuente que produce esa raíz en el texto de los documentos con
+    like del perfil (los mismos que formaron el centroide). Lee solo tablas de contenido.
+    Misma normalización que nlp_processor.clean_and_stem.
+    """
+    from nlp_processor import stemmer
+    buscadas = set(raices)
+    textos = []
+    for origen, tabla, cols in (("ejercicios", "ejercicios", "nombre_es, descripcion_es"),
+                                ("articulos", "articulos", "titulo, contenido")):
+        ids = sorted(d for d, o in vistos if o == origen)
+        if ids:
+            cursor.execute(f"SELECT {cols} FROM {tabla} WHERE id IN ({','.join(['%s'] * len(ids))})",
+                           tuple(ids))                      # tabla y columnas fijas; ids con %s
+            for fila in cursor.fetchall():
+                textos.extend(str(v or "") for v in fila.values())
+    cuenta = defaultdict(lambda: defaultdict(int))
+    for texto in textos:
+        for palabra in re.findall(r"[a-záéíóúüñ]+", texto.lower()):
+            base = re.sub(r"[^a-z]", "", palabra.translate(_ACENTOS))
+            if len(base) > 2:
+                raiz = stemmer.stem(base)
+                if raiz in buscadas:
+                    cuenta[raiz][palabra] += 1
+    return {r: sorted(c.items(), key=lambda x: (-x[1], x[0]))[0][0] for r, c in cuenta.items()}
 
 
 def magnitude(vector):
@@ -72,7 +103,7 @@ def recomendar(conn, perfil_id, limit=10):
 
         # Top raíces para "Tu Perfil Semántico" (solo los términos del perfil, no todo el diccionario)
         top = sorted(user_vector.items(), key=lambda x: x[1], reverse=True)[:TOP_TERMINOS_PERFIL]
-        perfil_semantico = []
+        perfil_semantico, nombres = [], {}
         if top:
             ids = [t for t, _ in top]
             cursor.execute(
@@ -81,6 +112,10 @@ def recomendar(conn, perfil_id, limit=10):
             )
             nombres = {r["id"]: r["termino"] for r in cursor.fetchall()}
             perfil_semantico = [nombres[t] for t in ids if t in nombres]
+        # Para la gráfica: raíz, palabra completa y peso en el centroide, de mayor a menor
+        visibles = palabras_visibles(cursor, vistos, perfil_semantico)
+        perfil_terminos = [{"termino": nombres[t], "palabra": visibles.get(nombres[t], nombres[t]),
+                            "peso": round(p, 4)} for t, p in top if t in nombres]
 
         # 3. Vectores de documentos D no vistos (postings es contenido público, no del usuario)
         cursor.execute("SELECT doc_id, origen, termino_id, peso_tfidf FROM postings")
@@ -109,7 +144,8 @@ def recomendar(conn, perfil_id, limit=10):
 
     # 5. Orden determinista: similitud desc y, en empate, por documento
     scores.sort(key=lambda x: (-x["similitud"], x["origen"], x["doc_id"]))
-    return {"status": "success", "perfil_semantico": perfil_semantico, "recomendaciones": scores[:limit]}
+    return {"status": "success", "perfil_semantico": perfil_semantico, "perfil_terminos": perfil_terminos,
+            "recomendaciones": scores[:limit]}
 
 
 def main(argv):

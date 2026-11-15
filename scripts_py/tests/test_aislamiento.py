@@ -221,3 +221,19 @@ def test_no_se_pueden_crear_mas_de_cuatro_perfiles(conn, escenario):
         cur.execute("INSERT INTO perfiles (cuenta_id, nombre) VALUES (%s, 'Quinto')", (escenario["cuenta1"],))
     conn.rollback()
     cur.close()
+
+
+# --------------------------------------------------------------------------- gráfica del perfil
+
+def test_perfil_terminos_ordenados_con_peso_y_palabra_completa(conn, escenario):
+    pecho = recomendar(conn, escenario["pecho"])
+    terminos = pecho["perfil_terminos"]
+    assert 0 < len(terminos) <= 8
+    pesos = [t["peso"] for t in terminos]
+    assert pesos == sorted(pesos, reverse=True) and all(p > 0 for p in pesos)
+    por_raiz = {t["termino"]: t["palabra"] for t in terminos}
+    assert por_raiz["pech"] == "pecho"           # palabra del texto de los likes, no la raíz
+    assert por_raiz["banc"] == "banca"
+    assert [t["termino"] for t in terminos] == pecho["perfil_semantico"]
+    # Solo palabras del historial de este perfil
+    assert not {"sentadill", "cuadricep", "piern", "zancad"} & set(por_raiz)
