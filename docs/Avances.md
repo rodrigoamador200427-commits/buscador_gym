@@ -203,9 +203,18 @@ SELECT * FROM consultas ORDER BY id DESC LIMIT 5;
 - Esquema aplicado también a `gym_buscador` (dos veces, sin errores; la purga corre sobre la
   BD real). Por Apache: `registrar_evento.php` da 405 con GET y 401 sin sesión; `lib/`, `sql/`,
   `tests/` y `herramientas/` dan 403.
-- La vista de detalle no se probó en un navegador: falta abrir una tarjeta con la cuenta demo y
-  confirmar que aparece la fila `apertura` en `eventos`. Bajo Apache (mod_php) tampoco se midió
-  que el registro no retrase la respuesta; eso solo está probado con `php -S`.
+- **Probado contra Apache y la BD real con la cuenta demo** (con `curl`; las 64 filas de
+  `eventos` y las 3 de `consultas` que generó la prueba se borraron después):
+  - `registrar_evento.php` con `perfil_id: 4` y `tipo: like` en el cuerpo guardó una
+    `apertura` del perfil 3 (Pecho, el de la sesión).
+  - **El registro no retrasa la respuesta bajo mod_php:** con `consultas` bloqueada
+    (`LOCK TABLES ... WRITE` durante 40 s desde otra sesión), la búsqueda respondió 200 en
+    12.6 s con `Content-Length` y `Connection: close`. En ese momento la fila todavía no
+    existía; se escribió al liberar el bloqueo.
+  - Las búsquedas tardan unos 13 s, pero no por el registro: `motor_arboles.py` solo tarda
+    12.1 s sobre la BD real. Es un problema anterior a esta fase.
+- Falta comprobar el diálogo de detalle en un navegador: que se abra al hacer clic en la
+  tarjeta, que se cierre con "Cerrar", con Esc y con clic fuera, y que el corazón no lo abra.
 - El artículo descubierto por los árboles y las tarjetas de la vista A+B no abren el detalle.
   El artículo descubierto trae su texto cortado a 150 caracteres.
 - `registrar_evento.php` no tiene límite de frecuencia: un usuario con sesión puede inflar las
