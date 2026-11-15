@@ -10,17 +10,21 @@ PHP no está en el PATH: usar `D:\Tools\SHAMP\php\php.exe` y `D:\Tools\SHAMP\mys
   recomendaciones y menús A+B.
 - Endpoints JSON en la raíz: `registro.php`, `login.php`, `logout.php`, `sesion.php`,
   `perfiles.php`, `seleccionar_perfil.php`, `buscar.php`, `recomendaciones.php`,
-  `registrar_interaccion.php`, `menus.php`.
+  `registrar_interaccion.php`, `registrar_evento.php`, `menus.php`.
 - `lib/`: código común. Todo endpoint empieza con `require_once __DIR__ . '/lib/bootstrap.php';`.
   - `config.php` (secretos) · `db.php` (`conexion()`) · `sesion.php` (sesión + autorización)
   - `cifrado.php` (AES-256-GCM) · `validacion.php` · `intentos.php` (límite de login)
   - `respuesta.php` (`responder`, `responder_error`, `leer_json_post`, `registrar_fallo`)
-  - `python.php` (`ejecutar_python`) · `documentos.php` · `cuentas.php`
+  - `python.php` (`ejecutar_python`) · `documentos.php` (`leer_ref_documento`) · `cuentas.php`
+  - `estadisticas.php` (`registrar_consulta`, `registrar_eventos`, `registrar_sin_fallar`)
 - `scripts_py/`: motor TF-IDF, árboles (`arboles/`), `recommender.py` (centroide + coseno por
   perfil), `db_config.py` (lee la misma config que PHP).
 - `sql/esquema_cuentas.sql`: cuentas, perfiles, interacciones (por perfil), intentos_login.
   Es idempotente y no tiene `USE`: se aplica a la BD elegida.
+- `sql/esquema_estadisticas.sql`: `eventos` (impresion/apertura/like; `perfil_id` NULL con
+  `ON DELETE SET NULL`) y `consultas` (solo raíces; sin perfil ni texto original). Mismo estilo.
 - `herramientas/crear_demo.php`: cuenta demo con perfiles "Pecho" y "Pierna" (solo CLI).
+- `herramientas/purgar_estadisticas.php`: borra `consultas` y `eventos` de más de 180 días (solo CLI).
 - `config/`, `lib/`, `herramientas/`, `sql/`, `tests/` tienen `.htaccess` con `Require all denied`.
 
 ## Configuración (secretos fuera de Git)
@@ -49,22 +53,29 @@ Cambiar `aes_clave` vuelve ilegibles los datos ya cifrados.
 7. POST siempre con `leer_json_post()` (exige `application/json`; frena CSRF junto con
    `SameSite=Strict`).
 8. En `index.html`, todo texto del servidor pasa por `esc()` antes de ir a `innerHTML`.
+9. Estadísticas: el registro nunca hace fallar ni retrasa la petición (`enviar_y_continuar()` +
+   `registrar_sin_fallar()`). Las impresiones se guardan SIN perfil (si no, se unirían por
+   `creado_en` con `consultas`). `consultas` nunca guarda el texto original ni el perfil.
 
 ## Pruebas
 
 ```
 cd scripts_py && python -m pytest tests -v                  # incluye test_aislamiento.py
 D:\Tools\SHAMP\php\php.exe tests\test_autorizacion.php       # HTTP: 403, sesión, aislamiento
+D:\Tools\SHAMP\php\php.exe tests\test_estadisticas.php       # HTTP: eventos, consultas, purga
 ```
 Ambas usan SOLO `gym_buscador_test`: la recrean con contenido sintético
 (`scripts_py/tests/fixtures/contenido_test.sql`) y se niegan a correr si la BD no termina en
-`_test` o coincide con la real. `test_autorizacion.php` levanta su propio `php -S` en un puerto
-libre; no usa Apache.
+`_test` o coincide con la real. Las pruebas PHP comparten `tests/arnes.php`: guardas de BD, su
+propio `php -S` en un puerto libre (no usa Apache) y el cliente HTTP. `buscar.php` registra
+después de responder: una prueba que lea la BD tras buscar debe esperar con otra petición
+(ver `buscar()` en `test_estadisticas.php`).
 
 ## Puesta en marcha
 
 ```
 mysql -uroot gym_buscador < sql/esquema_cuentas.sql
+mysql -uroot gym_buscador < sql/esquema_estadisticas.sql
 php herramientas/crear_demo.php        # imprime la contraseña demo una sola vez
 ```
 

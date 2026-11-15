@@ -13,6 +13,38 @@ function responder(array $datos, int $codigo = 200): never
     exit;
 }
 
+/**
+ * Envía la respuesta completa al cliente y DEVUELVE el control, para hacer trabajo
+ * secundario (registro de estadísticas) sin retrasar la respuesta. Con mod_php no hay
+ * fastcgi_finish_request(): Content-Length + Connection: close permiten que el cliente
+ * dé la respuesta por terminada en cuanto llega el cuerpo.
+ * Después de llamarla ya no se puede responder otra vez: el trabajo posterior debe ir
+ * dentro de registrar_sin_fallar().
+ */
+function enviar_y_continuar(array $datos, int $codigo = 200): void
+{
+    $cuerpo = json_encode($datos, JSON_UNESCAPED_UNICODE);
+    ignore_user_abort(true);              // si el cliente cierra, el registro termina igual
+    @ini_set('zlib.output_compression', '0');
+    if (function_exists('apache_setenv')) {
+        @apache_setenv('no-gzip', '1');   // mod_deflate retendría la respuesta
+    }
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    http_response_code($codigo);
+    header('Content-Type: application/json; charset=utf-8');
+    header('X-Content-Type-Options: nosniff');
+    header('Cache-Control: no-store');
+    header('Content-Length: ' . strlen($cuerpo));
+    header('Connection: close');
+    echo $cuerpo;
+    flush();
+    if (function_exists('fastcgi_finish_request')) {
+        fastcgi_finish_request();
+    }
+}
+
 function responder_error(int $codigo, string $mensaje, array $extra = []): never
 {
     responder(['status' => 'error', 'mensaje' => $mensaje] + $extra, $codigo);

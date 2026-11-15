@@ -4,17 +4,12 @@
 declare(strict_types=1);
 require_once __DIR__ . '/lib/bootstrap.php';
 require_once __DIR__ . '/lib/documentos.php';
+require_once __DIR__ . '/lib/estadisticas.php';
 
 $datos = leer_json_post();
 $perfilId = requerir_perfil_activo();
 
-$origen = $datos['origen'] ?? '';
-$docId = $datos['doc_id'] ?? null;
-if (!in_array($origen, ORIGENES_VALIDOS, true)              // lista blanca: cierra la inyección de segundo orden
-    || !(is_int($docId) || (is_string($docId) && ctype_digit($docId))) || (int)$docId <= 0) {
-    responder_error(422, 'doc_id u origen inválido');
-}
-$docId = (int)$docId;
+[$docId, $origen] = leer_ref_documento($datos);
 
 $db = conexion();
 if (!hidratar_documentos($db, [['doc_id' => $docId, 'origen' => $origen]])) {
@@ -27,6 +22,10 @@ $del->execute([$perfilId, $origen, $docId]);
 if ($del->rowCount() > 0) {
     responder(['status' => 'removed']);
 }
-$db->prepare("INSERT IGNORE INTO interacciones (perfil_id, doc_id, origen, interaccion, peso) VALUES (?, ?, ?, 'like', 1.0)")
-   ->execute([$perfilId, $docId, $origen]);
+$ins = $db->prepare("INSERT IGNORE INTO interacciones (perfil_id, doc_id, origen, interaccion, peso) VALUES (?, ?, ?, 'like', 1.0)");
+$ins->execute([$perfilId, $docId, $origen]);
+if ($ins->rowCount() > 0) {
+    // Estadística: solo al dar like (quitarlo no es un evento). Si falla, el like queda igual.
+    registrar_sin_fallar(fn() => registrar_eventos($db, 'like', [['doc_id' => $docId, 'origen' => $origen]], $perfilId));
+}
 responder(['status' => 'added']);
