@@ -200,10 +200,12 @@ SELECT * FROM consultas ORDER BY id DESC LIMIT 5;
 
 ## 4. Pendientes
 
-- **El esquema solo se aplicó a `gym_buscador_test`.** Falta aplicarlo a `gym_buscador`
-  (comando de arriba).
-- La vista de detalle no se probó en un navegador real durante esta fase (Apache estaba
-  apagado). Solo se revisó la sintaxis del JavaScript.
+- Esquema aplicado también a `gym_buscador` (dos veces, sin errores; la purga corre sobre la
+  BD real). Por Apache: `registrar_evento.php` da 405 con GET y 401 sin sesión; `lib/`, `sql/`,
+  `tests/` y `herramientas/` dan 403.
+- La vista de detalle no se probó en un navegador: falta abrir una tarjeta con la cuenta demo y
+  confirmar que aparece la fila `apertura` en `eventos`. Bajo Apache (mod_php) tampoco se midió
+  que el registro no retrase la respuesta; eso solo está probado con `php -S`.
 - El artículo descubierto por los árboles y las tarjetas de la vista A+B no abren el detalle.
   El artículo descubierto trae su texto cortado a 150 caracteres.
 - `registrar_evento.php` no tiene límite de frecuencia: un usuario con sesión puede inflar las
