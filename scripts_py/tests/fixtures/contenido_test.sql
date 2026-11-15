@@ -4,6 +4,7 @@
 -- Dos "universos" de vocabulario que casi no se tocan:
 --   PECHO  (ejercicios 101-105, artículo 301): pech, banc, press, pectoral
 --   PIERNA (ejercicios 201-205, artículo 302): sentadill, piern, cuadricep, zancad
+-- grupo_id: los de taxonomia.MUSCULOS (1 = Pecho, 6 = Cuádriceps).
 -- Solo comparten "calent" con peso pequeño (0.1): el coseno entre universos es
 -- menor que 0.01, por debajo del umbral de 0.05 del recomendador.
 
@@ -43,16 +44,16 @@ INSERT INTO diccionario (id, termino) VALUES
  (9,'calent');
 
 INSERT INTO ejercicios (id, nombre_es, descripcion_es, grupo_id, equipamiento, modalidad, nivel) VALUES
- (101,'Press de banca plano','Press de pecho en banco plano',5,'Barbell','Strength','Beginner'),
- (102,'Press de banca inclinado','Press de pecho en banco inclinado',5,'Barbell','Strength','Beginner'),
- (103,'Aperturas con mancuernas','Aperturas para el pectoral',5,'Dumbbell','Strength','Beginner'),
- (104,'Press de pecho en máquina','Press de pecho guiado',5,'Machine','Strength','Beginner'),
- (105,'Cruce de poleas','Pectoral con poleas',5,'Cable','Strength','Beginner'),
- (201,'Sentadilla trasera','Sentadilla con barra para pierna',1,'Barbell','Strength','Beginner'),
- (202,'Sentadilla frontal','Sentadilla frontal para cuádriceps',1,'Barbell','Strength','Beginner'),
- (203,'Zancada caminando','Zancada para pierna',1,'Dumbbell','Strength','Beginner'),
- (204,'Prensa de piernas','Cuádriceps en prensa',1,'Machine','Strength','Beginner'),
- (205,'Zancada búlgara','Zancada con pie atrás',1,'Dumbbell','Strength','Beginner');
+ (101,'Press de banca plano','Press de pecho en banco plano',1,'Barbell','Strength','Beginner'),
+ (102,'Press de banca inclinado','Press de pecho en banco inclinado',1,'Barbell','Strength','Beginner'),
+ (103,'Aperturas con mancuernas','Aperturas para el pectoral',1,'Dumbbell','Strength','Beginner'),
+ (104,'Press de pecho en máquina','Press de pecho guiado',1,'Machine','Strength','Intermediate'),
+ (105,'Cruce de poleas','Pectoral con poleas',1,'Cable','Strength','Beginner'),
+ (201,'Sentadilla trasera','Sentadilla con barra para pierna',6,'Barbell','Strength','Beginner'),
+ (202,'Sentadilla frontal','Sentadilla frontal para cuádriceps',6,'Barbell','Strength','Beginner'),
+ (203,'Zancada caminando','Zancada para pierna',6,'Dumbbell','Strength','Beginner'),
+ (204,'Prensa de piernas','Cuádriceps en prensa',6,'Machine','Strength','Intermediate'),
+ (205,'Zancada búlgara','Zancada con pie atrás',6,'Dumbbell','Strength','Beginner');
 
 INSERT INTO articulos (id, titulo, contenido, etiquetas) VALUES
  (301,'Biomecánica del press de banca','El pectoral y el press de banca.','pecho,fuerza'),
