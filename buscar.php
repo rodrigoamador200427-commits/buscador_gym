@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/lib/bootstrap.php';
 require_once __DIR__ . '/lib/python.php';
 require_once __DIR__ . '/lib/documentos.php';
+require_once __DIR__ . '/lib/estadisticas.php';
 
 $perfilId = requerir_perfil_activo();          // 401 sin sesión, 409 sin perfil elegido
 session_write_close();
@@ -24,6 +25,7 @@ $db = conexion();
 $motor = ejecutar_python('motor_arboles.py', [$busquedaBruta]);
 
 $raices = [];
+$raicesConsulta = [];
 $articulo_serendipia = null;
 $debug_motor = null;
 if (($motor['status'] ?? '') !== 'success') {
@@ -33,6 +35,8 @@ if (($motor['status'] ?? '') !== 'success') {
                     'ref' => registrar_fallo(new RuntimeException('motor_arboles.py sin JSON válido'))];
 } else {
     $raices = array_values(array_filter($motor['raices'] ?? [], 'is_string'));
+    // Para estadísticas: solo las raíces de lo que escribió el usuario, sin la expansión
+    $raicesConsulta = array_values(array_filter($motor['raices_consulta'] ?? $raices, 'is_string'));
     $d = $motor['descubrimiento'] ?? [];
     $doc = $d['documentos'][0] ?? null;   // ya viene ordenado y es determinista
 
@@ -93,9 +97,29 @@ if ($raices) {
     }
 }
 
-responder([
+enviar_y_continuar([
     'status' => 'success',
     'resultados' => $resultados_finales,
     'descubrimiento' => $articulo_serendipia,
     'debug_motor' => $debug_motor,
 ]);
+
+// =========================================================================
+// ESTADÍSTICAS (después de responder: no retrasan la búsqueda ni la hacen fallar)
+// - consultas: una fila, solo raíces; sin perfil y sin el texto original.
+// - eventos: impresiones de lo mostrado (TF-IDF + artículo descubierto), en un
+//   solo INSERT múltiple y sin perfil.
+// raices = solo las de la consulta, sin la expansión por árboles.
+// Sin raíces (motor caído o consulta vacía tras procesarla) no se registra nada.
+// =========================================================================
+if ($raicesConsulta) {
+    registrar_sin_fallar(fn() => registrar_consulta(
+        $db, $raicesConsulta, $articulo_serendipia['via'] ?? null, count($resultados_finales)));
+
+    $mostrados = $resultados_finales;
+    if (isset($articulo_serendipia['doc_id'])) {
+        $mostrados[] = $articulo_serendipia;
+    }
+    registrar_sin_fallar(fn() => registrar_eventos($db, 'impresion', $mostrados, null));
+}
+exit;

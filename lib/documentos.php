@@ -43,6 +43,23 @@ function hidratar_documentos(PDO $db, array $refs): array
     return $tarjetas;
 }
 
+/**
+ * Lee {doc_id, origen} de una petición. origen contra la lista blanca y doc_id entero
+ * positivo (int o cadena de dígitos); si no, 422. No comprueba que el documento exista.
+ * @return array{0:int,1:string} [doc_id, origen]
+ */
+function leer_ref_documento(array $datos): array
+{
+    $origen = $datos['origen'] ?? '';
+    $docId = $datos['doc_id'] ?? null;
+    if (!in_array($origen, ORIGENES_VALIDOS, true)              // lista blanca: cierra la inyección de segundo orden
+        || !(is_int($docId) || (is_string($docId) && ctype_digit($docId) && strlen($docId) <= 10))
+        || (int)$docId <= 0 || (int)$docId > 2147483647) {
+        responder_error(422, 'doc_id u origen inválido');
+    }
+    return [(int)$docId, $origen];
+}
+
 /** Conjunto 'origen:id' de los likes del perfil (solo de ese perfil). */
 function likes_del_perfil(PDO $db, int $perfilId): array
 {
