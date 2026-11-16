@@ -6,23 +6,33 @@ PHP no está en el PATH: usar `D:\Tools\SHAMP\php\php.exe` y `D:\Tools\SHAMP\mys
 
 ## Arquitectura
 
-- `index.html`: única página. Acceso (registro/login) → selector de perfil → búsqueda,
-  recomendaciones y menús A+B.
+- `index.html`: única página (HTML + JS). Acceso (registro/login) → selector de perfil →
+  búsqueda, recomendaciones, detalle de tarjeta (`<dialog>`) y "Explorar por árboles".
+  Sus estilos están en `assets/estilos.css` (sistema de diseño con variables CSS).
 - Endpoints JSON en la raíz: `registro.php`, `login.php`, `logout.php`, `sesion.php`,
   `perfiles.php`, `seleccionar_perfil.php`, `buscar.php`, `recomendaciones.php`,
-  `registrar_interaccion.php`, `registrar_evento.php`, `menus.php`.
+  `registrar_interaccion.php`, `registrar_evento.php`, `detalle.php`, `etiquetas.php`,
+  `menus.php`.
 - `lib/`: código común. Todo endpoint empieza con `require_once __DIR__ . '/lib/bootstrap.php';`.
   - `config.php` (secretos) · `db.php` (`conexion()`) · `sesion.php` (sesión + autorización)
   - `cifrado.php` (AES-256-GCM) · `validacion.php` · `intentos.php` (límite de login)
   - `respuesta.php` (`responder`, `responder_error`, `leer_json_post`, `registrar_fallo`)
-  - `python.php` (`ejecutar_python`) · `documentos.php` (`leer_ref_documento`) · `cuentas.php`
+  - `python.php` (`ejecutar_python`) · `cuentas.php`
+  - `documentos.php`: `hidratar_documentos()` arma la tarjeta que usan TODOS los endpoints
+    (tipo, título, resumen, `meta`, `etiquetas`), `leer_ref_documento`,
+    `documentos_relacionados`, `ruta_documento`
   - `estadisticas.php` (`registrar_consulta`, `registrar_eventos`, `registrar_sin_fallar`)
 - `scripts_py/`: motor TF-IDF, árboles (`arboles/`), `recommender.py` (centroide + coseno por
-  perfil), `db_config.py` (lee la misma config que PHP).
+  perfil), `db_config.py` (lee la misma config que PHP), `etiquetado.py` (lógica pura) y
+  `generar_etiquetas.py` (llena las tablas de etiquetas y rutas; hay que volver a correrlo si
+  cambia el contenido).
 - `sql/esquema_cuentas.sql`: cuentas, perfiles, interacciones (por perfil), intentos_login.
   Es idempotente y no tiene `USE`: se aplica a la BD elegida.
 - `sql/esquema_estadisticas.sql`: `eventos` (impresion/apertura/like; `perfil_id` NULL con
   `ON DELETE SET NULL`) y `consultas` (solo raíces; sin perfil ni texto original). Mismo estilo.
+- `sql/esquema_etiquetas.sql`: `etiquetas`, `documento_etiquetas` y `documento_rutas`. Son
+  tablas DERIVADAS: las regenera `generar_etiquetas.py`. Los nombres en español de músculo,
+  equipamiento, nivel y modalidad, y los sinónimos, viven en `arboles/taxonomia.py`.
 - `herramientas/crear_demo.php`: cuenta demo con perfiles "Pecho" y "Pierna" (solo CLI).
 - `herramientas/purgar_estadisticas.php`: borra `consultas` y `eventos` de más de 180 días (solo CLI).
 - `config/`, `lib/`, `herramientas/`, `sql/`, `tests/` tienen `.htaccess` con `Require all denied`.
@@ -52,7 +62,9 @@ Cambiar `aes_clave` vuelve ilegibles los datos ya cifrados.
    reenvía al cliente, y su stderr se descarta.
 7. POST siempre con `leer_json_post()` (exige `application/json`; frena CSRF junto con
    `SameSite=Strict`).
-8. En `index.html`, todo texto del servidor pasa por `esc()` antes de ir a `innerHTML`.
+8. En `index.html`, todo texto del servidor pasa por `esc()` antes de ir a `innerHTML` (o se
+   asigna con `textContent`). `tests/test_interfaz.php` lo comprueba con un documento que trae
+   HTML en título, texto y etiquetas.
 9. Estadísticas: el registro nunca hace fallar ni retrasa la petición (`enviar_y_continuar()` +
    `registrar_sin_fallar()`). Las impresiones se guardan SIN perfil (si no, se unirían por
    `creado_en` con `consultas`). `consultas` nunca guarda el texto original ni el perfil.
@@ -63,7 +75,12 @@ Cambiar `aes_clave` vuelve ilegibles los datos ya cifrados.
 cd scripts_py && python -m pytest tests -v                  # incluye test_aislamiento.py
 D:\Tools\SHAMP\php\php.exe tests\test_autorizacion.php       # HTTP: 403, sesión, aislamiento
 D:\Tools\SHAMP\php\php.exe tests\test_estadisticas.php       # HTTP: eventos, consultas, purga
+D:\Tools\SHAMP\php\php.exe tests\test_etiquetas.php          # HTTP: etiquetas, detalle, gráfica
+D:\Tools\SHAMP\php\php.exe tests\test_interfaz.php           # navegador: teclado, filtros, XSS, 375 px
 ```
+`test_interfaz.php` lanza `tests/interfaz.mjs`, que maneja Edge sin ventana por el protocolo de
+DevTools (Node 22+, sin dependencias; `EDGE_PATH` cambia el navegador y `CAPTURAS=<carpeta>`
+guarda capturas). No correr dos pruebas a la vez: todas recrean la misma BD de pruebas.
 Ambas usan SOLO `gym_buscador_test`: la recrean con contenido sintético
 (`scripts_py/tests/fixtures/contenido_test.sql`) y se niegan a correr si la BD no termina en
 `_test` o coincide con la real. Las pruebas PHP comparten `tests/arnes.php`: guardas de BD, su
@@ -76,6 +93,8 @@ después de responder: una prueba que lea la BD tras buscar debe esperar con otr
 ```
 mysql -uroot gym_buscador < sql/esquema_cuentas.sql
 mysql -uroot gym_buscador < sql/esquema_estadisticas.sql
+mysql -uroot gym_buscador < sql/esquema_etiquetas.sql
+python scripts_py/generar_etiquetas.py # etiquetas y rutas; repetir si cambia el contenido
 php herramientas/crear_demo.php        # imprime la contraseña demo una sola vez
 ```
 
