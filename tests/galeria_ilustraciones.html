@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title>Galería de ilustraciones (página de pruebas)</title>
+    <!--
+      Página de pruebas: la abre tests/ilustraciones.mjs. Muestra TODAS las ilustraciones con
+      los mismos recuadros que la interfaz: el de la tarjeta (16:9, medio cuerpo) y el del
+      detalle (cuerpo completo). Los colores son los de assets/estilos.css, así que cambia
+      de claro a oscuro igual que la interfaz. Las rutas se resuelven desde la raíz.
+    -->
+    <base href="../">
+    <link rel="stylesheet" href="assets/estilos.css">
+    <style>
+        body { padding: 16px; }
+        .rejilla { display: grid; grid-template-columns: repeat(4, 290px); gap: 12px; }
+        .muestra { margin: 0; padding: 8px; background: var(--color-superficie); border: 1px solid var(--color-borde); }
+        .muestra figcaption { font-size: 13px; margin-bottom: 6px; font-weight: 600; }
+        .muestra .detalle-imagen { margin-top: 8px; }
+    </style>
+</head>
+<body>
+    <div class="rejilla" id="rejilla"></div>
+
+    <script src="assets/ilustraciones.js"></script>
+    <script>
+        // Una muestra por grupo muscular, por tema y por cada imagen de respaldo.
+        // ?musculos=1,2,...&temas=Fuerza|Hipertrofia|... permite a la prueba pasar la lista de
+        // la taxonomía; sin parámetros se usan los de ilustraciones.js.
+        const p = new URLSearchParams(location.search);
+        const ids = p.get('musculos') ? p.get('musculos').split(',').map(Number) : Object.keys(Ilustraciones.MUSCULOS).map(Number);
+        const temas = p.get('temas') ? p.get('temas').split('|') : ['Fuerza', 'Hipertrofia', 'Resistencia',
+            'Técnica y biomecánica', 'Planificación', 'Recuperación', 'Prevención y movilidad', 'Alimentación', 'Suplementación'];
+
+        const muestras = [
+            ...ids.map(id => ({ clave: `musculo-${id}`, texto: `grupo_id ${id}`, origen: 'ejercicios', valor: id })),
+            { clave: 'respaldo-ejercicios', texto: 'respaldo: grupo_id sin ilustración', origen: 'ejercicios', valor: 99 },
+            ...temas.map((t, i) => ({ clave: `tema-${i + 1}`, texto: t, origen: 'articulos', valor: t })),
+            { clave: 'respaldo-articulos', texto: 'respaldo: tema sin ilustración', origen: 'articulos', valor: 'Sin clasificar' },
+        ];
+
+        document.getElementById('rejilla').innerHTML = muestras.map(m => `
+            <figure class="muestra" data-muestra="${m.clave}">
+                <figcaption></figcaption>
+                <div class="tarjeta-imagen" data-tamano="tarjeta">${ilustracion(m.origen, m.valor, { encuadre: 'medio' })}</div>
+                <div class="detalle-imagen" data-tamano="detalle">${ilustracion(m.origen, m.valor)}</div>
+            </figure>`).join('');
+        document.querySelectorAll('.muestra').forEach((f, i) => {
+            f.querySelector('figcaption').textContent = `${muestras[i].texto} · ${f.querySelector('title').textContent}`;
+        });
+        window.muestras = muestras;
+    </script>
+</body>
+</html>

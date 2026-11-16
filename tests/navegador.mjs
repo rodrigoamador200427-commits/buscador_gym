@@ -7,6 +7,7 @@ import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { inflateSync } from 'node:zlib';
 
 const TOPE_MS = 5 * 60 * 1000;      // si algo se bloquea, la prueba termina en vez de colgarse
 const ORDEN_MS = 30000;             // tiempo límite de cada orden al navegador
@@ -112,20 +113,78 @@ export async function abrirNavegador() {
     async function captura(nombre, { carpeta = process.env.CAPTURAS, recorte = null } = {}) {
         if (!carpeta) return;
         mkdirSync(carpeta, { recursive: true });
+        writeFileSync(join(carpeta, nombre + '.png'), await foto(recorte));
+    }
+    /** Captura PNG en memoria (Buffer) de toda la ventana o de un `recorte` de la página. */
+    async function foto(recorte = null) {
         const params = { format: 'png' };
         if (recorte) { params.clip = { ...recorte, scale: 1 }; params.captureBeyondViewport = true; }
-        const r = await cdp('Page.captureScreenshot', params);
-        writeFileSync(join(carpeta, nombre + '.png'), Buffer.from(r.data, 'base64'));
+        return Buffer.from((await cdp('Page.captureScreenshot', params)).data, 'base64');
+    }
+    /** Simula la preferencia de tema del sistema: 'dark', 'light' o '' para quitarla. */
+    async function tema(valor) {
+        await cdp('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: valor }] });
     }
 
     await cdp('Page.enable');
     await cdp('Runtime.enable');
     return {
-        cdp, js, esperar, hasta, pantalla, ir, captura, cerrar,
+        cdp, js, esperar, hasta, pantalla, ir, captura, foto, tema, cerrar,
         ENTER: () => tecla('Enter', 13, '\r'),
         TAB: () => tecla('Tab', 9),
         ESCAPE: () => tecla('Escape', 27),
     };
+}
+
+/**
+ * Decodifica un PNG de 8 bits RGB o RGBA sin entrelazar (el formato de las capturas) para
+ * poder contar píxeles. Devuelve { ancho, alto, canales, datos }.
+ */
+export function leerPNG(buf) {
+    let p = 8, ancho = 0, alto = 0, bits = 0, tipo = 0;
+    const idat = [];
+    while (p < buf.length) {
+        const largo = buf.readUInt32BE(p), nombre = buf.toString('ascii', p + 4, p + 8), d = buf.subarray(p + 8, p + 8 + largo);
+        if (nombre === 'IHDR') {
+            ancho = d.readUInt32BE(0); alto = d.readUInt32BE(4); bits = d[8]; tipo = d[9];
+            if (d[12] !== 0) throw new Error('PNG entrelazado: no se admite');
+        } else if (nombre === 'IDAT') idat.push(d);
+        else if (nombre === 'IEND') break;
+        p += 12 + largo;
+    }
+    if (bits !== 8 || (tipo !== 6 && tipo !== 2)) throw new Error(`PNG no admitido (bits ${bits}, tipo ${tipo})`);
+    const canales = tipo === 6 ? 4 : 3, fila = ancho * canales, crudo = inflateSync(Buffer.concat(idat)), datos = Buffer.alloc(alto * fila);
+    for (let y = 0; y < alto; y++) {
+        const filtro = crudo[y * (fila + 1)], base = y * (fila + 1) + 1, sal = y * fila;
+        for (let x = 0; x < fila; x++) {
+            const a = x >= canales ? datos[sal + x - canales] : 0;
+            const b = y > 0 ? datos[sal - fila + x] : 0;
+            const c = x >= canales && y > 0 ? datos[sal - fila + x - canales] : 0;
+            let v = crudo[base + x];
+            if (filtro === 1) v += a;
+            else if (filtro === 2) v += b;
+            else if (filtro === 3) v += (a + b) >> 1;
+            else if (filtro === 4) { const pa = Math.abs(b - c), pb = Math.abs(a - c), pc = Math.abs(a + b - 2 * c); v += pa <= pb && pa <= pc ? a : pb <= pc ? b : c; }
+            datos[sal + x] = v & 255;
+        }
+    }
+    return { ancho, alto, canales, datos };
+}
+
+/** Cuántos píxeles de la imagen tienen ese color [r, g, b], con una tolerancia por canal. */
+export function contarColor(png, [r, g, b], tolerancia = 10) {
+    let n = 0;
+    for (let i = 0; i < png.datos.length; i += png.canales) {
+        if (Math.abs(png.datos[i] - r) <= tolerancia && Math.abs(png.datos[i + 1] - g) <= tolerancia && Math.abs(png.datos[i + 2] - b) <= tolerancia) n++;
+    }
+    return n;
+}
+
+/** Contraste WCAG entre dos colores [r, g, b] (de 1 a 21). */
+export function contraste(c1, c2) {
+    const lum = c => { const [r, g, b] = c.map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+    const [a, b] = [lum(c1), lum(c2)].sort((x, y) => y - x);
+    return (a + 0.05) / (b + 0.05);
 }
 
 /** Contador de comprobaciones con el mismo formato que las pruebas PHP. */
