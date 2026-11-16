@@ -9,8 +9,10 @@ const LARGO_RESUMEN = 280;      // la tarjeta muestra 3 líneas; el texto comple
 /**
  * Recibe [['doc_id'=>..,'origen'=>..], ...] y devuelve ['origen:id' => tarjeta]:
  *   doc_id, origen, tipo, titulo, resumen (o texto si $textoCompleto),
- *   meta {musculo, equipamiento, nivel} (nombres visibles o null) y etiquetas [{id, nombre, tipo}].
- * Una consulta preparada por origen y una más para las etiquetas de todos.
+ *   meta {musculo, equipamiento, nivel} (nombres visibles o null), etiquetas [{id, nombre, tipo}]
+ *   y lo que decide su ilustración (assets/ilustraciones.js): grupo_id en los ejercicios y
+ *   tema (el del árbol de Temas) en los artículos; el otro va en null.
+ * Una consulta preparada por origen, una para las etiquetas de todos y una para los temas.
  * Todo es contenido público; el escape lo hace quien lo muestra.
  */
 function hidratar_documentos(PDO $db, array $refs, bool $textoCompleto = false): array
@@ -22,8 +24,8 @@ function hidratar_documentos(PDO $db, array $refs, bool $textoCompleto = false):
         }
     }
     $consultas = [
-        'ejercicios' => 'SELECT id, nombre_es AS titulo, descripcion_es AS texto FROM ejercicios WHERE id IN (%s)',
-        'articulos'  => 'SELECT id, titulo, contenido AS texto FROM articulos WHERE id IN (%s)',
+        'ejercicios' => 'SELECT id, nombre_es AS titulo, descripcion_es AS texto, grupo_id FROM ejercicios WHERE id IN (%s)',
+        'articulos'  => 'SELECT id, titulo, contenido AS texto, NULL AS grupo_id FROM articulos WHERE id IN (%s)',
     ];
 
     $tarjetas = [];
@@ -41,7 +43,22 @@ function hidratar_documentos(PDO $db, array $refs, bool $textoCompleto = false):
             ] + ($textoCompleto ? ['texto' => $texto] : ['resumen' => resumir($texto)]) + [
                 'meta' => ['musculo' => null, 'equipamiento' => null, 'nivel' => null],
                 'etiquetas' => [],
+                'grupo_id' => $f['grupo_id'] !== null ? (int)$f['grupo_id'] : null,
+                'tema' => null,
             ];
+        }
+    }
+
+    // Tema de cada artículo: el último nodo de su ruta en el árbol de Temas
+    if ($ids['articulos']) {
+        $s = $db->prepare("SELECT doc_id, ruta FROM documento_rutas WHERE origen = 'articulos' AND arbol = 'temas' AND doc_id IN ("
+            . implode(',', array_fill(0, count($ids['articulos']), '?')) . ')');
+        $s->execute($ids['articulos']);
+        foreach ($s->fetchAll() as $f) {
+            $nodos = explode(' > ', (string)$f['ruta']);
+            if (isset($tarjetas["articulos:{$f['doc_id']}"])) {
+                $tarjetas["articulos:{$f['doc_id']}"]['tema'] = end($nodos);
+            }
         }
     }
 

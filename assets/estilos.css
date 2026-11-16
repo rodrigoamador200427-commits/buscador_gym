@@ -4,7 +4,7 @@
    1. Sistema de diseño (variables)      5. Tarjetas
    2. Base y utilidades                  6. Panel lateral: filtros y gráfica
    3. Barra superior y pestañas          7. Detalle (dialog)
-   4. Acceso y perfiles                  8. Árboles · 9. Teléfono
+   4. Acceso y perfiles                  8. Árboles · 9. Teléfono · 10. Ilustraciones
    ============================================================================= */
 
 /* ---------------------------------------------------------------- 1. Sistema de diseño */
@@ -24,6 +24,13 @@
     --color-ejercicio-texto: #6f4300;
     --color-articulo-fondo: #efe6fb;
     --color-articulo-texto: #5720a0;
+
+    /* Ilustraciones (assets/ilustraciones.js): fondo del recuadro, figura atenuada,
+       región resaltada y trazo de los pictogramas. Resaltado sobre atenuado: 4.6:1 */
+    --color-ilustracion-fondo: #eceff5;
+    --color-ilustracion-base: #b4bdce;
+    --color-ilustracion-resaltado: var(--color-acento);
+    --color-ilustracion-tinta: var(--color-texto-suave);
 
     /* Tipografía */
     --fuente: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -372,4 +379,56 @@ button { cursor: pointer; }
     padding: var(--esp-3) var(--esp-4);
     background: var(--color-texto); color: #fff;
     border-radius: var(--radio-m); font-size: var(--texto-s);
+}
+
+/* ---------------------------------------------------------------- 10. Ilustraciones */
+/* El SVG lee estas variables (ver assets/anatomia/*.svg y assets/temas/pictogramas.svg).
+   Para otro tema de color basta redefinir las --color-ilustracion-* de :root. */
+.ilustracion {
+    display: block;
+    width: 100%;
+    height: 100%;
+    color: var(--color-ilustracion-tinta);
+    --ilu-base: var(--color-ilustracion-base);
+    --ilu-resaltado: var(--color-ilustracion-resaltado);
+    --ilu-tinta: var(--color-ilustracion-tinta);
+}
+
+/* Recuadro de proporción fija para la imagen de la tarjeta. Hoy lleva la ilustración; una
+   foto (<img>) ocuparía exactamente el mismo espacio, así que nada más se mueve. */
+.tarjeta-imagen {
+    aspect-ratio: 16 / 9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: var(--color-ilustracion-fondo);
+    border-radius: var(--radio-m);
+}
+.tarjeta-imagen .ilustracion-cuerpo { height: 100%; }       /* el medio cuerpo se corta en el borde */
+.tarjeta-imagen .ilustracion-completo { height: 92%; }
+.tarjeta-imagen .ilustracion-pictograma { height: 60%; }
+.tarjeta-imagen img { width: 100%; height: 100%; object-fit: cover; }
+
+/* En el detalle: la misma ilustración, grande y con el cuerpo completo, en una columna a la
+   izquierda del texto (la figura es vertical). En teléfono va arriba, a todo el ancho. */
+.detalle-principal { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: var(--esp-4); align-items: start; }
+.detalle-info { display: grid; gap: var(--esp-4); min-width: 0; }
+.detalle-imagen {
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--esp-3);
+    background: var(--color-ilustracion-fondo);
+    border-radius: var(--radio-m);
+}
+.detalle-imagen:has(.ilustracion-pictograma) { height: 220px; }     /* el pictograma es cuadrado */
+.detalle-imagen .ilustracion-pictograma { width: 64%; height: auto; }
+.detalle-imagen img { width: 100%; height: 100%; object-fit: contain; }
+@media (max-width: 640px) {
+    .detalle-principal { grid-template-columns: minmax(0, 1fr); }
+    .detalle-imagen { height: 340px; }
+    .detalle-imagen:has(.ilustracion-pictograma) { height: 200px; }
+    .detalle-imagen .ilustracion-pictograma { width: auto; height: 70%; }
 }
