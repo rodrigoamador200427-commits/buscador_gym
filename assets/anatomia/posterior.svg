@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Cuerpo humano, vista posterior. Dibujo original del proyecto: esquemático, de una sola tinta.
+  Lienzo 200 x 400; el lado izquierdo es el espejo del derecho.
+
+  Colores: ninguno fijo. Cada región se pinta con la variable CSS "ilu-<id>"; si no está
+  definida, con "ilu-base"; y si tampoco, con currentColor (las variables llevan dos guiones
+  delante, que aquí no se escriben porque un comentario XML no los admite).
+    - abierto solo: todo se pinta con currentColor (una tinta);
+    - en la interfaz: "ilu-base" atenúa todo y "ilu-<id>" resalta una región.
+  Se usa desde assets/ilustraciones.js con <use href="assets/anatomia/posterior.svg#cuerpo">.
+  Regiones con id: hombro, espalda, triceps, antebrazos, gluteo, isquiotibiales, pantorrilla.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 400" role="img" aria-labelledby="titulo">
+  <title id="titulo">Cuerpo humano, vista posterior</title>
+  <g id="cuerpo">
+    <g id="silueta" style="fill:var(--ilu-base,currentColor)">
+      <ellipse cx="100" cy="31" rx="18" ry="22"/>
+      <path d="M94 57H106V64Q100 67 94 64Z"/>
+      <ellipse cx="157" cy="217" rx="5.5" ry="10"/>
+      <g transform="matrix(-1 0 0 1 200 0)"><ellipse cx="157" cy="217" rx="5.5" ry="10"/></g>
+      <ellipse cx="118.2" cy="293.5" rx="9.3" ry="6.5"/>
+      <g transform="matrix(-1 0 0 1 200 0)"><ellipse cx="118.2" cy="293.5" rx="9.3" ry="6.5"/></g>
+      <path d="M115 351H126.5L124.5 372H116Z"/>
+      <g transform="matrix(-1 0 0 1 200 0)"><path d="M115 351H126.5L124.5 372H116Z"/></g>
+      <path d="M115 376H125Q127.5 384 126.5 391H113.5Q112.5 384 115 376Z"/>
+      <g transform="matrix(-1 0 0 1 200 0)"><path d="M115 376H125Q127.5 384 126.5 391H113.5Q112.5 384 115 376Z"/></g>
+    </g>
+    <g id="hombro" style="fill:var(--ilu-hombro,var(--ilu-base,currentColor))">
+      <path d="M138 67Q157 67 157 93Q157 103 150 109Q142 99 139 87Z"/>
+      <g transform="matrix(-1 0 0 1 200 0)"><path d="M138 67Q157 67 157 93Q157 103 150 109Q142 99 139 87Z"/></g>
+    </g>
+    <g id="espalda" style="fill:var(--ilu-espalda,var(--ilu-base,currentColor))">
+      <path d="M102 71.5L109.5 68V61L135 66.5V69.5L116 86L102 113Z"/>
+      <g transform="matrix(-1 0 0 1 200 0)"><path d="M102 71.5L109.5 68V61L135 66.5V69.5L116 86L102 113Z"/></g>
+      <path d="M119 87.5L134 74.5Q135.5 105 131 130Q128 152 124 167L104.5 157V118.5Z"/>
+      <g transform="matrix(-1 0 0 1 200 0)"><path d="M119 87.5L134 74.5Q135.5 105 131 130Q128 152 124 167L104.5 157V118.5Z"/></g>
+      <path d="M102 160.5L123.5 171L127 184Q114 189 102 190Z"/>
+      <g transform="matrix(-1 0 0 1 200 0)"><path d="M102 160.5L123.5 171L127 184Q114 189 102 190Z"/></g>
+    </g>
+    <g id="triceps" style="fill:var(--ilu-triceps,var(--ilu-base,currentColor))">
+      <path d="M141 103L149.7 113L157.5 106.5L158.5 151Q152.5 155 146.5 151Z"/>
+      <g transform="matrix(-1 0 0 1 200 0)"><path d="M141 103L149.7 113L157.5 106.5L158.5 151Q152.5 155 146.5 151Z"/></g>
+    </g>
+    <g id="antebrazos" style="fill:var(--ilu-antebrazos,var(--ilu-base,currentColor))">
+      <path d="M146.5 158Q153 154 159.5 158L160.5 203Q156.5 206 152.5 203Z"/>
+      <g transform="matrix(-1 0 0 1 200 0)"><path d="M146.5 158Q153 154 159.5 158L160.5 203Q156.5 206 152.5 203Z"/></g>
+    </g>
+    <g id="gluteo" style="fill:var(--ilu-gluteo,var(--ilu-base,currentColor))">
+      <path d="M102 194.5L127.5 187.5Q137 203 134 219Q129.5 234 115 234Q104 234 102 227Z"/>
+      <g transform="matrix(-1 0 0 1 200 0)"><path d="M102 194.5L127.5 187.5Q137 203 134 219Q129.5 234 115 234Q104 234 102 227Z"/></g>
+    </g>
+    <g id="isquiotibiales" style="fill:var(--ilu-isquiotibiales,var(--ilu-base,currentColor))">
+      <path d="M103.5 239.5Q120 242 134.5 227Q136 250 133 268L128 285H109Q103.5 262 103.5 239.5Z"/>
+      <g transform="matrix(-1 0 0 1 200 0)"><path d="M103.5 239.5Q120 242 134.5 227Q136 250 133 268L128 285H109Q103.5 262 103.5 239.5Z"/></g>
+    </g>
+    <g id="pantorrilla" style="fill:var(--ilu-pantorrilla,var(--ilu-base,currentColor))">
+      <path d="M108.5 304H127.5Q134.5 322 127.5 347H114Q105.5 325 108.5 304Z"/>
+      <g transform="matrix(-1 0 0 1 200 0)"><path d="M108.5 304H127.5Q134.5 322 127.5 347H114Q105.5 325 108.5 304Z"/></g>
+    </g>
+  </g>
+</svg>
