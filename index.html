@@ -1,539 +1,178 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Motor Semántico & Sistema de Recomendación</title>
-    <style>
-        :root {
-            --primary: #0f172a;
-            --accent: #4f46e5;
-            --accent-hover: #4338ca;
-            --bg: #f1f5f9;
-            --surface: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --like: #f43f5e;
-        }
-
-        .tab-btn { padding:10px 18px; border:1px solid var(--border); background:#fff; border-radius:999px; font-weight:600; cursor:pointer; color:var(--text-muted); }
-        .tab-btn.activa { background:var(--accent); color:#fff; border-color:var(--accent); }
-        [hidden] { display:none !important; }
-        * { box-sizing: border-box; }
-        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text-main); margin: 0; padding-bottom: 50px;}
-
-        /* Header Hero */
-        .hero { background: var(--primary); padding: 50px 20px 80px; text-align: center; color: white; }
-        .hero h1 { margin: 0 0 10px; font-size: 2.5rem; letter-spacing: -0.5px; }
-        .hero p { margin: 0; color: #94a3b8; font-size: 1.1rem; }
-
-        /* Search Bar Floating */
-        .search-wrapper { max-width: 800px; margin: -35px auto 40px; padding: 0 20px; position: relative; }
-        .search-input { width: 100%; padding: 20px 30px; font-size: 1.2rem; border: none; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); outline: none; transition: box-shadow 0.3s; }
-        .search-input:focus { box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4); }
-
-        /* Main Layout Grid */
-        .container { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: 280px 1fr; gap: 30px; padding: 0 20px; }
-        @media (max-width: 900px) { .container { grid-template-columns: 1fr; } }
-
-        /* Sidebar Panels */
-        .panel { background: var(--surface); border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid var(--border); margin-bottom: 24px; }
-        .panel h3 { margin: 0 0 16px 0; font-size: 1.1rem; color: var(--primary); display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
-        
-        /* Perfil Semántico Tags */
-        .semantic-tags { display: flex; flex-wrap: wrap; gap: 8px; }
-        .s-tag { background: #e0e7ff; color: #3730a3; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; text-transform: lowercase; }
-        .s-tag-empty { color: var(--text-muted); font-size: 0.9rem; font-style: italic; }
-
-        /* Filters */
-        .filter-item { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; cursor: pointer; font-size: 0.95rem; color: var(--text-main); }
-        .filter-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
-
-        /* Main Content */
-        .section-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
-        .section-title { font-size: 1.5rem; margin: 0; font-weight: 700; color: var(--primary); }
-        .stats { font-size: 0.9rem; color: var(--text-muted); font-weight: 500; }
-
-        .results-grid { display: grid; gap: 20px; }
-
-        /* Result Cards */
-        .card { background: var(--surface); border-radius: 16px; padding: 24px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: transform 0.2s, box-shadow 0.2s; position: relative; }
-        .card:hover { transform: translateY(-3px); box-shadow: 0 12px 20px -5px rgba(0,0,0,0.08); border-color: #cbd5e1; }
-        
-        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; padding-right: 40px; }
-        .card-title { font-size: 1.25rem; margin: 0; color: var(--primary); font-weight: 700; line-height: 1.3; }
-        
-        .card[data-i] { cursor: pointer; }
-        .card-abrir { all: unset; cursor: pointer; }
-        .card-abrir:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 4px; }
-
-        /* Detalle de una tarjeta */
-        .detalle { width: min(720px, calc(100vw - 32px)); max-height: calc(100vh - 64px); border: 1px solid var(--border); border-radius: 16px; padding: 24px; background: var(--surface); color: var(--text-main); box-sizing: border-box; }
-        .detalle::backdrop { background: rgba(15, 23, 42, 0.45); }
-        .detalle-cab { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 12px; }
-        .detalle-cab h3 { margin: 0; font-size: 1.3rem; color: var(--primary); line-height: 1.3; }
-        .detalle-texto { white-space: pre-line; line-height: 1.7; color: var(--text-main); margin: 16px 0 0; }
-
-        .card-snippet { font-size: 0.95rem; color: var(--text-muted); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 16px; }
-        
-        .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 16px; }
-        .meta-tags { display: flex; gap: 8px; }
-        .badge { padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; }
-        .badge-Ejercicios { background: #fef3c7; color: #b45309; }
-        .badge-Teoría { background: #f3e8ff; color: #7e22ce; }
-        .badge-info { background: #f1f5f9; color: #475569; }
-        
-        .score { font-family: monospace; font-size: 0.85rem; font-weight: 700; color: var(--accent); background: #e0e7ff; padding: 4px 10px; border-radius: 6px; }
-
-        /* Like Button */
-        .like-btn { position: absolute; top: 20px; right: 20px; background: none; border: none; cursor: pointer; padding: 8px; border-radius: 50%; transition: background 0.2s; display: flex; align-items: center; justify-content: center; }
-        .like-btn:hover { background: #fee2e2; }
-        .like-btn svg { width: 24px; height: 24px; fill: none; stroke: #94a3b8; stroke-width: 2; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .like-btn.liked svg { fill: var(--like); stroke: var(--like); transform: scale(1.1); }
-        
-        /* Loader & Empty States */
-        .status-msg { padding: 40px; text-align: center; color: var(--text-muted); font-size: 1.1rem; border: 2px dashed var(--border); border-radius: 16px; }
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--accent); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Tarjeta de Serendipia / Grafo de Conocimiento */
-        .serendipity-card { background: linear-gradient(145deg, #fffbeb, #fef3c7); border: 2px solid #fbbf24; border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 10px 20px -5px rgba(251, 191, 36, 0.3); }
-        .serendipity-header { display: flex; align-items: center; gap: 8px; color: #d97706; font-weight: 800; font-size: 1.1rem; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .serendipity-path { font-family: monospace; font-size: 0.85rem; background: #fef08a; color: #854d0e; padding: 8px 12px; border-radius: 8px; display: inline-block; margin-bottom: 16px; border: 1px dashed #ca8a04; }
-        .serendipity-reason { font-style: italic; color: #92400e; font-size: 0.95rem; margin-bottom: 16px; border-left: 4px solid #fbbf24; padding-left: 12px; line-height: 1.5; }
-
-        /* Cuentas y perfiles */
-        .barra-sesion { max-width: 1300px; margin: 12px auto 0; padding: 0 20px; display: flex; justify-content: flex-end; align-items: center; gap: 12px; font-size: .9rem; color: var(--text-muted); flex-wrap: wrap; }
-        .barra-sesion strong { color: var(--primary); }
-        .btn-link { background: none; border: 1px solid var(--border); border-radius: 999px; padding: 6px 14px; cursor: pointer; font-weight: 600; color: var(--text-main); }
-        .btn-link:hover { border-color: var(--accent); color: var(--accent); }
-        .acceso { max-width: 440px; margin: 40px auto; padding: 0 20px; }
-        .acceso form { display: grid; gap: 12px; }
-        .acceso label { display: grid; gap: 4px; font-size: .85rem; font-weight: 600; }
-        .acceso input { padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 1rem; }
-        .btn-primario { padding: 12px; border: 0; border-radius: 10px; background: var(--accent); color: #fff; font-weight: 700; cursor: pointer; font-size: 1rem; }
-        .btn-primario:hover { background: var(--accent-hover); }
-        .acceso-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
-        .msg-error { color: #b91c1c; font-size: .9rem; min-height: 1.2em; }
-        .lista-perfiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
-        .perfil-item { border: 1px solid var(--border); border-radius: 14px; padding: 18px 12px; text-align: center; background: #fff; position: relative; }
-        .perfil-item .elegir { background: none; border: 0; cursor: pointer; font-size: 1rem; font-weight: 700; color: var(--primary); width: 100%; }
-        .perfil-item .elegir:hover { color: var(--accent); }
-        .perfil-item .borrar { position: absolute; top: 6px; right: 8px; background: none; border: 0; cursor: pointer; color: #94a3b8; font-size: .8rem; }
-        .perfil-item .borrar:hover { color: #b91c1c; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Buscador Gym</title>
+    <link rel="stylesheet" href="assets/estilos.css">
 </head>
 <body>
 
-    <header class="hero">
-        <h1>Inteligencia Deportiva</h1>
-        <p>Motor de Recomendación Semántica y Búsqueda Vectorial</p>
+    <!-- BARRA SUPERIOR FIJA: nombre, búsqueda y menú del perfil activo -->
+    <header class="barra">
+        <div class="contenedor barra-contenido">
+            <div class="marca">Buscador Gym</div>
+            <form class="busqueda" id="formBusqueda" role="search" hidden>
+                <input type="search" id="searchInput" autocomplete="off" maxlength="200"
+                       aria-label="Buscar ejercicios y artículos" placeholder="Buscar ejercicios y artículos">
+            </form>
+            <details class="menu-perfil" id="menuPerfil" hidden>
+                <summary id="nombrePerfil"></summary>
+                <div class="menu-opciones">
+                    <div class="correo" id="correoCuenta"></div>
+                    <button type="button" id="btnCambiarPerfil">Cambiar perfil</button>
+                    <button type="button" data-accion="logout">Cerrar sesión</button>
+                </div>
+            </details>
+        </div>
     </header>
 
-    <!-- ACCESO: registro / inicio de sesión -->
+    <!-- ACCESO: iniciar sesión / crear cuenta -->
     <section id="pantallaAcceso" class="acceso" hidden>
         <div class="panel">
-            <div class="acceso-tabs">
-                <button class="tab-btn activa" id="tabLogin" type="button">Iniciar sesión</button>
-                <button class="tab-btn" id="tabRegistro" type="button">Crear cuenta</button>
+            <div class="pestanas" role="tablist">
+                <button class="pestana" id="tabLogin" type="button" role="tab" aria-selected="true">Iniciar sesión</button>
+                <button class="pestana" id="tabRegistro" type="button" role="tab" aria-selected="false">Crear cuenta</button>
             </div>
             <form id="formLogin">
-                <label>Correo <input type="email" name="correo" autocomplete="username" required maxlength="254"></label>
-                <label>Contraseña <input type="password" name="contrasena" autocomplete="current-password" required maxlength="72"></label>
-                <div class="msg-error" id="errLogin"></div>
-                <button class="btn-primario" type="submit">Entrar</button>
+                <label class="campo">Correo <input type="email" name="correo" autocomplete="username" required maxlength="254"></label>
+                <label class="campo">Contraseña <input type="password" name="contrasena" autocomplete="current-password" required maxlength="72"></label>
+                <div class="msg-error" id="errLogin" role="alert"></div>
+                <button class="btn btn-primario" type="submit">Entrar</button>
             </form>
             <form id="formRegistro" hidden>
-                <label>Nombre completo <input name="nombre_completo" autocomplete="name" required maxlength="100"></label>
-                <label>Fecha de nacimiento <input type="date" name="fecha_nacimiento" required></label>
-                <label>Correo <input type="email" name="correo" autocomplete="username" required maxlength="254"></label>
-                <label>Contraseña (10+ caracteres, letras y números) <input type="password" name="contrasena" autocomplete="new-password" required minlength="10" maxlength="72"></label>
-                <div class="msg-error" id="errRegistro"></div>
-                <button class="btn-primario" type="submit">Crear cuenta</button>
+                <label class="campo">Nombre completo <input name="nombre_completo" autocomplete="name" required maxlength="100"></label>
+                <label class="campo">Fecha de nacimiento <input type="date" name="fecha_nacimiento" required></label>
+                <label class="campo">Correo <input type="email" name="correo" autocomplete="username" required maxlength="254"></label>
+                <label class="campo">Contraseña (10 caracteres o más, con letras y números) <input type="password" name="contrasena" autocomplete="new-password" required minlength="10" maxlength="72"></label>
+                <div class="msg-error" id="errRegistro" role="alert"></div>
+                <button class="btn btn-primario" type="submit">Crear cuenta</button>
             </form>
         </div>
     </section>
 
     <!-- SELECTOR DE PERFIL (máximo 4 por cuenta) -->
-    <section id="pantallaPerfiles" class="acceso" style="max-width:720px" hidden>
+    <section id="pantallaPerfiles" class="acceso acceso-ancho" hidden>
         <div class="panel">
-            <h3>¿Quién está entrenando?</h3>
+            <h2>Elige un perfil</h2>
             <div id="listaPerfiles" class="lista-perfiles"></div>
-            <form id="formPerfil" style="grid-template-columns:1fr auto; align-items:end">
-                <label>Nuevo perfil <input name="nombre" required maxlength="40" placeholder="Ej. Pierna"></label>
-                <button class="btn-primario" type="submit">Crear</button>
+            <form id="formPerfil" class="form-perfil">
+                <label class="campo">Nombre del perfil nuevo <input name="nombre" required maxlength="40"></label>
+                <button class="btn btn-primario" type="submit">Crear perfil</button>
             </form>
-            <div class="msg-error" id="errPerfiles"></div>
-            <div style="text-align:right; margin-top:8px"><button class="btn-link" type="button" data-accion="logout">Cerrar sesión</button></div>
+            <div class="msg-error" id="errPerfiles" role="alert"></div>
+            <div class="pie-perfiles"><button class="btn" type="button" data-accion="logout">Cerrar sesión</button></div>
         </div>
     </section>
 
     <div id="app" hidden>
-    <div class="barra-sesion">
-        <span>Perfil: <strong id="nombrePerfil"></strong> · <span id="correoCuenta"></span></span>
-        <button class="btn-link" type="button" id="btnCambiarPerfil">Cambiar perfil</button>
-        <button class="btn-link" type="button" data-accion="logout">Cerrar sesión</button>
-    </div>
+        <nav class="contenedor pestanas" role="tablist">
+            <button class="pestana" type="button" role="tab" data-vista="vistaBusqueda">Búsqueda y recomendaciones</button>
+            <button class="pestana" type="button" role="tab" data-vista="vistaArboles">Explorar por árboles</button>
+        </nav>
 
-    <div class="search-wrapper">
-        <input type="text" id="searchInput" class="search-input" placeholder="Explora rutinas, biomecánica o escribe un objetivo..." autocomplete="off">
-    </div>
+        <!-- VISTA 1: búsqueda y recomendaciones -->
+        <main class="contenedor disposicion" id="vistaBusqueda">
+            <details class="lateral" id="lateral" open>
+                <summary>Filtros y perfil</summary>
+                <section class="panel" aria-labelledby="tituloFiltros">
+                    <h2 id="tituloFiltros">Filtros</h2>
+                    <div class="filtro-grupo">
+                        <h3>Tipo de documento</h3>
+                        <label class="opcion"><input type="checkbox" data-tipo="ejercicios" checked> Ejercicios <span class="n" id="nEjercicios"></span></label>
+                        <label class="opcion"><input type="checkbox" data-tipo="articulos" checked> Artículos <span class="n" id="nArticulos"></span></label>
+                    </div>
+                    <div class="filtro-grupo" id="grupoNivel" hidden>
+                        <h3>Nivel</h3>
+                        <div id="opcionesNivel"></div>
+                    </div>
+                    <div class="filtro-grupo" id="grupoEquipamiento" hidden>
+                        <h3>Equipamiento</h3>
+                        <div id="opcionesEquipamiento"></div>
+                    </div>
+                    <div class="filtro-grupo" id="grupoEtiquetas" hidden>
+                        <h3>Etiquetas</h3>
+                        <ul class="etiquetas" id="opcionesEtiquetas"></ul>
+                    </div>
+                    <button class="btn" type="button" id="quitarFiltros" hidden>Quitar filtros</button>
+                </section>
+                <section class="panel" aria-labelledby="tituloGrafica">
+                    <h2 id="tituloGrafica">Lo que más pesa en tus recomendaciones</h2>
+                    <div id="grafica"></div>
+                </section>
+            </details>
 
-    <nav id="tabs" style="max-width:1300px; margin:16px auto 20px; padding:0 20px; display:flex; gap:8px;">
-        <button class="tab-btn" id="tabBusqueda" data-vista="vistaBusqueda">Búsqueda y recomendaciones</button>
-        <button class="tab-btn" id="tabArboles" data-vista="vistaArboles">Explorar por árboles (A + B)</button>
-    </nav>
-
-    <!-- Panel de gráfico dinámico (Se oculta en búsquedas TF-IDF) -->
-    <div class="panel" id="chartPanel" style="max-width: 1300px; margin: 0 auto 20px; display: none;">
-        <h3> Posicionamiento Algorítmico </h3>
-        <canvas id="recommendationsChart" width="400" height="120"></canvas>
-    </div>
-
-    <main class="container" id="vistaBusqueda">
-        <!-- Sidebar -->
-        <aside>
-            <div class="panel">
-                <h3> Perfil Semántico</h3>
-                <div id="semanticProfile" class="semantic-tags">
-                    <!-- Se llena vía JS -->
-                    <span class="s-tag-empty">Analizando tus interacciones...</span>
+            <section aria-labelledby="sectionTitle">
+                <div class="cabecera-seccion">
+                    <h1 id="sectionTitle"></h1>
+                    <div id="statsBar" class="conteo" role="status"></div>
                 </div>
-            </div>
+                <div id="discoveryZone"></div>
+                <div id="resultsGrid" class="cuadricula"></div>
+            </section>
+        </main>
 
+        <!-- VISTA 2: explorar por árboles -->
+        <main class="contenedor arboles" id="vistaArboles" hidden>
             <div class="panel">
-                <h3> Filtro de Universos</h3>
-                <label class="filter-item">
-                    <input type="checkbox" class="universe-filter" value="Ejercicios" checked>
-                    Ejercicios Prácticos
-                </label>
-                <label class="filter-item">
-                    <input type="checkbox" class="universe-filter" value="Teoría" checked>
-                    Artículos y Biomecánica
-                </label>
+                <h1 class="cabecera-seccion" style="font-size:var(--texto-xl)">Explorar por árboles</h1>
+                <p>Elige un músculo y un tema para ver los artículos que tratan los dos.</p>
+                <form class="arboles-form" id="formAB">
+                    <label class="campo">Músculo <select id="menuA"></select></label>
+                    <label class="campo">Tema <select id="menuB"></select></label>
+                    <button class="btn btn-primario" type="submit">Ver artículos</button>
+                </form>
+                <div id="resultadoAB" class="arboles-resultado"></div>
             </div>
-        </aside>
+        </main>
+    </div>
 
-        <!-- Resultados -->
-        <section>
-            <div class="section-header">
-                <h2 id="sectionTitle" class="section-title">Para Ti</h2>
-                <div id="statsBar" class="stats">Cargando motor...</div>
-            </div>
-
-
-            <div id="discoveryZone"></div>
-
-            <div id="resultsGrid" class="results-grid">
-                <!-- Se llena vía JS -->
-                <div class="status-msg"><div class="loader"></div> Calculando distancias vectoriales...</div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Vista aparte: solo se ve cuando el usuario elige la pestaña -->
-    <main id="vistaArboles" style="max-width:1300px; margin:0 auto; padding:0 20px;" hidden>
-        <div class="panel">
-            <h3 style="margin-top:0">Explorar por árboles</h3>
-            <p style="color:var(--text-muted); font-size:.9rem; margin:12px 0;">
-                    Elige un nodo del árbol de Anatomía (A) y uno del árbol de Temas (B): el sistema muestra los artículos que unen ambos árboles. Si no hay ninguno, lo dice.
-                </p>
-                <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:end;">
-                    <label style="flex:1; min-width:200px; font-size:.8rem; font-weight:600;">A · Músculo (Anatomía)
-                        <select id="menuA" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:10px; margin-top:4px;"></select></label>
-                    <label style="flex:1; min-width:200px; font-size:.8rem; font-weight:600;">B · Tema (Conocimiento)
-                        <select id="menuB" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:10px; margin-top:4px;"></select></label>
-                    <button id="btnAB" style="padding:10px 20px; border:0; border-radius:10px; background:var(--accent); color:#fff; font-weight:600; cursor:pointer;">Combinar A + B</button>
-                </div>
-                <div id="resultadoAB" style="margin-top:16px;"></div>
-        </div>
-    </main>
-    </div><!-- /#app -->
-
+    <!-- DETALLE DE UNA TARJETA. showModal() deja el foco dentro y Escape la cierra. -->
     <dialog id="detalle" class="detalle" aria-labelledby="detalleTitulo">
         <div class="detalle-cab">
-            <h3 id="detalleTitulo"></h3>
-            <button type="button" class="btn-link" id="detalleCerrar">Cerrar</button>
+            <div>
+                <span id="detalleTipo" class="tipo"></span>
+                <h2 id="detalleTitulo" tabindex="-1"></h2>
+            </div>
+            <button type="button" class="btn" id="detalleCerrar">Cerrar</button>
         </div>
-        <div id="detalleMeta" class="meta-tags"></div>
-        <p id="detalleTexto" class="detalle-texto"></p>
+        <div class="detalle-cuerpo" id="detalleCuerpo"></div>
     </dialog>
 
+    <div id="aviso" class="aviso" role="status" hidden></div>
+
 <script>
-    const searchInput = document.getElementById('searchInput');
-    const resultsGrid = document.getElementById('resultsGrid');
-    const sectionTitle = document.getElementById('sectionTitle');
-    const statsBar = document.getElementById('statsBar');
-    const semanticProfile = document.getElementById('semanticProfile');
-    const filters = document.querySelectorAll('.universe-filter');
-    const chartPanel = document.getElementById('chartPanel');
-
-    let currentData = [];
-    let currentMode = 'recommendations'; // 'recommendations' o 'search'
-    let recChart = null;
-
-    // ==========================================
-    // GRÁFICO EN VIVO (CHART.JS)
-    // ==========================================
-    function updateRecommendationGraph(recommendations) {
-    const topRecs = recommendations.slice(0, 10);
-    const labels = topRecs.map(item => item.titulo.length > 20 ? item.titulo.substring(0, 20) + "..." : item.titulo);
-    
-    // Extracción limpia del número ignorando texto como "Similitud: " y "%"
-    const scores = topRecs.map(item => {
-        let rawStr = String(item.score);
-        // Extrae solo caracteres que sean dígitos o el punto decimal
-        let numericMatch = rawStr.match(/[\d\.]+/);
-        
-        if (numericMatch) {
-            let num = parseFloat(numericMatch[0]);
-            // Si el texto original tenía un "%", lo dividimos entre 100
-            return rawStr.includes('%') ? num / 100 : num;
-        }
-        return 0; // Si no encontró ningún número, devuelve 0
-    });
-
-    const ctx = document.getElementById('recommendationsChart').getContext('2d');
-
-    if (recChart) {
-        recChart.data.labels = labels;
-        recChart.data.datasets[0].data = scores;
-        recChart.update(); 
-        return;
+    // =========================================================================
+    // Regla de seguridad: TODO texto que viene del servidor pasa por esc() antes de
+    // entrar en innerHTML (o se asigna con textContent). Los ids se convierten con Number().
+    // =========================================================================
+    function esc(t) {
+        return String(t ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
+    const $ = id => document.getElementById(id);
 
-    recChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Similitud del Coseno (Relevancia)',
-                data: scores,
-                backgroundColor: 'rgba(99, 102, 241, 0.6)', 
-                borderColor: 'rgba(99, 102, 241, 1)',
-                borderWidth: 1,
-                borderRadius: 4
-            }]
-        },
-        options: {
-            indexAxis: 'y', 
-            responsive: true,
-            scales: {
-                x: {
-                    min: 0,
-                    max: 1,
-                    title: { display: true, text: 'Distancia Angular / Coseno (0 a 1)' }
-                }
-            },
-            plugins: { legend: { display: false } },
-            animation: { duration: 600 }
-        }
-    });
-}
-    // ==========================================
-    // 1. INICIALIZACIÓN (Cold Start o Perfil)
-    // ==========================================
-    function loadRecommendations() {
-        currentMode = 'recommendations';
-        sectionTitle.textContent = "Recomendado para tu perfil";
-        statsBar.textContent = "Calculando Coseno Vectorial...";
-        chartPanel.style.display = 'block'; // Mostrar gráfico en modo recomendación
-        const gen = generacion;
+    const searchInput = $('searchInput');
+    const resultsGrid = $('resultsGrid');
+    const sectionTitle = $('sectionTitle');
+    const statsBar = $('statsBar');
+    const detalle = $('detalle');
 
-        api('recomendaciones.php')
-            .then(data => {
-                if (gen !== generacion) return;      // respuesta de un perfil anterior: se descarta
-                if(data.status === 'error') throw new Error(data.mensaje);
-                
-                if(data.status === 'cold_start') {
-                    semanticProfile.innerHTML = '<span class="s-tag-empty">Sin datos. Interactúa con el contenido para perfilarte.</span>';
-                    resultsGrid.innerHTML = '<div class="status-msg">🚀 <strong>Modo Descubrimiento</strong><br>Busca un ejercicio que te guste y dale al corazón para entrenar a tu algoritmo.</div>';
-                    statsBar.textContent = "Cold Start";
-                    chartPanel.style.display = 'none'; // Sin datos, no hay gráfico
-                    return;
-                }
-
-                // Renderizar Tags Semánticos
-                semanticProfile.innerHTML = data.perfil_semantico.map(tag => `<span class="s-tag">${esc(tag)}</span>`).join('');
-
-                currentData = data.recomendaciones;
-                renderCards();
-                updateRecommendationGraph(currentData);
-            })
-            .catch(manejarError);
-    }
-
-    // ==========================================
-    // 2. MOTOR DE BÚSQUEDA EXPLÍCITA
-    // ==========================================
-    let timeoutId;
-    // Cada búsqueda lanzada recibe un número; solo se pinta la respuesta de la ÚLTIMA.
-    // Sin esto, la respuesta lenta de un prefijo ("trice") podía llegar después de la de
-    // la palabra completa ("triceps") y reemplazar sus resultados.
-    let busquedaActual = 0;
-    searchInput.addEventListener('keyup', (e) => {
-        clearTimeout(timeoutId);
-        const query = e.target.value.trim();
-
-        if (query.length < 2) {
-            busquedaActual++;               // invalida búsquedas en vuelo
-            if(currentMode !== 'recommendations') loadRecommendations();
-            return;
-        }
-
-        timeoutId = setTimeout(() => {
-            currentMode = 'search';
-            sectionTitle.textContent = "Resultados de Búsqueda";
-            statsBar.textContent = "Consultando índice inverso...";
-            chartPanel.style.display = 'none'; // Ocultar gráfico de cosenos al buscar
-            resultsGrid.innerHTML = '<div class="status-msg"><div class="loader"></div> Calculando TF-IDF...</div>';
-
-            const gen = generacion;
-            const id = ++busquedaActual;
-            api(`buscar.php?q=${encodeURIComponent(query)}`)
-                .then(data => {
-                    if (gen !== generacion || id !== busquedaActual) return;   // respuesta vieja
-                    if (data.status === 'error') throw new Error(data.mensaje);
-                    
-                    // 1. Guardar SOLO el arreglo de ejercicios para los filtros
-                    currentData = data.resultados || [];
-                    
-                    // 2. Dibujar la tarjeta del Grafo de Conocimiento si existe
-                    renderDescubrimiento(data.descubrimiento);
-                    
-                    // 3. Renderizar la cuadrícula normal de ejercicios
-                    renderCards();
-                })
-                .catch(manejarError);
-        }, 300); // Debounce de 300ms
-    });
-
-    // ==========================================
-    // 3. RENDERIZADO Y FILTROS FACETADOS
-    // ==========================================
-    filters.forEach(f => f.addEventListener('change', renderCards));
-
-    function renderCards() {
-        const activeFilters = Array.from(filters).filter(f => f.checked).map(f => f.value);
-        const filteredData = currentData.filter(item => activeFilters.includes(item.tipo));
-
-        statsBar.textContent = `${filteredData.length} documentos relevantes.`;
-
-        if (filteredData.length === 0) {
-            resultsGrid.innerHTML = '<div class="status-msg">No hay documentos que coincidan con los filtros actuales.</div>';
-            return;
-        }
-
-        tarjetasVisibles = filteredData;
-        let html = '';
-        filteredData.forEach((item, i) => {
-            const isRec = item.score.toString().includes('%'); 
-            const docId = Number(item.doc_id || item.id) || 0;
-            const origen = item.tipo === 'Ejercicios' ? 'ejercicios' : 'articulos';
-
-            // Persistencia del botón visual
-            const likedClass = item.liked ? 'liked' : '';
-
-            // Todo texto que viene del servidor pasa por esc() (evita XSS)
-            html += `
-                <article class="card" data-i="${i}">
-                    <button class="like-btn ${likedClass}" onclick="toggleLike(this, ${docId}, '${origen}')" title="Me gusta / Entrenar algoritmo">
-                        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                    </button>
-                    <div class="card-header">
-                        <h4 class="card-title"><button type="button" class="card-abrir">${esc(item.titulo)}</button></h4>
-                    </div>
-                    <p class="card-snippet">${esc(item.snippet)}</p>
-                    <div class="card-footer">
-                        <div class="meta-tags">
-                            <span class="badge badge-${esc(item.tipo)}">${esc(item.tipo)}</span>
-                            <span class="badge badge-info">${esc(item.tags)}</span>
-                        </div>
-                        <span class="score" title="${isRec ? 'Similitud del Coseno' : 'Peso TF-IDF'}">${esc(item.score)}</span>
-                    </div>
-                </article>
-            `;
-        });
-        resultsGrid.innerHTML = html;
-    }
-
-    // ==========================================
-    // 3b. DETALLE DE UNA TARJETA
-    // ==========================================
-    // Clic en la tarjeta (salvo en el corazón) abre el texto completo y registra la
-    // apertura. Solo se envían doc_id y origen: el perfil lo pone el servidor.
-    let tarjetasVisibles = [];
-    const detalle = document.getElementById('detalle');
-
-    resultsGrid.addEventListener('click', e => {
-        if (e.target.closest('.like-btn')) return;
-        const card = e.target.closest('.card[data-i]');
-        if (card) abrirDetalle(tarjetasVisibles[Number(card.dataset.i)]);
-    });
-
-    function abrirDetalle(item) {
-        if (!item) return;
-        const docId = Number(item.doc_id || item.id) || 0;
-        const origen = item.tipo === 'Ejercicios' ? 'ejercicios' : 'articulos';
-        document.getElementById('detalleTitulo').textContent = item.titulo || '';
-        document.getElementById('detalleMeta').innerHTML =
-            `<span class="badge badge-${esc(item.tipo)}">${esc(item.tipo)}</span>` +
-            (item.tags ? `<span class="badge badge-info">${esc(item.tags)}</span>` : '');
-        document.getElementById('detalleTexto').textContent = item.snippet || '';
-        detalle.showModal();
-        // La estadística nunca debe molestar al usuario: los errores se ignoran.
-        if (docId > 0) api('registrar_evento.php', { doc_id: docId, origen: origen }).catch(() => {});
-    }
-
-    document.getElementById('detalleCerrar').addEventListener('click', () => detalle.close());
-    detalle.addEventListener('click', e => { if (e.target === detalle) detalle.close(); });   // clic fuera
-
-    // ==========================================
-    // 4. SISTEMA DE INTERACCIONES (LIKES)
-    // ==========================================
-    function toggleLike(btn, docId, origen) {
-        // Animación optimista
-        btn.classList.toggle('liked');
-
-        // Solo doc_id y origen: el perfil lo pone el servidor desde la sesión
-        api('registrar_interaccion.php', { doc_id: docId, origen: origen })
-        .then(data => {
-            if (data.status === 'error') {
-                btn.classList.toggle('liked'); // Revertir visualmente el botón
-                alert("No se pudo guardar: " + (data.mensaje || "error"));
-            } else {
-                // Si está en modo recomendaciones, actualizamos el gráfico
-                if(currentMode === 'recommendations') {
-                    setTimeout(loadRecommendations, 2000);
-                }
-            }
-        })
-        .catch(error => {
-            btn.classList.toggle('liked');
-            if (!(error instanceof SesionRequerida)) alert("Error de red. Intenta de nuevo.");
-        });
-    }
-
-    function showError(msg) {
-        resultsGrid.innerHTML = `<div class="status-msg" style="color:var(--like)">Error de conexión con el motor: ${esc(msg)}</div>`;
-        statsBar.textContent = 'Error crítico';
-    }
-
-    function manejarError(err) {
-        if (!(err instanceof SesionRequerida)) showError(err.message);
-    }
-
-    // ==========================================
-    // 5. CUENTAS Y PERFILES
-    // ==========================================
-    // generacion cambia al entrar con un perfil o salir: las respuestas que lleguen
-    // tarde de otro perfil se descartan y nunca se pintan sobre el perfil actual.
-    let generacion = 0;
+    // ------------------------------------------------------------------ estado
+    let generacion = 0;          // cambia al entrar con un perfil o salir: descarta respuestas viejas
     let correoActual = '';
+    let modo = 'recomendaciones';  // 'recomendaciones' | 'busqueda'
+    let consulta = '';
+    let datos = [];              // tarjetas de la vista actual (sin filtrar)
+    let sinHistorial = false;    // el perfil no tiene "me gusta"
+    let detalleActual = null;    // 'origen:id' del documento abierto
+    let aperturaActual = 0;      // número de la última apertura: descarta respuestas de aperturas anteriores
+    const docs = new Map();      // 'origen:id' -> tarjeta (todo lo que se ha pintado)
+    const infoEtiqueta = new Map();   // id -> {nombre, tipo}
+    let catalogoEtiquetas = [];  // etiquetas.php: [{id, nombre, tipo, n}]
+    const filtros = { tipos: new Set(['ejercicios', 'articulos']), nivel: new Set(), equipamiento: new Set(), etiquetas: new Set() };
     class SesionRequerida extends Error {}
 
+    // ------------------------------------------------------------------ servidor
     async function api(url, cuerpo) {
         const opts = { credentials: 'same-origin', headers: {} };
         if (cuerpo !== undefined) {
@@ -549,19 +188,419 @@
         return data;
     }
 
+    let temporizadorAviso;
+    function avisar(texto) {
+        const a = $('aviso');
+        a.textContent = texto;
+        a.hidden = false;
+        clearTimeout(temporizadorAviso);
+        temporizadorAviso = setTimeout(() => { a.hidden = true; }, 5000);
+    }
+
+    // ------------------------------------------------------------------ tarjetas
+    const CORAZON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+
+    function claveDoc(d) {
+        return `${d.origen === 'articulos' ? 'articulos' : 'ejercicios'}:${Number(d.doc_id) || 0}`;
+    }
+
+    function recordar(d) {
+        docs.set(claveDoc(d), d);
+        (d.etiquetas || []).forEach(e => infoEtiqueta.set(Number(e.id), { nombre: e.nombre, tipo: e.tipo }));
+    }
+
+    function etiquetaHTML(e, conteo) {
+        const id = Number(e.id);
+        const activa = filtros.nivel.has(id) || filtros.equipamiento.has(id) || filtros.etiquetas.has(id);
+        return `<li><button type="button" class="etiqueta" data-etiqueta="${id}" aria-pressed="${activa}"
+                    title="Filtrar por ${esc(e.nombre)}">${esc(e.nombre)}${conteo === undefined ? '' : ` <span class="n">${Number(conteo)}</span>`}</button></li>`;
+    }
+
+    // Misma estructura siempre: tipo + me gusta, título, resumen (3 líneas), metadatos, etiquetas.
+    function tarjetaHTML(d) {
+        recordar(d);
+        const clave = claveDoc(d);
+        const origen = clave.split(':')[0];
+        const meta = d.meta || {};
+        const dato = v => v ? esc(v) : '<span aria-label="Sin dato">—</span>';
+        const chips = (d.etiquetas || []).filter(e => e.tipo === 'tema' || e.tipo === 'modalidad').slice(0, 4);
+        return `
+            <article class="tarjeta" data-doc="${clave}">
+                <div class="tarjeta-cab">
+                    <span class="tipo tipo-${origen}">${esc(d.tipo)}</span>
+                    <button type="button" class="btn-gusta" data-gusta aria-pressed="${d.liked ? 'true' : 'false'}"
+                            aria-label="Me gusta: ${esc(d.titulo)}">${CORAZON}</button>
+                </div>
+                <h3 class="tarjeta-titulo"><button type="button" class="abrir" data-abrir>${esc(d.titulo)}</button></h3>
+                <p class="tarjeta-resumen">${esc(d.resumen)}</p>
+                <dl class="tarjeta-meta">
+                    <div><dt>Músculo</dt><dd>${dato(meta.musculo)}</dd></div>
+                    <div><dt>Equipamiento</dt><dd>${dato(meta.equipamiento)}</dd></div>
+                    <div><dt>Nivel</dt><dd>${dato(meta.nivel)}</dd></div>
+                </dl>
+                <ul class="etiquetas">${chips.map(e => etiquetaHTML(e)).join('')}</ul>
+            </article>`;
+    }
+
+    // ------------------------------------------------------------------ filtros (sobre los resultados actuales)
+    function pasaFiltros(d) {
+        const origen = claveDoc(d).split(':')[0];
+        if (!filtros.tipos.has(origen)) return false;
+        const ids = new Set((d.etiquetas || []).map(e => Number(e.id)));
+        for (const grupo of ['nivel', 'equipamiento']) {           // dentro del grupo: cualquiera
+            if (filtros[grupo].size && ![...filtros[grupo]].some(i => ids.has(i))) return false;
+        }
+        for (const i of filtros.etiquetas) if (!ids.has(i)) return false;   // etiquetas: todas
+        return true;
+    }
+
+    function hayFiltros() {
+        return filtros.tipos.size < 2 || filtros.nivel.size || filtros.equipamiento.size || filtros.etiquetas.size;
+    }
+
+    function quitarFiltros() {
+        filtros.tipos = new Set(['ejercicios', 'articulos']);
+        ['nivel', 'equipamiento', 'etiquetas'].forEach(g => filtros[g].clear());
+    }
+
+    function alternarEtiqueta(id) {
+        const tipo = infoEtiqueta.get(id)?.tipo;
+        const grupo = filtros[tipo === 'nivel' || tipo === 'equipamiento' ? tipo : 'etiquetas'];
+        grupo.has(id) ? grupo.delete(id) : grupo.add(id);
+        pintarResultados();
+    }
+
+    function pintarFiltros() {
+        const conteo = new Map();
+        let nEj = 0, nAr = 0;
+        datos.forEach(d => {
+            claveDoc(d).startsWith('articulos') ? nAr++ : nEj++;
+            (d.etiquetas || []).forEach(e => conteo.set(Number(e.id), (conteo.get(Number(e.id)) || 0) + 1));
+        });
+        $('nEjercicios').textContent = nEj;
+        $('nArticulos').textContent = nAr;
+        document.querySelectorAll('[data-tipo]').forEach(c => { c.checked = filtros.tipos.has(c.dataset.tipo); });
+
+        const deTipo = tipos => [...conteo.entries()]
+            .map(([id, n]) => ({ id, n, ...infoEtiqueta.get(id) }))
+            .filter(e => tipos.includes(e.tipo))
+            .sort((a, b) => b.n - a.n || a.nombre.localeCompare(b.nombre, 'es'));
+
+        for (const [grupo, cont, caja] of [['nivel', 'opcionesNivel', 'grupoNivel'], ['equipamiento', 'opcionesEquipamiento', 'grupoEquipamiento']]) {
+            const lista = deTipo([grupo]);
+            $(caja).hidden = !lista.length;
+            $(cont).innerHTML = lista.map(e => `
+                <label class="opcion"><input type="checkbox" data-filtro="${grupo}" value="${e.id}" ${filtros[grupo].has(e.id) ? 'checked' : ''}>
+                    ${esc(e.nombre)} <span class="n">${e.n}</span></label>`).join('');
+        }
+
+        const todas = deTipo(['musculo', 'modalidad', 'tema']);
+        const visibles = todas.filter((e, i) => i < 12 || filtros.etiquetas.has(e.id));
+        $('grupoEtiquetas').hidden = !visibles.length;
+        $('opcionesEtiquetas').innerHTML = visibles.map(e => etiquetaHTML(e, e.n)).join('');
+        $('quitarFiltros').hidden = !hayFiltros();
+    }
+
+    function plural(n, uno, varios) { return `${n} ${n === 1 ? uno : varios}`; }
+
+    function pintarResultados() {
+        pintarFiltros();
+        if (!datos.length) {
+            statsBar.textContent = '';
+            if (modo === 'recomendaciones' && sinHistorial) {
+                const musculos = catalogoEtiquetas.filter(e => e.tipo === 'musculo').slice(0, 11);
+                resultsGrid.innerHTML = `<div class="estado">
+                    <p>Da «me gusta» a un ejercicio para recibir recomendaciones. Busca uno arriba${musculos.length ? ' o empieza por un músculo:' : '.'}</p>
+                    <ul class="etiquetas" style="justify-content:center">${musculos.map(e =>
+                        `<li><button type="button" class="etiqueta" data-buscar="${esc(e.nombre)}">${esc(e.nombre)}</button></li>`).join('')}</ul>
+                </div>`;
+            } else if (modo === 'recomendaciones') {
+                resultsGrid.innerHTML = '<div class="estado"><p>Ya viste todo lo parecido a tus «me gusta». Busca otro ejercicio y márcalo para recibir más.</p></div>';
+            } else {
+                resultsGrid.innerHTML = `<div class="estado"><p>No hay resultados para «${esc(consulta)}». Prueba con otra palabra o revisa la ortografía.</p></div>`;
+            }
+            return;
+        }
+        const visibles = datos.filter(pasaFiltros);
+        statsBar.textContent = visibles.length === datos.length
+            ? plural(datos.length, 'resultado', 'resultados')
+            : `${visibles.length} de ${plural(datos.length, 'resultado', 'resultados')}`;
+        resultsGrid.innerHTML = visibles.length
+            ? visibles.map(tarjetaHTML).join('')
+            : '<div class="estado"><p>Ningún resultado cumple los filtros.</p><button type="button" class="btn" data-quitar-filtros>Quitar filtros</button></div>';
+    }
+
+    function pintarError(reintentar) {
+        statsBar.textContent = '';
+        resultsGrid.innerHTML = '<div class="estado estado-error"><p>No se pudo cargar. Revisa tu conexión e intenta de nuevo.</p><button type="button" class="btn" id="btnReintentar">Reintentar</button></div>';
+        $('btnReintentar').addEventListener('click', reintentar);
+    }
+
+    // ------------------------------------------------------------------ gráfica del perfil
+    // Barras horizontales, un solo color, de mayor a menor y con el valor al lado.
+    function pintarGrafica(terminos) {
+        const g = $('grafica');
+        if (!terminos || !terminos.length) {
+            g.innerHTML = '<p class="sin-opciones">Da «me gusta» a un ejercicio para personalizar tus recomendaciones.</p>';
+            return;
+        }
+        const lista = terminos.slice(0, 8).map(t => ({ palabra: t.palabra || t.termino, peso: Number(t.peso) || 0 }))
+            .sort((a, b) => b.peso - a.peso);
+        const max = lista[0].peso || 1;
+        g.innerHTML = `<div class="barras" role="list">${lista.map(t => `
+            <div class="barra-fila" role="listitem">
+                <span class="termino" title="${esc(t.palabra)}">${esc(t.palabra)}</span>
+                <span class="pista"><span class="relleno" style="width:${Math.max(2, Math.round(t.peso / max * 100))}%"></span></span>
+                <span class="valor">${t.peso.toFixed(2)}</span>
+            </div>`).join('')}</div>`;
+    }
+
+    // ------------------------------------------------------------------ recomendaciones
+    function cargarRecomendaciones({ soloGrafica = false } = {}) {
+        const gen = generacion;
+        if (!soloGrafica) {
+            modo = 'recomendaciones';
+            consulta = '';
+            sectionTitle.textContent = 'Recomendado para ti';
+            statsBar.textContent = '';
+            $('discoveryZone').innerHTML = '';
+            resultsGrid.innerHTML = '<div class="estado"><p>Cargando recomendaciones…</p></div>';
+        }
+        return api('recomendaciones.php')
+            .then(data => {
+                if (gen !== generacion) return;                  // respuesta de un perfil anterior
+                if (data.status === 'error') throw new Error(data.mensaje);
+                const vacio = data.status === 'cold_start';
+                pintarGrafica(vacio ? null : data.perfil_terminos);
+                if (soloGrafica || modo !== 'recomendaciones') return;
+                sinHistorial = vacio;
+                datos = vacio ? [] : (data.recomendaciones || []);
+                quitarFiltros();
+                pintarResultados();
+            })
+            .catch(e => { if (!(e instanceof SesionRequerida) && !soloGrafica && gen === generacion) pintarError(() => cargarRecomendaciones()); });
+    }
+
+    // ------------------------------------------------------------------ búsqueda
+    // Cada búsqueda lleva un número: solo se pinta la respuesta de la ÚLTIMA.
+    let busquedaActual = 0, temporizador;
+
+    function buscar(texto) {
+        clearTimeout(temporizador);
+        const q = texto.trim();
+        mostrarVista('vistaBusqueda');
+        if (q.length < 2) {
+            busquedaActual++;                                   // invalida búsquedas en vuelo
+            if (modo !== 'recomendaciones') cargarRecomendaciones();
+            return;
+        }
+        modo = 'busqueda';
+        consulta = q;
+        sectionTitle.textContent = `Resultados de «${q}»`;
+        statsBar.textContent = '';
+        $('discoveryZone').innerHTML = '';
+        resultsGrid.innerHTML = '<div class="estado"><p>Buscando…</p></div>';
+        const gen = generacion, id = ++busquedaActual;
+        api(`buscar.php?q=${encodeURIComponent(q)}`)
+            .then(data => {
+                if (gen !== generacion || id !== busquedaActual) return;    // respuesta vieja
+                if (data.status === 'error') throw new Error(data.mensaje);
+                datos = data.resultados || [];
+                quitarFiltros();
+                pintarDescubrimiento(data.descubrimiento);
+                pintarResultados();
+            })
+            .catch(e => { if (!(e instanceof SesionRequerida) && id === busquedaActual) pintarError(() => buscar(q)); });
+    }
+
+    searchInput.addEventListener('input', () => {
+        clearTimeout(temporizador);
+        temporizador = setTimeout(() => buscar(searchInput.value), 400);
+    });
+    $('formBusqueda').addEventListener('submit', e => { e.preventDefault(); buscar(searchInput.value); });
+
+    function rutaHTML(nodos, nombreArbol) {
+        if (!nodos || !nodos.length) return '';
+        return `<ul class="ruta" aria-label="${esc(nombreArbol)}">${nodos.map(n => `<li>${esc(n)}</li>`).join('')}</ul>`;
+    }
+
+    // Artículo que el sistema relaciona con la búsqueda a través de los árboles.
+    function pintarDescubrimiento(d) {
+        const zona = $('discoveryZone');
+        if (!d || d.sin_documento || !d.doc_id) { zona.innerHTML = ''; return; }
+        zona.innerHTML = `
+            <section class="panel relacionado-busqueda" aria-labelledby="tituloRelacionado">
+                <h2 id="tituloRelacionado">Relacionado con tu búsqueda</h2>
+                <p class="porque"><strong>Por qué aparece esto:</strong> ${esc(d.razon_algoritmica)}</p>
+                <div class="rutas">${rutaHTML(d.origen_ruta, 'Ruta de origen')}${rutaHTML(d.destino_ruta, 'Ruta de destino')}</div>
+                <div class="cuadricula">${tarjetaHTML(d)}</div>
+            </section>`;
+    }
+
+    // ------------------------------------------------------------------ "me gusta"
+    function marcarGusta(clave, gusta) {
+        const d = docs.get(clave);
+        if (d) d.liked = gusta;
+        document.querySelectorAll(`[data-doc="${clave}"] [data-gusta]`).forEach(b => b.setAttribute('aria-pressed', String(gusta)));
+        if (detalleActual === clave) pintarBotonGustaDetalle(gusta);
+    }
+
+    function alternarGusta(clave) {
+        const [origen, id] = clave.split(':');
+        const antes = !!docs.get(clave)?.liked;
+        marcarGusta(clave, !antes);                              // respuesta inmediata
+        // Solo doc_id y origen: el perfil lo pone el servidor desde la sesión
+        api('registrar_interaccion.php', { doc_id: Number(id), origen })
+            .then(data => {
+                if (data.status === 'error') throw new Error();
+                marcarGusta(clave, data.status === 'added');
+                // El perfil cambió: se actualiza la gráfica y, si se están viendo, las recomendaciones
+                if (modo === 'recomendaciones' && !detalle.open) cargarRecomendaciones();
+                else cargarRecomendaciones({ soloGrafica: true });
+            })
+            .catch(e => {
+                if (e instanceof SesionRequerida) return;
+                marcarGusta(clave, antes);
+                avisar('No se pudo guardar tu «me gusta». Intenta de nuevo.');
+            });
+    }
+
+    // ------------------------------------------------------------------ detalle de una tarjeta
+    function pintarBotonGustaDetalle(gusta) {
+        const b = $('detalleGusta');
+        if (!b) return;
+        b.setAttribute('aria-pressed', String(gusta));
+        b.textContent = gusta ? 'Quitar «me gusta»' : 'Me gusta';
+    }
+
+    async function abrirDetalle(clave) {
+        const [origen, id] = clave.split(':');
+        const previo = docs.get(clave);
+        const apertura = ++aperturaActual;
+        detalleActual = clave;
+        $('detalleTipo').textContent = previo?.tipo || '';
+        $('detalleTipo').className = `tipo tipo-${origen}`;
+        $('detalleTitulo').textContent = previo?.titulo || '';
+        $('detalleCuerpo').innerHTML = '<p class="conteo">Cargando…</p>';
+        if (!detalle.open) detalle.showModal();
+        else $('detalleCerrar').focus();                         // al saltar a un relacionado
+
+        // Estadística de apertura: nunca molesta al usuario. Solo doc_id y origen.
+        api('registrar_evento.php', { doc_id: Number(id), origen }).catch(() => {});
+
+        const gen = generacion;
+        let r;
+        try { r = await api(`detalle.php?origen=${origen}&doc_id=${Number(id)}`); }
+        catch (e) { if (e instanceof SesionRequerida) { detalle.close(); return; } r = { status: 'error' }; }
+        if (apertura !== aperturaActual || gen !== generacion || !detalle.open) return;
+        if (r.status !== 'success') {
+            $('detalleCuerpo').innerHTML = '<p class="msg-error">No se pudo abrir el documento. Ciérralo e intenta de nuevo.</p>';
+            return;
+        }
+        const d = r.documento;
+        recordar({ ...previo, ...d, resumen: previo?.resumen ?? '' });
+        (r.relacionados || []).forEach(recordar);
+        $('detalleTipo').textContent = d.tipo;
+        $('detalleTitulo').textContent = d.titulo;
+        const meta = d.meta || {};
+        const metaFilas = [['Músculo', meta.musculo], ['Equipamiento', meta.equipamiento], ['Nivel', meta.nivel]]
+            .filter(f => f[1]).map(f => `<div><dt>${f[0]}</dt><dd>${esc(f[1])}</dd></div>`).join('');
+        $('detalleCuerpo').innerHTML = `
+            <div class="detalle-acciones">
+                <button type="button" class="btn btn-gusta-texto" id="detalleGusta" aria-pressed="false"></button>
+            </div>
+            ${d.ruta ? `<div><h3>Ubicación en el árbol</h3>${rutaHTML(d.ruta.nodos, 'Ubicación en el árbol')}</div>` : ''}
+            ${metaFilas ? `<dl class="tarjeta-meta" style="border-top:0; padding-top:0">${metaFilas}</dl>` : ''}
+            <p class="detalle-texto">${esc(d.texto)}</p>
+            ${(d.etiquetas || []).length ? `<div><h3>Etiquetas</h3><ul class="etiquetas">${d.etiquetas.map(e => etiquetaHTML(e)).join('')}</ul></div>` : ''}
+            ${(r.relacionados || []).length ? `<div><h3>Documentos relacionados</h3><div class="relacionados">${r.relacionados.slice(0, 4).map(x => `
+                <button type="button" class="relacionado" data-relacionado="${claveDoc(x)}">
+                    <span><span class="tipo tipo-${claveDoc(x).split(':')[0]}">${esc(x.tipo)}</span></span>
+                    <span class="titulo">${esc(x.titulo)}</span>
+                    <span class="comparte">Comparte: ${esc((x.comparte || []).join(', '))}</span>
+                </button>`).join('')}</div></div>` : ''}`;
+        pintarBotonGustaDetalle(!!d.liked);
+        const enTarjeta = docs.get(clave);
+        if (enTarjeta) enTarjeta.liked = !!d.liked;
+    }
+
+    // showModal() ya impide llegar al contenido de atrás, pero Tab en el último elemento
+    // sale hacia la barra del navegador: aquí se cicla dentro del detalle.
+    detalle.addEventListener('keydown', e => {
+        if (e.key !== 'Tab') return;
+        const foco = [...detalle.querySelectorAll('button, [href], input, select, textarea')]
+            .filter(el => !el.disabled && el.getClientRects().length);
+        if (!foco.length) return;
+        const primero = foco[0], ultimo = foco[foco.length - 1];
+        const dentro = detalle.contains(document.activeElement) && document.activeElement !== detalle;
+        if (e.shiftKey && (document.activeElement === primero || !dentro)) { e.preventDefault(); ultimo.focus(); }
+        else if (!e.shiftKey && (document.activeElement === ultimo || !dentro)) { e.preventDefault(); primero.focus(); }
+    });
+
+    $('detalleCerrar').addEventListener('click', () => detalle.close());
+    detalle.addEventListener('click', e => { if (e.target === detalle) detalle.close(); });   // clic fuera
+    detalle.addEventListener('close', () => {
+        // El evento llega después del cierre: si el usuario ya volvió a abrir un detalle,
+        // no se toca su estado (antes lo borraba y el detalle se quedaba en «Cargando…»).
+        if (detalle.open) return;
+        const clave = detalleActual;
+        detalleActual = null;
+        if (modo === 'recomendaciones' && docs.get(clave)?.liked) cargarRecomendaciones();   // ya no debe recomendarse
+        document.querySelector(`[data-doc="${clave}"] [data-abrir]`)?.focus();
+    });
+
+    // ------------------------------------------------------------------ clics (delegados)
+    document.addEventListener('click', e => {
+        const t = e.target;
+        const etiqueta = t.closest('[data-etiqueta]');
+        if (etiqueta) {
+            if (detalle.open) detalle.close();
+            mostrarVista('vistaBusqueda');
+            alternarEtiqueta(Number(etiqueta.dataset.etiqueta));
+            return;
+        }
+        const buscarBtn = t.closest('[data-buscar]');
+        if (buscarBtn) { searchInput.value = buscarBtn.dataset.buscar; buscar(searchInput.value); return; }
+        if (t.closest('[data-quitar-filtros]') || t.closest('#quitarFiltros')) { quitarFiltros(); pintarResultados(); return; }
+        const relacionado = t.closest('[data-relacionado]');
+        if (relacionado) { abrirDetalle(relacionado.dataset.relacionado); return; }
+        if (t.closest('#detalleGusta')) { if (detalleActual) alternarGusta(detalleActual); return; }
+        const tarjeta = t.closest('.tarjeta[data-doc]');
+        if (!tarjeta) return;
+        if (t.closest('[data-gusta]')) alternarGusta(tarjeta.dataset.doc);
+        else abrirDetalle(tarjeta.dataset.doc);
+    });
+
+    document.addEventListener('change', e => {
+        const c = e.target;
+        if (c.dataset.tipo) { c.checked ? filtros.tipos.add(c.dataset.tipo) : filtros.tipos.delete(c.dataset.tipo); pintarResultados(); }
+        else if (c.dataset.filtro) { const g = filtros[c.dataset.filtro], id = Number(c.value); c.checked ? g.add(id) : g.delete(id); pintarResultados(); }
+    });
+
+    // ------------------------------------------------------------------ cuentas y perfiles
     function mostrarPantalla(id) {
-        ['pantallaAcceso', 'pantallaPerfiles', 'app'].forEach(p => document.getElementById(p).hidden = p !== id);
+        ['pantallaAcceso', 'pantallaPerfiles', 'app'].forEach(p => { $(p).hidden = p !== id; });
+        $('formBusqueda').hidden = $('menuPerfil').hidden = id !== 'app';
+        $('menuPerfil').open = false;
     }
 
     function limpiarVistaPerfil() {
         generacion++;
-        currentData = [];
+        busquedaActual++;
+        clearTimeout(temporizador);
+        if (detalle.open) detalle.close();
+        datos = [];
+        docs.clear();
+        sinHistorial = false;
+        modo = 'recomendaciones';
+        consulta = '';
+        quitarFiltros();
         resultsGrid.innerHTML = '';
-        semanticProfile.innerHTML = '';
-        document.getElementById('discoveryZone').innerHTML = '';
+        $('discoveryZone').innerHTML = '';
+        $('grafica').innerHTML = '';
+        $('resultadoAB').innerHTML = '';
+        statsBar.textContent = '';
         searchInput.value = '';
-        chartPanel.style.display = 'none';
-        if (recChart) { recChart.destroy(); recChart = null; }
     }
 
     function salirAlAcceso() {
@@ -578,26 +617,26 @@
     }
 
     function renderPerfiles(d) {
-        const err = document.getElementById('errPerfiles');
-        if (d.status !== 'success') { err.textContent = d.mensaje || 'Error'; return; }
+        const err = $('errPerfiles');
+        if (d.status !== 'success') { err.textContent = d.mensaje || 'No se pudieron cargar los perfiles.'; return; }
         err.textContent = '';
-        const lista = document.getElementById('listaPerfiles');
-        lista.innerHTML = d.perfiles.length ? d.perfiles.map(p => `
+        $('listaPerfiles').innerHTML = d.perfiles.length ? d.perfiles.map(p => `
             <div class="perfil-item">
-                <button class="borrar" type="button" data-borrar="${Number(p.id)}" title="Eliminar perfil y su historial">✕</button>
                 <button class="elegir" type="button" data-elegir="${Number(p.id)}">${esc(p.nombre)}</button>
+                <button class="borrar" type="button" data-borrar="${Number(p.id)}" aria-label="Eliminar el perfil ${esc(p.nombre)}">Eliminar</button>
             </div>`).join('')
-            : '<p class="s-tag-empty">Crea tu primer perfil para empezar.</p>';
-        document.getElementById('formPerfil').hidden = d.perfiles.length >= d.maximo;
+            : '<p class="sin-opciones">Crea tu primer perfil para empezar.</p>';
+        $('formPerfil').hidden = d.perfiles.length >= d.maximo;
     }
 
     function entrarApp(perfil) {
         limpiarVistaPerfil();
-        document.getElementById('nombrePerfil').textContent = perfil.nombre;
-        document.getElementById('correoCuenta').textContent = correoActual;
+        $('nombrePerfil').textContent = perfil.nombre;
+        $('correoCuenta').textContent = correoActual;
         mostrarPantalla('app');
         mostrarVista('vistaBusqueda');
-        loadRecommendations();
+        cargarCatalogos();
+        cargarRecomendaciones();
     }
 
     async function iniciar() {
@@ -615,32 +654,32 @@
     function datosForm(form) { return Object.fromEntries(new FormData(form).entries()); }
 
     function tabAcceso(registro) {
-        document.getElementById('formLogin').hidden = registro;
-        document.getElementById('formRegistro').hidden = !registro;
-        document.getElementById('tabLogin').classList.toggle('activa', !registro);
-        document.getElementById('tabRegistro').classList.toggle('activa', registro);
+        $('formLogin').hidden = registro;
+        $('formRegistro').hidden = !registro;
+        $('tabLogin').setAttribute('aria-selected', String(!registro));
+        $('tabRegistro').setAttribute('aria-selected', String(registro));
     }
-    document.getElementById('tabLogin').addEventListener('click', () => tabAcceso(false));
-    document.getElementById('tabRegistro').addEventListener('click', () => tabAcceso(true));
+    $('tabLogin').addEventListener('click', () => tabAcceso(false));
+    $('tabRegistro').addEventListener('click', () => tabAcceso(true));
 
-    document.getElementById('formLogin').addEventListener('submit', async e => {
+    $('formLogin').addEventListener('submit', async e => {
         e.preventDefault();
-        const err = document.getElementById('errLogin');
+        const err = $('errLogin');
         err.textContent = '';
-        const d = await api('login.php', datosForm(e.target)).catch(() => ({ mensaje: 'Error de red' }));
+        const d = await api('login.php', datosForm(e.target)).catch(() => ({ mensaje: 'Sin conexión. Intenta de nuevo.' }));
         if (d.status === 'success') { e.target.reset(); iniciar(); } else { err.textContent = d.mensaje; }
     });
 
-    document.getElementById('formRegistro').addEventListener('submit', async e => {
+    $('formRegistro').addEventListener('submit', async e => {
         e.preventDefault();
-        const err = document.getElementById('errRegistro');
+        const err = $('errRegistro');
         err.textContent = '';
-        const d = await api('registro.php', datosForm(e.target)).catch(() => ({ mensaje: 'Error de red' }));
+        const d = await api('registro.php', datosForm(e.target)).catch(() => ({ mensaje: 'Sin conexión. Intenta de nuevo.' }));
         if (d.status === 'success') { e.target.reset(); iniciar(); }
         else { err.textContent = d.errores ? Object.values(d.errores).join(' · ') : d.mensaje; }
     });
 
-    document.getElementById('formPerfil').addEventListener('submit', async e => {
+    $('formPerfil').addEventListener('submit', async e => {
         e.preventDefault();
         const d = await api('perfiles.php', { accion: 'crear', ...datosForm(e.target) }).catch(() => null);
         if (!d) return;
@@ -650,178 +689,119 @@
 
     async function renderPerfilesConError(mensaje) {
         renderPerfiles(await api('perfiles.php'));
-        document.getElementById('errPerfiles').textContent = mensaje;
+        $('errPerfiles').textContent = mensaje;
     }
 
-    document.getElementById('listaPerfiles').addEventListener('click', async e => {
+    $('listaPerfiles').addEventListener('click', async e => {
         const elegir = e.target.closest('[data-elegir]'), borrar = e.target.closest('[data-borrar]');
         try {
             if (elegir) {
                 const d = await api('seleccionar_perfil.php', { perfil_id: Number(elegir.dataset.elegir) });
                 if (d.status === 'success') entrarApp(d.perfil_activo);
-                else document.getElementById('errPerfiles').textContent = d.mensaje;
-            } else if (borrar && confirm('¿Eliminar este perfil y todo su historial de likes? No se puede deshacer.')) {
+                else $('errPerfiles').textContent = d.mensaje;
+            } else if (borrar && confirm('¿Eliminar este perfil y todos sus «me gusta»? No se puede deshacer.')) {
                 const d = await api('perfiles.php', { accion: 'eliminar', perfil_id: Number(borrar.dataset.borrar) });
                 if (d.status === 'success') renderPerfiles(d); else renderPerfilesConError(d.mensaje);
             }
         } catch (err) { /* SesionRequerida: ya redirigido */ }
     });
 
-    document.getElementById('btnCambiarPerfil').addEventListener('click', mostrarPerfiles);
+    $('btnCambiarPerfil').addEventListener('click', mostrarPerfiles);
     document.querySelectorAll('[data-accion="logout"]').forEach(b => b.addEventListener('click', async () => {
         await api('logout.php', {}).catch(() => null);
         salirAlAcceso();
     }));
 
-    function esc(t) {
-        return String(t ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    }
+    // El menú del perfil se cierra con Escape o al hacer clic fuera
+    const menuPerfil = $('menuPerfil');
+    document.addEventListener('click', e => { if (menuPerfil.open && !menuPerfil.contains(e.target)) menuPerfil.open = false; });
+    menuPerfil.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && menuPerfil.open) { menuPerfil.open = false; menuPerfil.querySelector('summary').focus(); }
+    });
 
-    // Dibuja una rama del árbol: raíz > ... > nodo (el último, resaltado)
-    function renderRama(ruta, etiqueta, color) {
-        if (!ruta || !ruta.length) return '';
-        const nodos = ruta.map((n, i) => {
-            const esUltimo = i === ruta.length - 1;
-            return `<div style="margin-left:${i * 18}px; display:flex; align-items:center; gap:6px; margin-top:4px;">
-                        <span style="color:#b45309">${i === 0 ? '●' : '└'}</span>
-                        <span style="padding:2px 10px; border-radius:999px; font-size:.85rem;
-                              ${esUltimo ? `background:${color}; color:#fff; font-weight:700;` : 'background:#fef3c7; color:#78350f;'}">${esc(n)}</span>
-                    </div>`;
-        }).join('');
-        return `<div style="flex:1; min-width:220px">
-                    <div style="font-size:.75rem; text-transform:uppercase; letter-spacing:.05em; color:#92400e; font-weight:700">${esc(etiqueta)}</div>
-                    ${nodos}
-                </div>`;
-    }
-
-    const NOMBRE_ARBOL = { anatomia: 'Árbol de Anatomía', temas: 'Árbol de Temas' };
-    const TITULO_VIA = {
-        interseccion: 'Cruce de dos árboles',
-        concepto: 'Salto entre árboles',
-        recuperacion: 'Salto desde los resultados',
-        concepto_local: 'Recomendación dentro del tema',
-        sin_interseccion: 'Sin relación entre ambos conceptos',
-        ninguno: 'Sin relación'
-    };
-
-    function renderDescubrimiento(d) {
-        const zona = document.getElementById('discoveryZone');
-        if (!d) { zona.innerHTML = ''; return; }
-
-        const titulo = TITULO_VIA[d.via] || 'Recomendación';
-        const razon = `<div class="serendipity-reason"><strong>Razón algorítmica:</strong> ${esc(d.razon_algoritmica)}</div>`;
-
-        if (d.sin_documento) {      // el sistema declara que no hay relación, en vez de inventarla
-            zona.innerHTML = `<div class="serendipity-card"><div class="serendipity-header"><span>${esc(titulo)}</span></div>${razon}</div>`;
-            return;
-        }
-
-        const local = d.via === 'concepto_local';
-        let arboles = renderRama(d.origen_ruta, NOMBRE_ARBOL[d.origen_arbol] || 'Origen', '#d97706');
-        if (!local) {
-            const lift = d.lift ? `lift ${Number(d.lift).toFixed(1)}` : 'artículos puente';
-            arboles += `<div style="align-self:center; text-align:center; color:#b45309; font-weight:700; padding:0 8px">
-                            ⟷<div style="font-size:.7rem; font-weight:600">${esc(lift)}</div></div>`;
-            arboles += renderRama(d.destino_ruta, NOMBRE_ARBOL[d.destino_arbol] || 'Destino', '#92400e');
-        }
-
-        zona.innerHTML = `
-            <div class="serendipity-card">
-                <div class="serendipity-header"><span>${esc(titulo)}</span></div>
-                <div class="serendipity-path" style="display:flex; flex-wrap:wrap; gap:12px; align-items:flex-start; font-family:inherit">
-                    ${arboles}
-                </div>
-                ${razon}
-                <div class="card-header"><h4 class="card-title" style="color:#92400e;">${esc(d.titulo)}</h4></div>
-                <p class="card-snippet" style="color:#78350f;">${esc(d.snippet)}</p>
-                <div class="card-footer" style="border-top-color:#fcd34d;">
-                    <div class="meta-tags">
-                        <span class="badge badge-Teoría">${esc(d.tipo)}</span>
-                        <span class="badge badge-info">${esc(d.tags)}</span>
-                    </div>
-                    <span class="score" style="background:#fef08a; color:#b45309;">${esc(d.score)}</span>
-                </div>
-            </div>`;
-    }
-
-    // ==========================================
-    // MENÚS A + B  (dos árboles unidos por los artículos que comparten)
-    // ==========================================
+    // ------------------------------------------------------------------ explorar por árboles
     let catalogoAB = null;
-    const menuA = document.getElementById('menuA'), menuB = document.getElementById('menuB');
+    const menuA = $('menuA'), menuB = $('menuB');
 
     function opcionesB() {
-        const gid = menuA.value;
         const previo = menuB.value;
         menuB.innerHTML = catalogoAB.temas.map(t => {
-            const n = (catalogoAB.puentes[`${gid}|${t.nombre}`] || []).length;
-            return `<option value="${esc(t.nombre)}">${esc(t.nombre)} — ${n ? n + ' artículo(s) puente' : 'sin relación'}</option>`;
+            const n = (catalogoAB.puentes[`${menuA.value}|${t.nombre}`] || []).length;
+            return `<option value="${esc(t.nombre)}">${esc(t.nombre)} (${plural(n, 'artículo', 'artículos')})</option>`;
         }).join('');
         if (previo) menuB.value = previo;
     }
 
-    function cargarCatalogoAB() {
-        fetch('menus.php?accion=catalogo').then(r => r.json()).then(c => {
-            if (c.status !== 'success') throw new Error(c.mensaje || 'error');
+    function cargarCatalogos() {
+        const gen = generacion;
+        api('etiquetas.php').then(c => {
+            if (c.status !== 'success') return;
+            catalogoEtiquetas = c.etiquetas || [];
+            catalogoEtiquetas.forEach(e => infoEtiqueta.set(Number(e.id), { nombre: e.nombre, tipo: e.tipo }));
+            if (gen === generacion && sinHistorial && modo === 'recomendaciones') pintarResultados();
+        }).catch(() => {});
+        if (catalogoAB) return;
+        api('menus.php?accion=catalogo').then(c => {
+            if (c.status !== 'success') throw new Error();
             catalogoAB = c;
             menuA.innerHTML = c.musculos.map(m =>
-                `<option value="${m.gid}">${esc(m.nombre)} (${m.n_ejercicios} ejercicios)</option>`).join('');
+                `<option value="${Number(m.gid)}">${esc(m.nombre)} (${plural(Number(m.n_ejercicios), 'ejercicio', 'ejercicios')})</option>`).join('');
             opcionesB();
         }).catch(e => {
-            document.getElementById('resultadoAB').innerHTML =
-                `<div style="color:var(--like)">No se pudo cargar el catálogo: ${esc(e.message)}</div>`;
+            if (!(e instanceof SesionRequerida)) {
+                $('resultadoAB').innerHTML = '<p class="msg-error">No se pudieron cargar los músculos y temas. Recarga la página.</p>';
+            }
         });
     }
-    menuA.addEventListener('change', opcionesB);
+    menuA.addEventListener('change', () => { if (catalogoAB) opcionesB(); });
 
-    function tarjetaMini(d, color) {
-        return `<div class="card" style="padding:16px; border-left:4px solid ${color};">
-                    <div style="font-weight:700;">${esc(d.titulo)}</div>
-                    <div style="font-size:.85rem; color:var(--text-muted); margin:6px 0;">${esc(d.snippet)}</div>
-                    <span class="badge badge-info">${esc(d.tipo)} · ${esc(d.tags)}</span></div>`;
-    }
-
-    document.getElementById('btnAB').addEventListener('click', () => {
+    $('formAB').addEventListener('submit', e => {
+        e.preventDefault();
         if (!catalogoAB) return;
-        const out = document.getElementById('resultadoAB');
+        const out = $('resultadoAB');
         const m = catalogoAB.musculos.find(x => String(x.gid) === menuA.value);
         const t = catalogoAB.temas.find(x => x.nombre === menuB.value);
+        if (!m || !t) return;
         const ids = catalogoAB.puentes[`${m.gid}|${t.nombre}`] || [];
-
-        const ramas = renderRama(['Cuerpo humano', m.region, m.nombre], 'Árbol de Anatomía', '#d97706')
-            + `<div style="align-self:center; text-align:center; color:${ids.length ? '#b45309' : '#94a3b8'}; font-weight:700; padding:0 8px">
-                   ${ids.length ? '⟷' : '✕'}<div style="font-size:.7rem">${ids.length} artículo(s)</div></div>`
-            + renderRama(['Conocimiento', t.rama, t.nombre], 'Árbol de Temas', '#92400e');
-        const cabecera = `<div class="serendipity-path" style="display:flex; flex-wrap:wrap; gap:12px; align-items:flex-start; font-family:inherit">${ramas}</div>`;
+        const rutas = `<div class="rutas">${rutaHTML(['Cuerpo humano', m.region, m.nombre], 'Árbol de anatomía')}${rutaHTML(['Conocimiento', t.rama, t.nombre], 'Árbol de temas')}</div>`;
 
         if (!ids.length) {
             const alt = catalogoAB.temas
                 .map(x => [x.nombre, (catalogoAB.puentes[`${m.gid}|${x.nombre}`] || []).length])
-                .filter(a => a[1]).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 3)
+                .filter(a => a[1]).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'es')).slice(0, 3)
                 .map(a => `${esc(a[0])} (${a[1]})`).join(', ');
-            out.innerHTML = cabecera + `<p><strong>Ningún artículo relaciona «${esc(m.nombre)}» con «${esc(t.nombre)}».</strong>
-                El sistema no inventa una relación.${alt ? ' Temas que sí se relacionan con ese músculo: ' + alt + '.' : ''}</p>`;
+            out.innerHTML = rutas + `<div class="estado"><p>Ningún artículo trata «${esc(m.nombre)}» y «${esc(t.nombre)}» a la vez.${
+                alt ? ` Temas que sí tienen artículos sobre ese músculo: ${alt}.` : ' Elige otro músculo.'}</p></div>`;
             return;
         }
-        out.innerHTML = cabecera + '<div class="status-msg"><div class="loader"></div></div>';
-        fetch(`menus.php?accion=docs&m=${m.gid}&ids=${ids.join(',')}`).then(r => r.json()).then(d => {
-            if (d.status !== 'success') throw new Error(d.mensaje);
-            out.innerHTML = cabecera
-                + `<h4 style="margin:16px 0 8px">Artículos que unen ambos árboles</h4><div class="results-grid">${d.articulos.map(a => tarjetaMini(a, '#d97706')).join('')}</div>`
-                + `<h4 style="margin:16px 0 8px">Ejercicios de «${esc(m.nombre)}»</h4><div class="results-grid">${d.ejercicios.map(a => tarjetaMini(a, '#4f46e5')).join('')}</div>`;
-        }).catch(e => { out.innerHTML = cabecera + `<div style="color:var(--like)">Error: ${esc(e.message)}</div>`; });
+        out.innerHTML = rutas + '<div class="estado"><p>Cargando…</p></div>';
+        const gen = generacion;
+        api(`menus.php?accion=docs&m=${Number(m.gid)}&ids=${ids.map(Number).join(',')}`).then(d => {
+            if (gen !== generacion) return;
+            if (d.status !== 'success') throw new Error();
+            out.innerHTML = rutas
+                + `<h2>Artículos sobre «${esc(m.nombre)}» y «${esc(t.nombre)}»</h2><div class="cuadricula">${d.articulos.map(tarjetaHTML).join('')}</div>`
+                + (d.ejercicios.length ? `<h2>Ejercicios de «${esc(m.nombre)}»</h2><div class="cuadricula">${d.ejercicios.map(tarjetaHTML).join('')}</div>` : '');
+        }).catch(e => {
+            if (!(e instanceof SesionRequerida)) out.innerHTML = rutas + '<div class="estado estado-error"><p>No se pudo cargar. Vuelve a pulsar «Ver artículos».</p></div>';
+        });
     });
-    cargarCatalogoAB();
 
-    // Pestañas: la vista de árboles solo aparece si el usuario la elige
+    // ------------------------------------------------------------------ pestañas y panel lateral
     function mostrarVista(id) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('activa', b.dataset.vista === id));
-        document.getElementById('vistaBusqueda').hidden = id !== 'vistaBusqueda';
-        document.getElementById('vistaArboles').hidden = id !== 'vistaArboles';
+        document.querySelectorAll('[data-vista]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.vista === id)));
+        $('vistaBusqueda').hidden = id !== 'vistaBusqueda';
+        $('vistaArboles').hidden = id !== 'vistaArboles';
     }
-    document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => mostrarVista(b.dataset.vista)));
-    searchInput.addEventListener('input', () => mostrarVista('vistaBusqueda'));   // escribir vuelve a la búsqueda
-    searchInput.addEventListener('focus', () => mostrarVista('vistaBusqueda'));
+    document.querySelectorAll('[data-vista]').forEach(b => b.addEventListener('click', () => mostrarVista(b.dataset.vista)));
+    searchInput.addEventListener('focus', () => mostrarVista('vistaBusqueda'));   // buscar vuelve a la primera pestaña
+
+    // En pantallas anchas el panel lateral siempre está abierto; en teléfono se pliega.
+    const pantallaAncha = window.matchMedia('(min-width: 901px)');
+    const ajustarLateral = () => { $('lateral').open = pantallaAncha.matches; };
+    pantallaAncha.addEventListener('change', ajustarLateral);
+    ajustarLateral();
+
     mostrarVista('vistaBusqueda');
     iniciar();
 </script>
