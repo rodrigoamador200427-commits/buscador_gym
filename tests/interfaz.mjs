@@ -3,122 +3,19 @@
 // Lo lanza tests/test_interfaz.php, que prepara la BD de pruebas y el servidor:
 //     node tests/interfaz.mjs http://127.0.0.1:<puerto>
 //
-// Sin dependencias: habla con Edge por el protocolo de DevTools usando el WebSocket que
-// trae Node 22+. La ruta de Edge se puede cambiar con la variable EDGE_PATH.
+// El navegador se maneja con tests/navegador.mjs (sin dependencias; EDGE_PATH cambia la ruta).
+// Con CAPTURAS=<carpeta> guarda capturas de pantalla en los momentos clave.
 // Sale con 0 si todo pasa, 1 si algo falla y 3 si no se pudo arrancar el navegador.
-import { spawn } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { abrirNavegador, crearInforme } from './navegador.mjs';
 
 const BASE = process.argv[2];
 if (!BASE) { console.error('uso: node tests/interfaz.mjs <url base>'); process.exit(3); }
 
-const EDGE = [process.env.EDGE_PATH,
-    'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
-    'C:/Program Files/Microsoft/Edge/Application/msedge.exe',
-    'C:/Program Files/Google/Chrome/Application/chrome.exe'].find(p => p && existsSync(p));
-if (!EDGE) { console.error('ABORTADO: no se encontró Edge ni Chrome (define EDGE_PATH)'); process.exit(3); }
-
-// ----------------------------------------------------------------------------- navegador
-const perfilTmp = mkdtempSync(join(tmpdir(), 'bg-edge-'));
-const edge = spawn(EDGE, ['--headless=new', '--remote-debugging-port=0', `--user-data-dir=${perfilTmp}`,
-    '--no-first-run', '--no-default-browser-check', '--disable-gpu', '--window-size=1280,900', 'about:blank'],
-    { stdio: ['ignore', 'ignore', 'pipe'] });
-
-function cerrar(codigo) {
-    try { edge.kill(); } catch {}
-    setTimeout(() => { try { rmSync(perfilTmp, { recursive: true, force: true }); } catch {} process.exit(codigo); }, 500);
-}
-
-const puerto = await new Promise((ok, mal) => {
-    let buf = '';
-    const t = setTimeout(() => mal(new Error('Edge no abrió el puerto de depuración')), 20000);
-    edge.stderr.on('data', d => {
-        buf += d;
-        const m = buf.match(/DevTools listening on ws:\/\/127\.0\.0\.1:(\d+)\//);
-        if (m) { clearTimeout(t); ok(Number(m[1])); }
-    });
-    edge.on('exit', () => mal(new Error('Edge terminó antes de tiempo')));
-}).catch(e => { console.error('ABORTADO: ' + e.message); cerrar(3); });
-
-const paginas = await (await fetch(`http://127.0.0.1:${puerto}/json/list`)).json();
-const pagina = paginas.find(p => p.type === 'page');
-if (!pagina) { console.error('ABORTADO: Edge no abrió ninguna página'); cerrar(3); }
-const ws = new WebSocket(pagina.webSocketDebuggerUrl);
-await new Promise((ok, mal) => {
-    ws.addEventListener('open', ok);
-    ws.addEventListener('error', () => mal(new Error('no se pudo conectar con Edge')));
-    setTimeout(() => mal(new Error('Edge no aceptó la conexión')), 20000);
-}).catch(e => { console.error('ABORTADO: ' + e.message); cerrar(3); });
-
-// Tope global: si algo se bloquea, la prueba termina con un fallo en vez de colgarse.
-const TOPE_MS = 5 * 60 * 1000;
-setTimeout(() => { console.log(`  FALLO la prueba no terminó en ${TOPE_MS / 60000} minutos`); cerrar(1); }, TOPE_MS).unref();
-let seq = 0;
-const pendientes = new Map();
-ws.addEventListener('message', ev => {
-    const m = JSON.parse(ev.data);
-    if (m.id && pendientes.has(m.id)) { pendientes.get(m.id)(m); pendientes.delete(m.id); }
-});
-function cdp(method, params = {}) {
-    return new Promise((ok, mal) => {
-        const id = ++seq;
-        const t = setTimeout(() => { pendientes.delete(id); mal(new Error(`${method}: Edge no respondió en 30 s`)); }, 30000);
-        pendientes.set(id, m => { clearTimeout(t); m.error ? mal(new Error(`${method}: ${m.error.message}`)) : ok(m.result); });
-        ws.send(JSON.stringify({ id, method, params }));
-    });
-}
-
-/** Evalúa una expresión en la página y devuelve su valor (espera promesas). */
-async function js(expresion) {
-    const r = await cdp('Runtime.evaluate', { expression: expresion, awaitPromise: true, returnByValue: true });
-    if (r.exceptionDetails) throw new Error('JS: ' + (r.exceptionDetails.exception?.description || r.exceptionDetails.text));
-    return r.result.value;
-}
-async function esperar(expresion, ms = 30000) {
-    const fin = Date.now() + ms;
-    while (Date.now() < fin) {
-        if (await js(`!!(${expresion})`)) return true;
-        await new Promise(r => setTimeout(r, 100));
-    }
-    return false;
-}
-/** Como esperar(), pero si no ocurre a tiempo lanza un error que dice qué faltó. */
-async function hasta(expresion, ms = 30000) {
-    if (!await esperar(expresion, ms)) throw new Error('no ocurrió a tiempo: ' + expresion.slice(0, 120));
-}
-async function tecla(key, vk, text) {
-    await cdp('Input.dispatchKeyEvent', { type: text ? 'keyDown' : 'rawKeyDown', key, code: key, windowsVirtualKeyCode: vk, nativeVirtualKeyCode: vk, text, unmodifiedText: text });
-    await cdp('Input.dispatchKeyEvent', { type: 'keyUp', key, code: key, windowsVirtualKeyCode: vk, nativeVirtualKeyCode: vk });
-}
-const ENTER = () => tecla('Enter', 13, '\r');
-const TAB = () => tecla('Tab', 9);
-const ESCAPE = () => tecla('Escape', 27);
-async function pantalla(ancho, alto, movil) {
-    await cdp('Emulation.setDeviceMetricsOverride', { width: ancho, height: alto, deviceScaleFactor: 1, mobile: movil });
-}
-
-// Con CAPTURAS=<carpeta> guarda capturas de pantalla en los momentos clave (para revisar a ojo).
-const CAPTURAS = process.env.CAPTURAS;
-if (CAPTURAS) mkdirSync(CAPTURAS, { recursive: true });
-async function captura(nombre) {
-    if (!CAPTURAS) return;
-    const r = await cdp('Page.captureScreenshot', { format: 'png' });
-    writeFileSync(join(CAPTURAS, nombre + '.png'), Buffer.from(r.data, 'base64'));
-}
-
-// ----------------------------------------------------------------------------- informe
-let total = 0, fallos = 0;
-function comprobar(nombre, ok, detalle = '') {
-    total++;
-    if (!ok) fallos++;
-    console.log((ok ? '  OK    ' : '  FALLO ') + nombre + (ok || detalle === '' ? '' : `  -> ${typeof detalle === 'string' ? detalle : JSON.stringify(detalle)}`));
-}
+const { cdp, js, esperar, hasta, pantalla, captura, cerrar, ENTER, TAB, ESCAPE } = await abrirNavegador();
+const informe = crearInforme();
+const comprobar = informe.comprobar;
 
 // Funciones que se ejecutan DENTRO de la página
-await cdp('Page.enable');
-await cdp('Runtime.enable');
 await cdp('Page.addScriptToEvaluateOnNewDocument', { source: `
     window.__t = {
         visible: sel => { const e = document.querySelector(sel); return !!e && !e.closest('[hidden]') && e.getClientRects().length > 0; },
@@ -382,6 +279,13 @@ try {
 } catch (e) {
     comprobar('la prueba terminó sin errores', false, e.message);
 }
+if (informe.fallos) {
+    // Diagnóstico: qué mostraba la página cuando falló
+    const estado = await js(`({ titulo: document.getElementById('sectionTitle')?.textContent, conteo: document.getElementById('statsBar')?.textContent,
+        cuadricula: document.getElementById('resultsGrid')?.innerText.slice(0, 200), detalleAbierto: document.getElementById('detalle')?.open })`).catch(() => null);
+    console.log('  estado de la página al terminar: ' + JSON.stringify(estado));
+    await captura('fallo').catch(() => {});
+}
 
-console.log(`\n${total} comprobaciones de interfaz, ${fallos} fallos`);
-cerrar(fallos === 0 ? 0 : 1);
+console.log(`\n${informe.total} comprobaciones de interfaz, ${informe.fallos} fallos`);
+cerrar(informe.fallos === 0 ? 0 : 1);
