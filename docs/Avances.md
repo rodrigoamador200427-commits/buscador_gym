@@ -339,9 +339,9 @@ D:\Tools\SHAMP\php\php.exe tests\test_interfaz.php          72 del navegador + 3
 
 ## 4. Pendientes
 
-- **El esquema de etiquetas solo está aplicado en `gym_buscador_test`.** Hasta aplicarlo y
-  correr `generar_etiquetas.py` en `gym_buscador`, la búsqueda y las recomendaciones de esta
-  rama fallan contra la BD real, porque leen `documento_etiquetas`.
+- **Resuelto el 16 de noviembre (fase 4):** el esquema de etiquetas ya está aplicado en
+  `gym_buscador` y `generar_etiquetas.py` corrió ahí: 930 etiquetas, 13 491 asignaciones y
+  3189 rutas (una por documento). Ejercicios, artículos y cuentas no cambiaron.
 - Si cambia el contenido (ejercicios o artículos), hay que volver a correr
   `generar_etiquetas.py`.
 - Algunas etiquetas quedan sin acento ("Fisiologia", "Planificacion") porque así están escritas
@@ -352,7 +352,147 @@ D:\Tools\SHAMP\php\php.exe tests\test_interfaz.php          72 del navegador + 3
   catálogo. Fue la opción elegida.
 - Cuando la búsqueda no encuentra relación entre dos conceptos ya no se muestra la explicación;
   ese caso sigue visible en "Explorar por árboles".
-- No hay modo oscuro. Los colores ya están en variables, así que agregarlo es redefinirlas.
+- El modo oscuro se agregó en la fase 4.
 - La prueba de interfaz solo corre en Edge o Chrome; no se probó en Firefox ni Safari.
 - Las búsquedas contra la BD real siguen tardando unos 13 s por `motor_arboles.py` (problema
   anterior a esta fase).
+
+---
+
+# Fase 4 — Ilustraciones por músculo y por tema
+
+**Fecha:** 16 de noviembre de 2026. **Rama:** `fase-4-ilustraciones` (sale de `fase-3-interfaz`).
+
+## 1. Qué se hizo
+
+Todos los dibujos son originales del proyecto, hechos a mano con formas simples. No se copió
+ni se calcó ninguna imagen.
+
+| Archivo | Contenido |
+|---|---|
+| `assets/anatomia/frontal.svg` | Cuerpo humano esquemático de frente, de una sola tinta. Regiones con id: `hombro`, `pecho`, `biceps`, `antebrazos`, `abdomen`, `cuadriceps` |
+| `assets/anatomia/posterior.svg` | El mismo cuerpo de espaldas. Regiones: `hombro`, `espalda`, `triceps`, `antebrazos`, `gluteo`, `isquiotibiales`, `pantorrilla` |
+| `assets/temas/pictogramas.svg` | Un pictograma geométrico y sin texto por cada uno de los 9 temas del árbol de Temas, más uno de respaldo |
+| `assets/ilustraciones.js` | `ilustracion(origen, grupo_id_o_tema)` devuelve el SVG adecuado con su título accesible |
+
+**Una ilustración por grupo muscular sin duplicar el dibujo.** Hay un archivo por vista, no uno
+por músculo. `ilustracion()` toma el cuerpo con `<use href="assets/anatomia/frontal.svg#cuerpo">`
+y resalta la región con una variable CSS (`--ilu-pecho`, `--ilu-espalda`…) que el archivo lee.
+Corregir el dibujo en un solo lugar corrige las 11 ilustraciones.
+
+| grupo_id | Músculo | Vista | | grupo_id | Músculo | Vista |
+|---|---|---|---|---|---|---|
+| 1 | Pecho | frontal | | 7 | Isquiotibiales | posterior |
+| 2 | Espalda | posterior | | 8 | Pantorrilla | posterior |
+| 3 | Hombro | frontal | | 9 | Glúteo | posterior |
+| 4 | Bíceps | frontal | | 10 | Abdomen | frontal |
+| 5 | Tríceps | posterior | | 11 | Antebrazos | frontal |
+| 6 | Cuádriceps | frontal | | | | |
+
+**Pictogramas:** Fuerza (barra con discos), Hipertrofia (núcleo con anillos), Resistencia
+(pulso), Técnica y biomecánica (palanca con su ángulo), Planificación (calendario), Recuperación
+(luna), Prevención y movilidad (escudo con cruz), Alimentación (plato con cubiertos),
+Suplementación (cápsula). Respaldo: una hoja de documento.
+
+**Colores:** ningún dibujo lleva un color fijo. Cada región se pinta con su variable y, si no
+existe, con `currentColor`. Los valores salen de `assets/estilos.css`
+(`--color-ilustracion-fondo`, `-base`, `-resaltado`, `-tinta`).
+
+**Respaldo:** un `grupo_id` desconocido muestra el cuerpo sin ninguna región resaltada
+("Ejercicio sin grupo muscular asignado"); un tema desconocido, el pictograma de documento.
+
+**En la interfaz:**
+
+- **Tarjetas:** empiezan con un recuadro de proporción fija 16:9. Dentro va la ilustración con
+  medio cuerpo (la mitad superior o inferior, según el músculo), que se ve 1.8 veces más grande
+  que el cuerpo entero. Una foto puesta ahí ocupa el mismo recuadro (`object-fit: cover`).
+- **Detalle:** el cuerpo completo, a 400 px de alto, en una columna a la izquierda del texto.
+  En teléfono va arriba.
+- **Título accesible:** cada SVG lleva `role="img"` y un `<title>` enlazado con
+  `aria-labelledby`, por ejemplo "Músculo trabajado: pecho" o "Tema del artículo: fuerza".
+- **Datos:** `hidratar_documentos()` agrega a cada tarjeta `grupo_id` (ejercicios) o `tema`
+  (artículos; es el último nodo de su ruta en `documento_rutas`).
+
+**Modo oscuro (decidido en esta fase):** toda la interfaz sigue la preferencia del sistema
+(`prefers-color-scheme`). Es el mismo sistema de variables con otros valores. Los pocos colores
+que seguían fijos (texto sobre botones de acento, aviso, sombra, velo del detalle) pasaron a
+variables. Contraste en oscuro: texto 13:1, texto secundario 8:1, texto sobre acento 8:1.
+
+## 2. Verificación
+
+Se hizo una captura de cada ilustración, en tamaño de tarjeta y de detalle, en claro y en
+oscuro (88 capturas), y se revisaron de dos formas:
+
+- **A ojo:** en las 11 se distingue el músculo resaltado y la vista es la correcta. Las hojas
+  con todas están en `docs/capturas/ilustraciones/`.
+- **Contando píxeles** (`tests/ilustraciones.mjs` decodifica cada PNG):
+
+| Comprobación | Resultado |
+|---|---|
+| Área resaltada en la tarjeta | Entre 345 px (antebrazos) y 2220 px (espalda). Mínimo exigido: 250 |
+| Área resaltada en el detalle | Entre 788 px (antebrazos) y 5137 px (espalda). Mínimo exigido: 600 |
+| Contraste del resaltado con el cuerpo atenuado | 4.3:1 en claro y 3.3:1 en oscuro |
+| Respaldo de ejercicios | 0 píxeles resaltados |
+| Colores fijos | Con una paleta de prueba puesta solo con las variables CSS, el 0.000 % de los píxeles de las 44 capturas queda sin explicar |
+
+- **Todos los `grupo_id` tienen ilustración:** los 11 de `taxonomia.MUSCULOS`, los de la BD de
+  pruebas y, revisado a mano en `gym_buscador`, los 11 de `grupos_musculares` (2848 ejercicios,
+  ninguno con `grupo_id` nulo). Los 341 artículos reales caen en los 9 temas con pictograma.
+- **Ningún enlace externo:** ni en los SVG, ni en `ilustraciones.js`, `estilos.css` o
+  `index.html`. En el navegador, todo lo que se carga sale del mismo sitio.
+- **La foto no mueve el diseño:** se sustituyó la ilustración de una tarjeta por una imagen
+  vertical de 600 x 1500 y no cambió ni la altura de la tarjeta ni la posición del título.
+
+## 3. Qué falló durante el desarrollo
+
+1. **Comentarios XML inválidos (dibujos).** Escribí los nombres de las variables CSS, que
+   empiezan con dos guiones, dentro de comentarios de los SVG. XML no admite dos guiones
+   seguidos en un comentario. Lo detecté antes de probar y reescribí los comentarios.
+2. **El músculo no se veía más grande en el detalle (diseño).** Con el detalle a 300 px de
+   alto, cada músculo medía casi lo mismo que en la tarjeta. Se pasó a dos columnas con la
+   figura a 400 px.
+3. **Comparar el tema claro con el oscuro no sirve para buscar colores fijos (prueba).** Los dos
+   temas comparten grises parecidos y la prueba los confundía. Se cambió por la paleta de
+   prueba de colores inconfundibles.
+4. **Las esquinas redondeadas contaban como "color ajeno" (prueba).** Asomaba el blanco de la
+   tarjeta. En esa pasada las esquinas se ponen rectas.
+5. **Dos comprobaciones de HTML contaban un número fijo de `<script>` (prueba).** Al cargar
+   `ilustraciones.js` hay dos. Ahora comparan contra los que había antes de buscar.
+6. **Una corrida de la prueba de interfaz se arrastró hasta el tope de 5 minutos.** Coincidió
+   con el arranque del Edge del sistema. Repetida, pasó. Si la máquina está cargada, la prueba
+   del navegador puede fallar por tiempo: hay que repetirla.
+
+**Validación de la prueba:** se puso a propósito un color fijo en `frontal.svg` y se apuntó
+tríceps a una región que no existe en su vista. Fallaron 5 comprobaciones, tanto las que leen
+los archivos como las que cuentan píxeles. Con los archivos correctos pasan todas.
+
+## 4. Cómo probarlo
+
+```
+D:\Tools\SHAMP\php\php.exe tests\test_ilustraciones.php [carpeta]   85 del navegador + 12
+D:\Tools\SHAMP\php\php.exe tests\test_interfaz.php                  85 del navegador + 3
+D:\Tools\SHAMP\php\php.exe tests\test_etiquetas.php                 34 comprobaciones
+D:\Tools\SHAMP\php\php.exe tests\test_estadisticas.php              49 comprobaciones
+D:\Tools\SHAMP\php\php.exe tests\test_autorizacion.php              24 comprobaciones
+cd scripts_py && python -m pytest tests -q                          74 pasan, 8 se saltan
+```
+
+Con una carpeta como argumento, `test_ilustraciones.php` guarda ahí las capturas de cada
+ilustración. Para verlo en el navegador: entrar a `http://localhost/buscador_gym/`, buscar
+"press banca" y abrir una tarjeta. Para ver el modo oscuro, cambiar el tema del sistema o
+simularlo en las herramientas de desarrollo (Rendering → `prefers-color-scheme`).
+
+## 5. Pendientes
+
+- **Las ramas `fase-3-interfaz` y `fase-4-ilustraciones` no tienen push.** La fase 4 sale de la
+  fase 3, así que hay que fusionar primero la 3.
+- Las ilustraciones y el modo oscuro solo se probaron en Edge. `<use>` hacia otro archivo con
+  variables CSS es estándar, pero falta mirarlo en Firefox y Safari.
+- No hay un botón para elegir el tema: sigue al sistema.
+- La figura es esquemática y única (no hay versiones por sexo ni complexión).
+- La espalda es una sola región (trapecio, dorsal y lumbar juntos), igual que en la taxonomía.
+- Hombro y antebrazos existen en las dos vistas, pero se muestran siempre de frente.
+- Los relacionados del detalle no llevan ilustración.
+- El recuadro de la tarjeta está listo para fotos, pero no hay fotos ni dónde guardarlas.
+- La vista de árboles y el artículo relacionado con la búsqueda usan las mismas tarjetas, así
+  que también muestran ilustración; no tienen pruebas propias de esto.

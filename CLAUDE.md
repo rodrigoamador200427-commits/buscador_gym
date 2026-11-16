@@ -8,7 +8,14 @@ PHP no está en el PATH: usar `D:\Tools\SHAMP\php\php.exe` y `D:\Tools\SHAMP\mys
 
 - `index.html`: única página (HTML + JS). Acceso (registro/login) → selector de perfil →
   búsqueda, recomendaciones, detalle de tarjeta (`<dialog>`) y "Explorar por árboles".
-  Sus estilos están en `assets/estilos.css` (sistema de diseño con variables CSS).
+  Sus estilos están en `assets/estilos.css` (sistema de diseño con variables CSS; el modo
+  oscuro son las mismas variables con otros valores bajo `prefers-color-scheme: dark`).
+- Ilustraciones (dibujos propios, sin enlaces externos): `assets/anatomia/frontal.svg` y
+  `posterior.svg` (cuerpo con una región con id por músculo), `assets/temas/pictogramas.svg`
+  (un pictograma por tema) y `assets/ilustraciones.js`, cuya función
+  `ilustracion(origen, grupo_id_o_tema)` elige cuál mostrar. El cuerpo se toma con `<use>` y la
+  región se resalta con una variable CSS (`--ilu-<region>`): un archivo por vista sirve para
+  los 11 músculos. Un músculo o tema nuevo se agrega en los mapas `MUSCULOS` / `TEMAS` de ese JS.
 - Endpoints JSON en la raíz: `registro.php`, `login.php`, `logout.php`, `sesion.php`,
   `perfiles.php`, `seleccionar_perfil.php`, `buscar.php`, `recomendaciones.php`,
   `registrar_interaccion.php`, `registrar_evento.php`, `detalle.php`, `etiquetas.php`,
@@ -19,8 +26,8 @@ PHP no está en el PATH: usar `D:\Tools\SHAMP\php\php.exe` y `D:\Tools\SHAMP\mys
   - `respuesta.php` (`responder`, `responder_error`, `leer_json_post`, `registrar_fallo`)
   - `python.php` (`ejecutar_python`) · `cuentas.php`
   - `documentos.php`: `hidratar_documentos()` arma la tarjeta que usan TODOS los endpoints
-    (tipo, título, resumen, `meta`, `etiquetas`), `leer_ref_documento`,
-    `documentos_relacionados`, `ruta_documento`
+    (tipo, título, resumen, `meta`, `etiquetas`, y `grupo_id` o `tema` para su ilustración),
+    `leer_ref_documento`, `documentos_relacionados`, `ruta_documento`
   - `estadisticas.php` (`registrar_consulta`, `registrar_eventos`, `registrar_sin_fallar`)
 - `scripts_py/`: motor TF-IDF, árboles (`arboles/`), `recommender.py` (centroide + coseno por
   perfil), `db_config.py` (lee la misma config que PHP), `etiquetado.py` (lógica pura) y
@@ -76,11 +83,14 @@ cd scripts_py && python -m pytest tests -v                  # incluye test_aisla
 D:\Tools\SHAMP\php\php.exe tests\test_autorizacion.php       # HTTP: 403, sesión, aislamiento
 D:\Tools\SHAMP\php\php.exe tests\test_estadisticas.php       # HTTP: eventos, consultas, purga
 D:\Tools\SHAMP\php\php.exe tests\test_etiquetas.php          # HTTP: etiquetas, detalle, gráfica
-D:\Tools\SHAMP\php\php.exe tests\test_interfaz.php           # navegador: teclado, filtros, XSS, 375 px
+D:\Tools\SHAMP\php\php.exe tests\test_interfaz.php           # navegador: teclado, filtros, XSS, 375 px, contraste claro/oscuro
+D:\Tools\SHAMP\php\php.exe tests\test_ilustraciones.php      # navegador: captura cada ilustración y cuenta píxeles
 ```
-`test_interfaz.php` lanza `tests/interfaz.mjs`, que maneja Edge sin ventana por el protocolo de
-DevTools (Node 22+, sin dependencias; `EDGE_PATH` cambia el navegador y `CAPTURAS=<carpeta>`
-guarda capturas). No correr dos pruebas a la vez: todas recrean la misma BD de pruebas.
+Las dos pruebas de navegador lanzan un script de Node (`tests/interfaz.mjs`,
+`tests/ilustraciones.mjs`) que maneja Edge sin ventana con `tests/navegador.mjs` (protocolo de
+DevTools, Node 22+, sin dependencias; `EDGE_PATH` cambia el navegador y `CAPTURAS=<carpeta>`
+guarda capturas). Si la máquina está cargada pueden fallar por tiempo: repetirlas. No correr
+dos pruebas a la vez: todas recrean la misma BD de pruebas.
 Ambas usan SOLO `gym_buscador_test`: la recrean con contenido sintético
 (`scripts_py/tests/fixtures/contenido_test.sql`) y se niegan a correr si la BD no termina en
 `_test` o coincide con la real. Las pruebas PHP comparten `tests/arnes.php`: guardas de BD, su
@@ -105,4 +115,9 @@ php herramientas/crear_demo.php        # imprime la contraseña demo una sola ve
   desalineados; se corrigió con `sql/corregir_grupos_musculares.sql`. Ningún código la lee: la
   fuente de verdad es `taxonomia.py`.
 - No existe la tabla `alimentos`. `postings.origen` solo tiene `ejercicios` y `articulos`.
+- Colores: ninguno va fijo fuera de las variables de `:root` en `assets/estilos.css`, ni dentro
+  de los SVG (usan variables o `currentColor`). De eso dependen el modo oscuro y las
+  ilustraciones; `tests/test_ilustraciones.php` lo comprueba contando píxeles.
+- Un comentario XML no admite dos guiones seguidos: en los SVG no se pueden escribir los nombres
+  de las variables CSS (`--ilu-...`) dentro de `<!-- -->`.
 - Avances del proyecto: `docs/Avances.md`. Estructura de los árboles: `ESTRUCTURA.md`.

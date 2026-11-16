@@ -29,7 +29,7 @@
     --color-articulo-texto: #5720a0;
 
     /* Ilustraciones (assets/ilustraciones.js): fondo del recuadro, figura atenuada,
-       región resaltada y trazo de los pictogramas. Resaltado sobre atenuado: 4.6:1 */
+       región resaltada y trazo de los pictogramas. Resaltado sobre atenuado: 4.3:1 */
     --color-ilustracion-fondo: #eceff5;
     --color-ilustracion-base: #b4bdce;
     --color-ilustracion-resaltado: var(--color-acento);
