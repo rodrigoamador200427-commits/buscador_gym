@@ -660,3 +660,118 @@ Para verlo: iniciar sesión en `http://localhost/buscador_gym/` con la cuenta de
   no llevan perfil).
 - Un administrador solo puede serlo quien tenga acceso a la línea de comandos del servidor. No hay forma
   web de quitar el rol; se hace con SQL (`UPDATE cuentas SET rol = 'usuario' WHERE correo = ...`).
+
+
+---
+
+# Fase 6A — Ampliar el corpus de artículos de 341 a unos 2 000 (en curso)
+
+**Fecha:** 17 de noviembre de 2026. **Rama:** `fase-6a-corpus`. **Estado:** herramientas y lote 1 de 17 listos.
+
+**Objetivo:** pasar de 341 a unos 2 000 artículos sin repetir el sesgo actual (69 % sin ningún vínculo a
+un músculo; Alimentación, Recuperación y Suplementación sin ninguno), con texto original en español, etiquetas
+del vocabulario controlado y sin dosis, estudios ni promesas.
+
+## 1. Medición de partida (Paso 0)
+
+| Dato | Valor |
+|---|---|
+| Longitud del contenido | 39 a 53 palabras (media 46,7), 2 a 4 frases |
+| Etiquetas por artículo | 6 o 7; 950 distintas, el 64,5 % usada una sola vez |
+| Tema más grande | Recuperación (22,3 %); Técnica y biomecánica es la segunda (19,6 %) pero concentra el 57 % de los artículos que sí tienen músculo |
+| Sin vínculo a un músculo | 236 de 341 (69 %) |
+| Pares con similitud del coseno mayor a 0,8 | 0 (el máximo es 0,614) |
+| Etiquetas dentro del vocabulario de `taxonomia.py` | 46 % de las apariciones; solo 3 artículos con todas dentro |
+| Artículos con cantidades en g, mg, ml o kg | 45 (13 %); 26 usan la palabra "dosis" |
+
+Metas aprobadas (`corpus/objetivos.json`): 1 659 artículos nuevos repartidos por tema (Fuerza 270, Hipertrofia 270,
+Resistencia 170, Técnica 280, Planificación 160, Recuperación 220, Prevención 230, Alimentación 280,
+Suplementación 120 en total) y por músculo (de 35 en Antebrazos a 130 en Espalda y Cuádriceps), con 825 nuevos
+artículos que llevan un músculo (antes: 105 de 341).
+
+## 2. Qué se construyó
+
+| Pieza | Para qué |
+|---|---|
+| `sql/esquema_corpus.sql` | `articulos.origen_contenido ENUM('original','generado') NOT NULL DEFAULT 'original'`. Idempotente. Los 341 quedan como `original` |
+| `taxonomia.VOCABULARIO_EXTRA` y `etiquetado.vocabulario_controlado()` | Vocabulario controlado de 190 etiquetas: las 145 de la taxonomía más 45 que los originales ya usan 4 veces o más. Van aparte de `TEMAS` para no cambiar el tema que el árbol asigna a los originales. Se dejaron fuera 9 que tocan salud (dosis, cortisol, inflamación, inmunidad, hormonas, mtor, melatonina, atp, dolor) |
+| `scripts_py/validar_lote.py` | Valida un lote antes de importar (ver abajo) |
+| `scripts_py/planear_lote.py` | Reparte las plazas de un lote sobre la matriz tema por músculo, restando lo ya generado |
+| `scripts_py/ensamblar_lote.py` | Une los archivos de trabajo en `corpus/lotes/lote_NN.csv` y su plan, y comprueba las cuotas |
+| `scripts_py/importar_lote.py` | Vuelve a validar e inserta todo o nada como `generado`, con consultas preparadas |
+| `scripts_py/consultas_referencia.py` y `corpus/consultas_referencia.json` | Las 18 consultas de referencia (las propuse yo; no existían en el repositorio), ejecutadas antes y después de cada lote |
+
+**Qué valida `validar_lote.py`:** encabezado y columnas; títulos únicos (exactos y por similitud); 38 a 56 palabras y
+2 a 4 frases; 6 o 7 etiquetas, todas del vocabulario; español (proporción de palabras vacías); similitud del coseno
+con TF-IDF como el indexador (rechaza más de 0,8 y lista 0,6 a 0,8 para revisión); cantidades con unidad,
+porcentajes, años, plazos de resultados y palabras de salud, estudios o promesas; ejercicios inexistentes (la tabla
+`ejercicios` debe tener al menos 5 registros de la familia mencionada); que un artículo de técnica, fuerza o
+hipertrofia de un músculo nombre un ejercicio que la tabla sí tiene para ese músculo; y que el tema y el músculo que
+resultan de las etiquetas, calculados con las mismas funciones del árbol, sean los previstos en el plan.
+
+## 3. Lote 1 (100 artículos)
+
+Cuotas calculadas por `planear_lote.py` (53 celdas): Fuerza 13, Hipertrofia 15, Resistencia 9, Técnica 13,
+Planificación 8, Recuperación 7, Prevención 14, Alimentación 14, Suplementación 7; 49 con músculo y 51 sin él.
+
+| Paso | Resultado |
+|---|---|
+| Validación | 0 errores, 0 avisos, 41 a 55 palabras (media 47,9), similitud máxima con otro artículo 0,570 |
+| Importación | 100 artículos como `generado` (ids 343 a 442) |
+| `indexer.py` | 23 s; diccionario de 2 805 a 2 973 términos y postings de 77 885 a 81 120 |
+| `generar_etiquetas.py` | 931 etiquetas, 14 142 asignaciones, 3 289 rutas; ningún artículo sin ruta ni etiquetas |
+| 18 consultas de referencia | Ninguna marcada para revisión: el primer resultado de antes sigue entre los 3 primeros en las 18 |
+
+La consulta 12 ("correr resistencia cardio") cambió mucho (solo 1 de los 5 primeros se mantiene), y es una mejora:
+antes había un único artículo de cardio y el resto eran ejercicios con puntajes bajos; ahora lideran artículos
+pertinentes. En la 1 ("press de banca pecho") el nuevo artículo de press de banca inclinado entra primero por 0,001.
+
+## 4. Qué falló o hubo que corregir
+
+1. **Tres errores de etiquetas repetidas.** "abdomen" y "abdominales", y "hombro" y "deltoides", son la misma etiqueta
+   una vez normalizadas. El validador los rechazó y se cambió una de cada par.
+2. **Un artículo repetía el tema de uno original.** Mi "Extensión de tríceps sobre la cabeza" quedó con similitud 0,722
+   frente al original del mismo nombre: no era un error (está bajo 0,8) pero sí un duplicado de enfoque. Lo reescribí
+   como "Fondos en banco". Esta es la utilidad de la banda 0,6 a 0,8.
+3. **Una imprecisión que el validador no puede ver.** Escribí que el press militar se empuja "desde las piernas"; el
+   press militar estricto no usa las piernas. Lo encontré releyendo, no por una regla. El validador comprueba formato,
+   seguridad y consistencia, no si un consejo de ejercicio es correcto: por eso se entregan 5 artículos al azar por lote
+   para tu revisión.
+4. **El contenido de prueba no coincidía con la tabla real.** `articulos` de las pruebas no tenía `AUTO_INCREMENT` ni
+   `contenido NOT NULL`. Se alineó con la real.
+5. **Dos cálculos míos en las pruebas estaban mal** (2 y no 3 resultados perdidos; el contenido de prueba tiene 2 press
+   de banca y no 1).
+6. **MariaDB se detuvo dos veces durante la sesión** sin ningún error en su registro; la segunda vez, justo antes de
+   importar (al arrancar hizo la recuperación habitual y los datos coincidían). No sé la causa. Se reinició de forma
+   limpia y desacoplada del terminal; la importación es una sola transacción, así que una caída no deja datos a medias.
+7. **La corrida completa de pruebas fue anormalmente lenta y una suite de navegador falló por tiempo.** pytest tardó
+   25 minutos (normalmente unos 25 segundos) y `test_interfaz.php` agotó una espera de 30 s. Coincidió con poca memoria
+   libre en la máquina (1 GB de 16, con Android Studio, Word y varios navegadores abiertos). Repetidas por separado,
+   `test_interfaz.php` pasó (85 de 85) y las pruebas del corpus tardaron 17 s. Si pasa otra vez, hay que repetir esa suite.
+
+## 5. Cómo operar un lote
+
+```
+python scripts_py\planear_lote.py 100 --salida corpus\lotes\lote_NN.cuotas.csv
+(redactar corpus\lotes\trabajo\lote_NN_*.csv con: tema, musculo, titulo, contenido, etiquetas)
+python scripts_py\ensamblar_lote.py NN "corpus\lotes\trabajo\lote_NN_*.csv"
+python scripts_py\validar_lote.py corpus\lotes\lote_NN.csv --plan corpus\lotes\lote_NN.plan.csv
+python scripts_py\importar_lote.py corpus\lotes\lote_NN.csv --plan corpus\lotes\lote_NN.plan.csv
+python scripts_py\indexer.py
+python scripts_py\generar_etiquetas.py
+python scripts_py\consultas_referencia.py comparar corpus\resultados\base.json --guardar corpus\resultados\lote_NN.json
+```
+
+Antes del lote 1 se hizo una copia de `articulos`, `diccionario` y `postings` en `backups/` (carpeta fuera de Git).
+`indexer.py` vacía y recalcula todo el índice, así que cada lote cambia un poco el IDF de todos los términos.
+
+## 6. Pendientes
+
+- Faltan los lotes 2 a 17 (1 559 artículos): 15 de 100 y uno de 59.
+- Los 45 artículos originales con cantidades en gramos, mg o ml se dejaron como están (decisión tuya); quedan sin
+  editar y contradicen las reglas que sí cumplen los generados.
+- El validador no juzga la exactitud de un consejo de ejercicio ni un tono; depende de la revisión humana de las muestras.
+- `origen_contenido` todavía no se usa en la interfaz ni en el panel (por ejemplo, para comparar el consumo de originales
+  y generados).
+- Los textos son cortos y del mismo dominio: con más lotes la similitud entre artículos subirá; hay que vigilar la banda
+  0,6 a 0,8 en cada reporte.

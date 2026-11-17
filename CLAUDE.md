@@ -50,6 +50,11 @@ PHP no está en el PATH: usar `D:\Tools\SHAMP\php\php.exe` y `D:\Tools\SHAMP\mys
 - `sql/esquema_admin.sql`: `cuentas.rol ENUM('usuario','admin') DEFAULT 'usuario'`. Idempotente.
 - `herramientas/crear_admin.php`: ÚNICA forma de crear un administrador o dar el rol (solo CLI, pide
   la contraseña sin mostrarla).
+- `sql/esquema_corpus.sql`: `articulos.origen_contenido` ('original' o 'generado').
+- `corpus/`: lotes de artículos de la fase 6A (`lotes/lote_NN.csv`, su `.plan.csv` y `trabajo/`), `objetivos.json`
+  (metas aprobadas), `consultas_referencia.json` (18 consultas) y `resultados/` (línea de base y estado tras cada
+  lote). Bloqueada por HTTP. Herramientas en `scripts_py/`: `planear_lote.py`, `ensamblar_lote.py`, `validar_lote.py`,
+  `importar_lote.py` y `consultas_referencia.py`.
 - `herramientas/crear_demo.php`: cuenta demo con perfiles "Pecho" y "Pierna" (solo CLI).
 - `herramientas/purgar_estadisticas.php`: borra `consultas` y `eventos` de más de 180 días (solo CLI).
 - `config/`, `lib/`, `herramientas/`, `sql/`, `tests/` tienen `.htaccess` con `Require all denied`.
@@ -130,6 +135,7 @@ mysql -uroot gym_buscador < sql/esquema_etiquetas.sql
 mysql -uroot gym_buscador < sql/esquema_admin.sql
 php herramientas/crear_admin.php correo@dominio.com   # pide la contraseña; luego abrir admin.php
 python scripts_py/generar_etiquetas.py # etiquetas y rutas; repetir si cambia el contenido
+mysql -uroot gym_buscador < sql/esquema_corpus.sql
 php herramientas/crear_demo.php        # imprime la contraseña demo una sola vez
 ```
 
@@ -146,6 +152,12 @@ php herramientas/crear_demo.php        # imprime la contraseña demo una sola ve
   `-d "session.save_path=\"RUTA\""`.
 - MariaDB no deja usar un alias de agregado dentro de una expresión del `ORDER BY`: repetir la
   expresión (`SUM(...) / SUM(...)`).
+- Artículos nuevos: se agregan SOLO con `validar_lote.py` + `importar_lote.py` (marcan `generado`), y después hay que
+  correr `indexer.py` (vacía y recalcula diccionario y postings) y `generar_etiquetas.py`; sin lo segundo los nuevos no
+  tienen etiquetas ni ruta. Las etiquetas salen de `etiquetado.vocabulario_controlado()` (190); el tema y el músculo de
+  un artículo los decide `taxonomia.py` con sus etiquetas, así que un artículo generado solo cae donde se quiere si sus
+  etiquetas lo producen (el validador lo comprueba contra el plan). Hay que hacer copia de `articulos`, `diccionario` y
+  `postings` antes del primer lote de una tanda (`backups/` está en `.gitignore`).
 - Colores: ninguno va fijo fuera de las variables de `:root` en `assets/estilos.css`, ni dentro
   de los SVG (usan variables o `currentColor`). De eso dependen el modo oscuro y las
   ilustraciones; `tests/test_ilustraciones.php` lo comprueba contando píxeles.
