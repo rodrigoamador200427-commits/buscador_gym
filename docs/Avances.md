@@ -556,7 +556,10 @@ Capturas en `docs/capturas/admin/` (resumen, más consumidos, edad en claro y en
   que no se puede calcular el rango en SQL. Cada petición de la sección Edad descifra las fechas, las
   convierte en rango y las descarta; solo se devuelven rangos y conteos. Un rango con menos de 5 cuentas
   no aparece en la respuesta (ni siquiera con conteo cero).
-- **Las cuentas `admin` no cuentan en ninguna métrica.**
+- **Las cuentas `admin` no cuentan en el panel:** ni como cuentas, perfiles o edad, ni por las aperturas y
+  los «me gusta» de sus perfiles (aunque use la aplicación con un perfil propio). Excepción que no se puede
+  arreglar: sus búsquedas y las impresiones que generan **sí suman**, porque no llevan perfil a propósito
+  (decisión de la fase 2, para que no se pueda saber quién buscó qué).
 - **Perfil activo** = perfil con al menos una apertura o un «me gusta» en el período. Las impresiones no
   llevan perfil (decisión de la fase 2), así que no sirven para esto.
 - **Período anterior** = la misma duración justo antes (7 días contra los 7 anteriores, etc.). Si el
@@ -586,6 +589,11 @@ Capturas en `docs/capturas/admin/` (resumen, más consumidos, edad en claro y en
    confirmar.
 7. **`Blob.text()` quita el BOM** al decodificar, así que mi prueba no podía verlo en el CSV. Ahora se
    leen los bytes del archivo.
+9. **Documentación incorrecta que corregí después.** Había escrito que las cuentas admin no cuentan en
+   ninguna métrica, pero las consultas de aperturas, «me gusta», más consumidos, menos consumidos y cobertura
+   no filtraban por rol: los eventos de un administrador que usara la aplicación sumaban. Lo vi al explicar
+   cómo funciona la cuenta. Se agregó `sin_eventos_de_admin()` a cada consulta, el escenario de prueba
+   incluye ahora un administrador con 5 eventos, y al quitar el filtro fallan 21 comprobaciones.
 8. **Pulido visual detectado en las capturas:** el botón "Volver a la aplicación" se veía como enlace
    subrayado, la sexta tarjeta del resumen quedaba sola en una segunda fila y, en teléfono, los títulos
    largos salían en letra enorme porque una regla móvil pisaba a otra. Los tres tienen ahora su
@@ -603,7 +611,7 @@ las pruebas comparan contra esos números.
 | Ninguna respuesta contiene `correo`, `nombre`, `fecha_nac`, `contrasena` ni `perfil_id` | Las 18 respuestas (6 secciones por 3 períodos) se recorren buscando esas claves, y se busca que no aparezcan correos ni nombres en el texto |
 | Un rango con menos de 5 cuentas no aparece | "menos de 18" (2 cuentas) y "45 o más" (4) no salen aunque tengan eventos; al borrar 2 cuentas, "18 a 24" (de 6 a 4) desaparece |
 | El rol admin no se puede enviar en el registro | `registro.php` con `rol: "admin"` crea una cuenta `usuario`; ningún endpoint web ni librería escribe la columna |
-| Totales y rankings iguales a lo calculado a mano | 70 comprobaciones HTTP |
+| Totales y rankings iguales a lo calculado a mano | 77 comprobaciones HTTP (incluidas las del administrador que usa la aplicación) |
 
 Además: al quitar el rol en la BD, la misma sesión recibe 403 de inmediato; tras 16 minutos de inactividad el
 administrador recibe 401 mientras un usuario normal sigue con sesión (se simula envejeciendo el archivo de
@@ -622,7 +630,7 @@ D:\Tools\SHAMP\mysql\bin\mysql.exe -uroot gym_buscador < sql\esquema_admin.sql
 php herramientas\crear_admin.php tu-correo@dominio.com        pide la contraseña sin mostrarla
 
 cd scripts_py && python -m pytest tests -q                    74 pasan, 8 se saltan
-D:\Tools\SHAMP\php\php.exe tests\test_admin.php               70 comprobaciones
+D:\Tools\SHAMP\php\php.exe tests\test_admin.php               77 comprobaciones
 D:\Tools\SHAMP\php\php.exe tests\test_admin_interfaz.php      73 del navegador + 1
 D:\Tools\SHAMP\php\php.exe tests\test_autorizacion.php        24
 D:\Tools\SHAMP\php\php.exe tests\test_estadisticas.php        49

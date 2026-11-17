@@ -73,8 +73,15 @@ comprobar('otros endpoints con rol en el cuerpo tampoco lo cambian', $rol === 'u
 $fuentes = array_filter(glob("$RAIZ/*.php"), fn($f) => basename($f) !== 'admin_estadisticas.php' && basename($f) !== 'admin.php');
 $mencionan = array_map('basename', array_filter($fuentes, fn($f) => preg_match('/\brol\b/', (string)file_get_contents($f))));
 comprobar('ningún endpoint web (salvo los del panel) menciona la columna rol', !$mencionan, json_encode($mencionan));
-$libs = array_map('basename', array_filter(glob("$RAIZ/lib/*.php"), fn($f) => preg_match("/rol\s*=\s*'admin'|SET rol|rol = \?/i", (string)file_get_contents($f))));
+// Solo sentencias que ESCRIBEN la columna (UPDATE ... SET rol / INSERT INTO cuentas (... rol ...)); leerla
+// (por ejemplo para excluir a los administradores de las cifras) es normal.
+const ESCRIBE_ROL = '/UPDATE\s+cuentas\s+SET[^;"]*\brol\b|INSERT\s+INTO\s+cuentas\s*\([^)]*\brol\b/is';
+$libs = array_map('basename', array_filter(glob("$RAIZ/lib/*.php"), fn($f) => preg_match(ESCRIBE_ROL, (string)file_get_contents($f))));
 comprobar('ninguna librería escribe el rol (solo herramientas/crear_admin.php)', !$libs, json_encode($libs));
+comprobar('la regla sí detecta una escritura del rol (control)',
+    preg_match(ESCRIBE_ROL, "UPDATE cuentas SET rol = 'admin' WHERE id = 1") === 1
+    && preg_match(ESCRIBE_ROL, "INSERT INTO cuentas (correo, rol) VALUES (?, 'admin')") === 1
+    && preg_match(ESCRIBE_ROL, "SELECT 1 FROM cuentas ca WHERE ca.rol = 'admin'") === 0);
 $db->exec("DELETE FROM cuentas WHERE correo = 'colado@prueba.test'");
 
 // ----------------------------------------------------------------------------- sin datos personales
@@ -109,6 +116,30 @@ $textoTodo = json_encode(array_map(fn($x) => $x[1], $respuestas));
 comprobar('ningún correo de prueba ni nombre de usuario aparece en el texto de las respuestas',
     !preg_match('/@prueba\.test|Usuario u\d\d|Administrador/', $textoTodo));
 $rangoEdad = fn(array $r) => $r['edad']['rangos'] ?? [];
+
+// ----------------------------------------------------------------------------- el admin no cuenta
+echo "\n[Los eventos del administrador no cuentan]\n";
+$delAdmin = (int)$db->query("SELECT COUNT(*) FROM eventos e JOIN perfiles p ON p.id = e.perfil_id JOIN cuentas c ON c.id = p.cuenta_id WHERE c.rol = 'admin'")->fetchColumn();
+comprobar('control: el administrador sí tiene 5 eventos en la BD (4 aperturas y 1 «me gusta», hace 1 día)', $delAdmin === 5, "tiene $delAdmin");
+$r7admin = $respuestas['resumen/7'][1];
+comprobar('7 días: siguen siendo 9 aperturas y 5 «me gusta» (con los del admin serían 13 y 6)', $r7admin['aperturas']['valor'] === 9 && $r7admin['me_gusta']['valor'] === 5, json_encode([$r7admin['aperturas'], $r7admin['me_gusta']]));
+comprobar('la actividad de ayer sigue en 5 aperturas y 4 «me gusta»', (function () use ($r7admin) {
+    $ayer = (new DateTimeImmutable('today'))->sub(new DateInterval('P1D'))->format('Y-m-d');
+    $p = array_values(array_filter($r7admin['por_dia'], fn($x) => $x['dia'] === $ayer))[0] ?? [];
+    return ($p['aperturas'] ?? null) === 5 && ($p['me_gusta'] ?? null) === 4;
+})(), json_encode($r7admin['por_dia'] ?? null));
+$mas7 = $respuestas['mas/7'][1];
+comprobar('más consumidos: 105 y 303 (que solo abrió el admin) no aparecen y 101 sigue con 6',
+    !in_array(105, array_column($mas7['ejercicios'], 'doc_id'), true) && !in_array(303, array_column($mas7['articulos'], 'doc_id'), true)
+    && ($mas7['ejercicios'][0]['total'] ?? 0) === 6, json_encode($mas7));
+$menos7 = $respuestas['menos/7'][1];
+comprobar('105 sigue siendo "poco abierto" con 0 aperturas (el admin lo abrió) y 303 sigue "nunca mostrado"',
+    ($menos7['poco_abiertos'][0]['doc_id'] ?? 0) === 105 && ($menos7['poco_abiertos'][0]['aperturas'] ?? -1) === 0
+    && array_column($menos7['nunca_mostrados'], 'doc_id') === [303], json_encode([$menos7['poco_abiertos'][0] ?? null, $menos7['nunca_mostrados']]));
+comprobar('cobertura: Pecho sigue con 8 interacciones (con las del admin serían 10)', (function () use ($respuestas) {
+    $m = array_column($respuestas['cobertura/7'][1]['musculos'], null, 'concepto');
+    return ($m['Pecho']['interacciones'] ?? null) === 8;
+})());
 
 // ----------------------------------------------------------------------------- resumen
 echo "\n[Resumen: totales calculados a mano]\n";

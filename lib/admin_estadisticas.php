@@ -6,7 +6,9 @@
 // - Todo lo que sale de aquí es AGREGADO: nunca correo, nombre, fecha de nacimiento,
 //   contraseña ni perfil_id. La edad se calcula en memoria a partir de la fecha cifrada y
 //   solo se devuelven rangos con al menos EDAD_MIN_CUENTAS cuentas.
-// - Las cuentas con rol 'admin' no cuentan en ninguna métrica.
+// - Las cuentas con rol 'admin' no cuentan: ni como cuentas, perfiles o edad, ni por las
+//   aperturas y "me gusta" de sus perfiles (sin_eventos_de_admin). Sus búsquedas e impresiones
+//   NO se pueden separar: no llevan perfil, a propósito (fase 2), así que sí suman.
 // - Las impresiones no llevan perfil (fase 2), así que "perfil activo" se mide con
 //   aperturas y "me gusta".
 declare(strict_types=1);
@@ -23,6 +25,17 @@ const RANGOS_EDAD = [            // [etiqueta, edad mínima, edad máxima]
     ['35 a 44', 35, 44],
     ['45 o más', 45, 200],
 ];
+
+/**
+ * Condición SQL que deja fuera los eventos de perfiles de cuentas administradoras. Los eventos
+ * sin perfil (las impresiones, o los de un perfil ya borrado) se conservan. $alias es SIEMPRE
+ * una constante escrita en este archivo, nunca un dato de la petición.
+ */
+function sin_eventos_de_admin(string $alias): string
+{
+    return "NOT EXISTS (SELECT 1 FROM perfiles pfa JOIN cuentas ca ON ca.id = pfa.cuenta_id
+        WHERE pfa.id = {$alias}.perfil_id AND ca.rol = 'admin')";
+}
 
 /** Fechas (Y-m-d H:i:s) del período de `dias` días que termina ahora y del anterior. */
 function periodos(int $dias, ?DateTimeImmutable $ahora = null): array
@@ -55,8 +68,8 @@ function seccion_resumen(PDO $db, int $dias): array
     ];
 
     [$busquedas, $busquedasAnt] = $enPeriodo('SELECT COUNT(*) FROM consultas WHERE creado_en >= ? AND creado_en < ?');
-    [$aperturas, $aperturasAnt] = $enPeriodo("SELECT COUNT(*) FROM eventos WHERE tipo = 'apertura' AND creado_en >= ? AND creado_en < ?");
-    [$gustas, $gustasAnt] = $enPeriodo("SELECT COUNT(*) FROM eventos WHERE tipo = 'like' AND creado_en >= ? AND creado_en < ?");
+    [$aperturas, $aperturasAnt] = $enPeriodo("SELECT COUNT(*) FROM eventos e WHERE e.tipo = 'apertura' AND e.creado_en >= ? AND e.creado_en < ? AND " . sin_eventos_de_admin('e'));
+    [$gustas, $gustasAnt] = $enPeriodo("SELECT COUNT(*) FROM eventos e WHERE e.tipo = 'like' AND e.creado_en >= ? AND e.creado_en < ? AND " . sin_eventos_de_admin('e'));
     [$activos, $activosAnt] = $enPeriodo("SELECT COUNT(DISTINCT e.perfil_id) FROM eventos e
         JOIN perfiles pf ON pf.id = e.perfil_id JOIN cuentas c ON c.id = pf.cuenta_id
         WHERE c.rol = 'usuario' AND e.tipo IN ('apertura', 'like') AND e.creado_en >= ? AND e.creado_en < ?");
@@ -80,7 +93,7 @@ function actividad_por_dia(PDO $db, int $dias): array
     $p = periodos($dias);
     $s = $db->prepare("SELECT DATE(creado_en) AS dia,
             SUM(tipo = 'apertura') AS aperturas, SUM(tipo = 'like') AS me_gusta
-        FROM eventos WHERE creado_en >= ? AND creado_en < ? GROUP BY dia");
+        FROM eventos e WHERE e.creado_en >= ? AND e.creado_en < ? AND " . sin_eventos_de_admin('e') . " GROUP BY dia");
     $s->execute([$p['desde'], $p['hasta']]);
     $eventos = array_column($s->fetchAll(), null, 'dia');
     $s = $db->prepare('SELECT DATE(creado_en) AS dia, COUNT(*) AS n FROM consultas WHERE creado_en >= ? AND creado_en < ? GROUP BY dia');
@@ -157,7 +170,8 @@ function seccion_mas_consumidos(PDO $db, int $dias, int $limite = 10): array
     foreach (['ejercicios', 'articulos'] as $origen) {
         $s = $db->prepare("SELECT doc_id, SUM(tipo = 'apertura') AS aperturas, SUM(tipo = 'like') AS me_gusta,
                 SUM(tipo IN ('apertura', 'like')) AS total
-            FROM eventos WHERE origen = ? AND tipo IN ('apertura', 'like') AND creado_en >= ? AND creado_en < ?
+            FROM eventos e WHERE e.origen = ? AND e.tipo IN ('apertura', 'like') AND e.creado_en >= ? AND e.creado_en < ?
+              AND " . sin_eventos_de_admin('e') . "
             GROUP BY doc_id ORDER BY total DESC, aperturas DESC, doc_id LIMIT " . max(1, min(50, $limite)));
         $s->execute([$origen, $p['desde'], $p['hasta']]);
         $filas = $s->fetchAll();
@@ -177,7 +191,7 @@ function seccion_menos_consumidos(PDO $db, int $dias, int $limite = 10): array
     $p = periodos($dias);
     // Mostrados mucho y casi nunca abiertos: tasa de apertura por impresión
     $s = $db->prepare("SELECT origen, doc_id, SUM(tipo = 'impresion') AS impresiones, SUM(tipo = 'apertura') AS aperturas
-        FROM eventos WHERE creado_en >= ? AND creado_en < ? GROUP BY origen, doc_id
+        FROM eventos e WHERE e.creado_en >= ? AND e.creado_en < ? AND " . sin_eventos_de_admin('e') . " GROUP BY origen, doc_id
         HAVING impresiones >= ? ORDER BY SUM(tipo = 'apertura') / SUM(tipo = 'impresion') ASC, impresiones DESC, origen, doc_id LIMIT " . max(1, min(50, $limite)));
     $s->execute([$p['desde'], $p['hasta'], MIN_IMPRESIONES_POCO_ABIERTO]);
     $poco = $s->fetchAll();
@@ -196,12 +210,12 @@ function seccion_menos_consumidos(PDO $db, int $dias, int $limite = 10): array
     $nunca = [];
     $totales = [];
     foreach (['ejercicios' => 'SELECT id, nombre_es AS titulo FROM ejercicios e', 'articulos' => 'SELECT id, titulo FROM articulos e'] as $origen => $sql) {
-        $s = $db->prepare("$sql WHERE NOT EXISTS (SELECT 1 FROM eventos ev WHERE ev.origen = ? AND ev.doc_id = e.id) ORDER BY e.id LIMIT " . max(1, min(50, $limite)));
+        $s = $db->prepare("$sql WHERE NOT EXISTS (SELECT 1 FROM eventos ev WHERE ev.origen = ? AND ev.doc_id = e.id AND " . sin_eventos_de_admin('ev') . ") ORDER BY e.id LIMIT " . max(1, min(50, $limite)));
         $s->execute([$origen]);
         foreach ($s->fetchAll() as $f) {
             $nunca[] = ['origen' => $origen, 'doc_id' => (int)$f['id'], 'titulo' => $f['titulo']];
         }
-        $s = $db->prepare("SELECT COUNT(*) FROM $origen e WHERE NOT EXISTS (SELECT 1 FROM eventos ev WHERE ev.origen = ? AND ev.doc_id = e.id)");
+        $s = $db->prepare("SELECT COUNT(*) FROM $origen e WHERE NOT EXISTS (SELECT 1 FROM eventos ev WHERE ev.origen = ? AND ev.doc_id = e.id AND " . sin_eventos_de_admin('ev') . ")");
         $s->execute([$origen]);
         $totales[$origen] = (int)$s->fetchColumn();
     }
@@ -394,8 +408,9 @@ function seccion_cobertura(PDO $db, int $dias): array
     $s = $db->prepare("SELECT e.nombre_visible AS concepto, COUNT(DISTINCT de.origen, de.doc_id) AS documentos,
             COALESCE(SUM(ev.n), 0) AS interacciones
         FROM etiquetas e JOIN documento_etiquetas de ON de.etiqueta_id = e.id
-        LEFT JOIN (SELECT origen, doc_id, COUNT(*) AS n FROM eventos
-                   WHERE tipo IN ('apertura', 'like') AND creado_en >= ? AND creado_en < ? GROUP BY origen, doc_id) ev
+        LEFT JOIN (SELECT x.origen, x.doc_id, COUNT(*) AS n FROM eventos x
+                   WHERE x.tipo IN ('apertura', 'like') AND x.creado_en >= ? AND x.creado_en < ? AND " . sin_eventos_de_admin('x') . "
+                   GROUP BY x.origen, x.doc_id) ev
                ON ev.origen = de.origen AND ev.doc_id = de.doc_id
         WHERE e.tipo = 'musculo' GROUP BY e.id, e.nombre_visible ORDER BY documentos ASC, interacciones ASC, concepto");
     $s->execute([$p['desde'], $p['hasta']]);
@@ -404,8 +419,9 @@ function seccion_cobertura(PDO $db, int $dias): array
     // Temas: por el nodo del árbol de Temas (documento_rutas), no por etiqueta libre
     $s = $db->prepare("SELECT SUBSTRING_INDEX(r.ruta, ' > ', -1) AS concepto, COUNT(*) AS documentos, COALESCE(SUM(ev.n), 0) AS interacciones
         FROM documento_rutas r
-        LEFT JOIN (SELECT origen, doc_id, COUNT(*) AS n FROM eventos
-                   WHERE tipo IN ('apertura', 'like') AND creado_en >= ? AND creado_en < ? GROUP BY origen, doc_id) ev
+        LEFT JOIN (SELECT x.origen, x.doc_id, COUNT(*) AS n FROM eventos x
+                   WHERE x.tipo IN ('apertura', 'like') AND x.creado_en >= ? AND x.creado_en < ? AND " . sin_eventos_de_admin('x') . "
+                   GROUP BY x.origen, x.doc_id) ev
                ON ev.origen = r.origen AND ev.doc_id = r.doc_id
         WHERE r.origen = 'articulos' AND r.arbol = 'temas' GROUP BY concepto ORDER BY documentos ASC, interacciones ASC, concepto");
     $s->execute([$p['desde'], $p['hasta']]);

@@ -91,7 +91,9 @@ Cambiar `aes_clave` vuelve ilegibles los datos ya cifrados.
    inactividad. `admin_estadisticas.php` devuelve solo agregados y nunca `correo`, `nombre`,
    `fecha_nac`, `contrasena`, `perfil_id` ni `cuenta_id` (una barrera final lo comprueba; por eso las
    listas de músculos y temas usan la clave `concepto`). La edad se calcula en memoria y un rango
-   con menos de 5 cuentas no se devuelve. Las cuentas admin no cuentan en las métricas.
+   con menos de 5 cuentas no se devuelve. Las cuentas admin no cuentan: ni como cuentas, perfiles o edad, ni por las
+   aperturas y «me gusta» de sus perfiles (`sin_eventos_de_admin()` en cada consulta de eventos). Sus
+   búsquedas e impresiones sí suman: no llevan perfil, a propósito.
 
 ## Pruebas
 

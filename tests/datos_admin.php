@@ -10,6 +10,12 @@
 // hace 7 días cae DENTRO de un período de 30 días y FUERA de uno de 7 (que empieza ahora
 // menos 7 días, es decir, unas horas después de ese mediodía).
 //
+// El ADMINISTRADOR también usa la aplicación con un perfil. Sus eventos (hace 1 día: apertura de
+// 101, 102, 105 y del artículo 303, y un "me gusta" a 201) NO deben contar en ninguna cifra de las de
+// abajo: si contaran, 7 días daría 13 aperturas y 6 "me gusta", 105 ya no sería "poco abierto" y
+// el artículo 303 dejaría de ser "nunca mostrado". Además su fecha de nacimiento (1980) lo pondría
+// en "45 o más", que con las 4 cuentas de ese rango llegaría a 5 y dejaría de estar oculto.
+//
 // CUENTAS (rol usuario), 31 en total, por rango de edad:
 //   menos de 18:  2 cuentas (menos de 5: el rango NO debe aparecer)   edad 15, 16
 //   18 a 24:      6 cuentas                                            edad 20
@@ -81,6 +87,8 @@ function datos_admin(PDO $db): array
     $insC->execute(['admin@prueba.test', password_hash('AdminPrueba12345', PASSWORD_DEFAULT), 'admin',
         cifrar_campo('Administrador', 'cuentas.nombre'), cifrar_campo('1980-01-01', 'cuentas.fecha_nacimiento'), $hace(60)]);
     $adminId = (int)$db->lastInsertId();
+    $insP->execute([$adminId, 'Admin', $hace(60)]);
+    $perfil['admin'] = (int)$db->lastInsertId();
 
     $db->prepare("INSERT INTO articulos (id, titulo, contenido, etiquetas) VALUES (303, 'Artículo sin estrenar', 'Nadie lo ha visto.', 'recuperacion')")->execute();
     // Etiquetas y rutas del artículo nuevo (BUSCADOR_ENTORNO=pruebas ya está puesto por el arnés)
@@ -112,6 +120,11 @@ function datos_admin(PDO $db): array
     // Hace 20 y 50 días
     $evento('u10', 'apertura', 'ejercicios', 202, 20); $evento('u11', 'like', 'ejercicios', 203, 20);
     $evento('u12', 'apertura', 'ejercicios', 204, 50); $evento('u12', 'apertura', 'ejercicios', 205, 50);
+
+    // El administrador usando la aplicación: nada de esto debe verse en el panel
+    $evento('admin', 'apertura', 'ejercicios', 101, 1); $evento('admin', 'apertura', 'ejercicios', 102, 1);
+    $evento('admin', 'apertura', 'ejercicios', 105, 1); $evento('admin', 'apertura', 'articulos', 303, 1);
+    $evento('admin', 'like', 'ejercicios', 201, 1);
 
     // Impresiones (sin perfil)
     $imp = $db->prepare("INSERT INTO eventos (perfil_id, tipo, origen, doc_id, creado_en) VALUES (NULL, 'impresion', ?, ?, ?)");
