@@ -496,3 +496,159 @@ simularlo en las herramientas de desarrollo (Rendering → `prefers-color-scheme
 - El recuadro de la tarjeta está listo para fotos, pero no hay fotos ni dónde guardarlas.
 - La vista de árboles y el artículo relacionado con la búsqueda usan las mismas tarjetas, así
   que también muestran ilustración; no tienen pruebas propias de esto.
+
+
+---
+
+# Fase 5 — Panel de administrador
+
+**Fecha:** 17 de noviembre de 2026. **Rama:** `fase-5-admin` (sale de `main`, que ya incluye las fases 3 y 4).
+
+## 1. Qué se hizo
+
+**Esquema** (`sql/esquema_admin.sql`, idempotente, sin `USE`): `cuentas.rol ENUM('usuario','admin') NOT NULL
+DEFAULT 'usuario'`. Se agrega solo si la columna no existe; las cuentas que ya existían quedan como `usuario`.
+
+**Acceso** (lo importante de la fase):
+
+| Pieza | Qué hace |
+|---|---|
+| `herramientas/crear_admin.php` | Única forma de obtener el rol `admin`. Solo línea de comandos. Pide la contraseña dos veces **sin mostrarla** (PowerShell `Read-Host -AsSecureString` en Windows, `stty -echo` en otros). Si el correo ya tiene cuenta, solo le cambia el rol y conserva su contraseña |
+| `registro.php` y demás endpoints web | Nunca mencionan la columna `rol`. Un `rol: "admin"` en el cuerpo se ignora |
+| `requerir_admin()` en `lib/sesion.php` | 401 sin sesión; 403 si el rol leído **de la BD en esa petición** no es `admin`. No basta el rol guardado en la sesión: si se quita el rol, la siguiente petición ya recibe 403 |
+| Sesión de administrador | 15 minutos de inactividad (900 s); un usuario normal conserva 30 minutos |
+| `admin.php` | Entrega la página del panel solo después de `requerir_admin()`. Con cabeceras `no-store`, `X-Frame-Options: DENY` y una política de contenido que solo permite recursos del mismo sitio |
+| `admin_estadisticas.php?seccion=...&dias=7\|30\|90` | Solo GET, consultas preparadas, solo agregados. Una última barrera lanza un error si alguna respuesta llegara a contener `correo`, `nombre`, `fecha_nac`, `contrasena`, `perfil_id` o `cuenta_id` |
+
+**Por qué `admin.php` y no `admin.html`:** PHP no puede proteger un archivo `.html` estático; cualquiera
+que adivine la URL lo descargaría. El HTML vive en `lib/admin_panel.html` (carpeta bloqueada por HTTP) y
+solo sale por `admin.php`. Así "un usuario normal recibe 403" se cumple en el servidor y no solo en el
+navegador. La URL `admin.html` da 404.
+
+**Secciones** (cada una con el período de 7, 30 o 90 días):
+
+| Sección | Qué muestra |
+|---|---|
+| Resumen | Cuentas, perfiles, perfiles activos, búsquedas, aperturas y «me gusta», con la variación frente al período anterior de la misma duración. Dos gráficas de línea por día |
+| Más consumidos | Top 10 de ejercicios y de artículos por aperturas más «me gusta» |
+| Menos consumidos | Documentos con al menos 20 impresiones y pocas aperturas (de menor a mayor tasa de apertura) y documentos nunca mostrados. Un aviso nombra los títulos y las etiquetas que conviene revisar |
+| Edad | Consumo por rango (menos de 18, 18 a 24, 25 a 34, 35 a 44, 45 o más) con los 5 músculos y temas más consumidos de cada uno. Solo rangos con al menos 5 cuentas |
+| Búsquedas | Raíces más buscadas y consultas que terminan en `ninguno` o `sin_interseccion` (contenido que falta) |
+| Cobertura | Músculos y temas con sus documentos e interacciones, marcando pocos documentos o poca interacción |
+
+**Gráficas:** SVG propio, sin librerías ni enlaces externos (como las ilustraciones de la fase 4). Líneas
+por día con eje de fechas ("12 nov") y tooltip, también con el teclado; barras horizontales ordenadas de
+mayor a menor con el valor al lado y un solo color; barras agrupadas para la edad con leyenda. Sin gráficas
+de pastel. Cada título dice la conclusión, por ejemplo "El rango 18 a 24 concentra el 50 % de las
+aperturas" o "«Cuádriceps» tiene solo 5 documentos: es donde más falta contenido". Cada tabla exporta a
+CSV con datos agregados (las celdas que empiezan con `=`, `+`, `-` o `@` llevan un apóstrofo para que una
+hoja de cálculo no las ejecute como fórmula).
+
+**Diseño:** navegación lateral, selector de período que sigue visible al desplazar, fila de tarjetas de
+números y debajo las gráficas en dos columnas (una en pantallas pequeñas). Reutiliza el sistema de la fase 3,
+incluido el modo oscuro; se agregó solo `--color-serie-b` para la segunda serie.
+
+Capturas en `docs/capturas/admin/` (resumen, más consumidos, edad en claro y en oscuro, y 375 px).
+
+## 2. Decisiones
+
+- **La edad se calcula en el servidor, en memoria.** La fecha de nacimiento está cifrada (AES-GCM), así
+  que no se puede calcular el rango en SQL. Cada petición de la sección Edad descifra las fechas, las
+  convierte en rango y las descarta; solo se devuelven rangos y conteos. Un rango con menos de 5 cuentas
+  no aparece en la respuesta (ni siquiera con conteo cero).
+- **Las cuentas `admin` no cuentan en ninguna métrica.**
+- **Perfil activo** = perfil con al menos una apertura o un «me gusta» en el período. Las impresiones no
+  llevan perfil (decisión de la fase 2), así que no sirven para esto.
+- **Período anterior** = la misma duración justo antes (7 días contra los 7 anteriores, etc.). Si el
+  anterior es 0, la variación se muestra como "Sin datos de los N días anteriores".
+- **Las claves de músculos y temas se llaman `concepto`, no `nombre`**, para que ninguna respuesta del
+  panel contenga una clave `nombre`, aunque aquí fuera un músculo.
+- **"Poca interacción"** = ninguna interacción o menos de la mitad de la mediana. "Pocos documentos" =
+  menos de la mitad de la mediana.
+
+## 3. Qué falló durante el desarrollo
+
+1. **MariaDB no admite un alias de agregado dentro de una expresión del `ORDER BY`** (error 1247). La
+   consulta de "poco abiertos" usaba `aperturas / impresiones`. Se repitió la expresión completa.
+2. **Regla de cobertura que no marcaba nada.** Con más de la mitad de los temas sin interacciones, la
+   mediana es 0 y "menos de la mitad de la mediana" nunca se cumple. Lo vio la prueba del navegador. Se
+   puso un umbral mínimo de 1.
+3. **Prueba intermitente por la coma del ID de sesión (arnés).** El archivo de cookies guarda la coma como
+   `%2C`; cuando el ID la tenía, la prueba de envejecer la sesión no encontraba su archivo. Fallaba 3 de
+   cada 4 corridas. Se decodifica el valor.
+4. **La `~` de las rutas cortas de Windows (`ANAKAR~1`) rompe el valor de `php -d`** (la toma como el
+   operador `~`). Todo el servidor de pruebas daba 500. La ruta va entre comillas.
+5. **Dos cifras calculadas a mano estaban mal** (aperturas del período anterior: son 2 y no 3; interacciones
+   de Pecho en 7 días: 8 y no 6). La prueba falló y se corrigió el cálculo, no el código. Los dos
+   artículos que agregué para probar HTML en los títulos también cambiaron los totales de 30 y 90 días
+   (20 y 22 aperturas); la prueba lo refleja.
+6. **Comprobaciones que no probaban nada.** Dejé dos con `|| true`, que pasaban siempre. Las quité antes de
+   confirmar.
+7. **`Blob.text()` quita el BOM** al decodificar, así que mi prueba no podía verlo en el CSV. Ahora se
+   leen los bytes del archivo.
+8. **Pulido visual detectado en las capturas:** el botón "Volver a la aplicación" se veía como enlace
+   subrayado, la sexta tarjeta del resumen quedaba sola en una segunda fila y, en teléfono, los títulos
+   largos salían en letra enorme porque una regla móvil pisaba a otra. Los tres tienen ahora su
+   comprobación.
+
+## 4. Verificación
+
+Los totales y rankings de las pruebas están calculados a mano en el encabezado de `tests/datos_admin.php`
+(31 cuentas de usuario en 5 rangos de edad, un administrador, eventos y consultas en fechas conocidas) y
+las pruebas comparan contra esos números.
+
+| Requisito | Cómo se comprueba |
+|---|---|
+| Usuario normal: 403 en la página y en el endpoint; sin sesión: 401 | `test_admin.php`, y a mano contra Apache con la cuenta demo (403) |
+| Ninguna respuesta contiene `correo`, `nombre`, `fecha_nac`, `contrasena` ni `perfil_id` | Las 18 respuestas (6 secciones por 3 períodos) se recorren buscando esas claves, y se busca que no aparezcan correos ni nombres en el texto |
+| Un rango con menos de 5 cuentas no aparece | "menos de 18" (2 cuentas) y "45 o más" (4) no salen aunque tengan eventos; al borrar 2 cuentas, "18 a 24" (de 6 a 4) desaparece |
+| El rol admin no se puede enviar en el registro | `registro.php` con `rol: "admin"` crea una cuenta `usuario`; ningún endpoint web ni librería escribe la columna |
+| Totales y rankings iguales a lo calculado a mano | 70 comprobaciones HTTP |
+
+Además: al quitar el rol en la BD, la misma sesión recibe 403 de inmediato; tras 16 minutos de inactividad el
+administrador recibe 401 mientras un usuario normal sigue con sesión (se simula envejeciendo el archivo de
+sesión del servidor de pruebas).
+
+**Validación de las pruebas:** se rompió a propósito el mínimo de 5 cuentas, la comprobación del rol y se
+agregó una clave prohibida a la respuesta: fallaron 22 comprobaciones (la clave prohibida hizo fallar el
+endpoint con 500 en vez de salir). En el navegador se desactivó `esc()`, se invirtió el orden de las barras
+y se mostraron los rangos pequeños: fallaron 11 comprobaciones (los títulos con HTML crearon 5 nodos
+`<img>` reales). Con el código correcto pasa todo.
+
+## 5. Cómo probarlo
+
+```
+D:\Tools\SHAMP\mysql\bin\mysql.exe -uroot gym_buscador < sql\esquema_admin.sql
+php herramientas\crear_admin.php tu-correo@dominio.com        pide la contraseña sin mostrarla
+
+cd scripts_py && python -m pytest tests -q                    74 pasan, 8 se saltan
+D:\Tools\SHAMP\php\php.exe tests\test_admin.php               70 comprobaciones
+D:\Tools\SHAMP\php\php.exe tests\test_admin_interfaz.php      73 del navegador + 1
+D:\Tools\SHAMP\php\php.exe tests\test_autorizacion.php        24
+D:\Tools\SHAMP\php\php.exe tests\test_estadisticas.php        49
+D:\Tools\SHAMP\php\php.exe tests\test_etiquetas.php           34
+D:\Tools\SHAMP\php\php.exe tests\test_interfaz.php            85 del navegador + 3
+D:\Tools\SHAMP\php\php.exe tests\test_ilustraciones.php       85 del navegador + 12
+```
+
+Para verlo: iniciar sesión en `http://localhost/buscador_gym/` con la cuenta de administrador y abrir
+`http://localhost/buscador_gym/admin.php`. Con `CAPTURAS=<carpeta>` la prueba del navegador guarda capturas.
+
+## 6. Pendientes
+
+- **El esquema ya está aplicado en `gym_buscador` (17 de noviembre), pero todavía no existe ninguna cuenta
+  de administrador.** El script pide la contraseña por la consola, así que la tiene que escribir quien va
+  a usar la cuenta: `php herramientas\crear_admin.php <correo>` en una terminal normal.
+- El panel nunca se ha visto con datos reales de varias semanas: la BD real tiene 2 cuentas y 25 eventos,
+  así que casi todo saldrá vacío (la edad no mostrará ningún rango hasta que haya 5 cuentas por rango).
+- La sección Edad descifra la fecha de todas las cuentas en cada petición. Con miles de cuentas habría que
+  guardar el rango por cuenta; con las que hay hoy es instantáneo.
+- No hay registro de qué hace cada administrador (bitácora de auditoría).
+- Los artículos que el árbol de Temas no logra clasificar aparecen en Cobertura como un tema llamado
+  "Sin clasificar".
+- La prueba del panel solo corre en Edge o Chrome. Los tooltips con el dedo (pantalla táctil) no se
+  probaron; el teclado sí.
+- "Perfiles activos" no cuenta a quien solo vio resultados sin abrir nada ni dar «me gusta» (las impresiones
+  no llevan perfil).
+- Un administrador solo puede serlo quien tenga acceso a la línea de comandos del servidor. No hay forma
+  web de quitar el rol; se hace con SQL (`UPDATE cuentas SET rol = 'usuario' WHERE correo = ...`).
