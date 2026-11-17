@@ -4,11 +4,13 @@
    1. Sistema de diseño (variables)      5. Tarjetas
    2. Base y utilidades                  6. Panel lateral: filtros y gráfica
    3. Barra superior y pestañas          7. Detalle (dialog)
-   4. Acceso y perfiles                  8. Árboles · 9. Teléfono
+   4. Acceso y perfiles                  8. Árboles · 9. Teléfono · 10. Ilustraciones
    ============================================================================= */
 
 /* ---------------------------------------------------------------- 1. Sistema de diseño */
 :root {
+    color-scheme: light dark;       /* controles y barras del navegador siguen el tema */
+
     /* Color. Contraste sobre --color-superficie: texto 15:1, texto suave 7.5:1, acento 8:1 */
     --color-fondo: #f3f5f9;
     --color-superficie: #ffffff;
@@ -18,12 +20,20 @@
     --color-acento: #3b3fb8;
     --color-acento-fuerte: #2a2d8c;
     --color-acento-suave: #e9eafc;
+    --color-sobre-acento: #ffffff;  /* texto encima de --color-acento o --color-gusta */
     --color-gusta: #c2183f;
     --color-error: #b42318;
     --color-ejercicio-fondo: #fdf0d5;
     --color-ejercicio-texto: #6f4300;
     --color-articulo-fondo: #efe6fb;
     --color-articulo-texto: #5720a0;
+
+    /* Ilustraciones (assets/ilustraciones.js): fondo del recuadro, figura atenuada,
+       región resaltada y trazo de los pictogramas. Resaltado sobre atenuado: 4.3:1 */
+    --color-ilustracion-fondo: #eceff5;
+    --color-ilustracion-base: #b4bdce;
+    --color-ilustracion-resaltado: var(--color-acento);
+    --color-ilustracion-tinta: var(--color-texto-suave);
 
     /* Tipografía */
     --fuente: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -48,9 +58,40 @@
     --radio-l: 14px;
     --radio-pastilla: 999px;
     --sombra: 0 1px 3px rgba(23, 32, 46, 0.08);
+    --sombra-flotante: 0 8px 24px rgba(23, 32, 46, 0.16);
+    --color-velo: rgba(23, 32, 46, 0.55);       /* detrás del detalle */
 
     --ancho-pagina: 1280px;
     --alto-barra: 64px;
+}
+
+/* Modo oscuro: el mismo sistema con otros valores. Se activa solo cuando el sistema del
+   usuario lo pide. Contraste sobre --color-superficie: texto 13:1, texto suave 8:1;
+   texto sobre acento 8:1. Las variables que derivan de otras (--color-ilustracion-resaltado,
+   --color-ilustracion-tinta) no se repiten: se recalculan con los valores de aquí. */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-fondo: #10151f;
+        --color-superficie: #1a2130;
+        --color-texto: #e8ecf3;
+        --color-texto-suave: #b3bccb;
+        --color-borde: #3a4660;
+        --color-acento: #9ea4ff;
+        --color-acento-fuerte: #c3c7ff;
+        --color-acento-suave: #2a3150;
+        --color-sobre-acento: #10151f;
+        --color-gusta: #ff6b8e;
+        --color-error: #ff9a8f;
+        --color-ejercicio-fondo: #4a3a12;
+        --color-ejercicio-texto: #ffd98a;
+        --color-articulo-fondo: #3a2a5c;
+        --color-articulo-texto: #dcc7ff;
+        --color-ilustracion-fondo: #222b3c;
+        --color-ilustracion-base: #465476;
+        --sombra: 0 1px 3px rgba(0, 0, 0, 0.4);
+        --sombra-flotante: 0 8px 24px rgba(0, 0, 0, 0.5);
+        --color-velo: rgba(0, 0, 0, 0.65);
+    }
 }
 
 /* ---------------------------------------------------------------- 2. Base y utilidades */
@@ -90,8 +131,8 @@ button { cursor: pointer; }
     font-weight: 600;
 }
 .btn:hover { border-color: var(--color-acento); color: var(--color-acento-fuerte); }
-.btn-primario { background: var(--color-acento); border-color: var(--color-acento); color: #fff; }
-.btn-primario:hover { background: var(--color-acento-fuerte); border-color: var(--color-acento-fuerte); color: #fff; }
+.btn-primario { background: var(--color-acento); border-color: var(--color-acento); color: var(--color-sobre-acento); }
+.btn-primario:hover { background: var(--color-acento-fuerte); border-color: var(--color-acento-fuerte); color: var(--color-sobre-acento); }
 .btn-texto { border: 0; background: none; padding: 0; color: var(--color-acento-fuerte); font-weight: 600; text-decoration: underline; }
 
 .campo { display: grid; gap: var(--esp-1); font-size: var(--texto-s); font-weight: 600; }
@@ -131,7 +172,7 @@ button { cursor: pointer; }
     white-space: nowrap;
 }
 .etiqueta:hover { border-color: var(--color-acento); }
-.etiqueta[aria-pressed="true"] { background: var(--color-acento); border-color: var(--color-acento); color: #fff; }
+.etiqueta[aria-pressed="true"] { background: var(--color-acento); border-color: var(--color-acento); color: var(--color-sobre-acento); }
 .etiqueta .n { font-weight: 400; opacity: 0.85; }
 
 .tipo {
@@ -197,7 +238,7 @@ button { cursor: pointer; }
     background: var(--color-superficie);
     border: 1px solid var(--color-borde);
     border-radius: var(--radio-m);
-    box-shadow: 0 8px 24px rgba(23, 32, 46, 0.16);
+    box-shadow: var(--sombra-flotante);
     display: grid;
     gap: var(--esp-1);
 }
@@ -314,7 +355,7 @@ button { cursor: pointer; }
     color: var(--color-texto);
     overflow: auto;
 }
-.detalle::backdrop { background: rgba(23, 32, 46, 0.55); }
+.detalle::backdrop { background: var(--color-velo); }
 .detalle-cab {
     position: sticky; top: 0;
     display: flex; justify-content: space-between; align-items: flex-start; gap: var(--esp-3);
@@ -328,7 +369,7 @@ button { cursor: pointer; }
 .detalle-cuerpo h3 { font-size: var(--texto-s); color: var(--color-texto-suave); margin-bottom: var(--esp-2); }
 .detalle-texto { white-space: pre-line; overflow-wrap: anywhere; }
 .detalle-acciones { display: flex; flex-wrap: wrap; gap: var(--esp-2); }
-.btn-gusta-texto[aria-pressed="true"] { background: var(--color-gusta); border-color: var(--color-gusta); color: #fff; }
+.btn-gusta-texto[aria-pressed="true"] { background: var(--color-gusta); border-color: var(--color-gusta); color: var(--color-sobre-acento); }
 .relacionados { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--esp-2); }
 .relacionado {
     display: grid; gap: var(--esp-1); width: 100%; text-align: left;
@@ -370,6 +411,58 @@ button { cursor: pointer; }
     position: fixed; left: 50%; bottom: var(--esp-4); transform: translateX(-50%); z-index: 20;
     max-width: calc(100vw - 2 * var(--esp-4));
     padding: var(--esp-3) var(--esp-4);
-    background: var(--color-texto); color: #fff;
+    background: var(--color-texto); color: var(--color-superficie);
     border-radius: var(--radio-m); font-size: var(--texto-s);
+}
+
+/* ---------------------------------------------------------------- 10. Ilustraciones */
+/* El SVG lee estas variables (ver assets/anatomia/*.svg y assets/temas/pictogramas.svg).
+   Para otro tema de color basta redefinir las --color-ilustracion-* de :root. */
+.ilustracion {
+    display: block;
+    width: 100%;
+    height: 100%;
+    color: var(--color-ilustracion-tinta);
+    --ilu-base: var(--color-ilustracion-base);
+    --ilu-resaltado: var(--color-ilustracion-resaltado);
+    --ilu-tinta: var(--color-ilustracion-tinta);
+}
+
+/* Recuadro de proporción fija para la imagen de la tarjeta. Hoy lleva la ilustración; una
+   foto (<img>) ocuparía exactamente el mismo espacio, así que nada más se mueve. */
+.tarjeta-imagen {
+    aspect-ratio: 16 / 9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: var(--color-ilustracion-fondo);
+    border-radius: var(--radio-m);
+}
+.tarjeta-imagen .ilustracion-cuerpo { height: 100%; }       /* el medio cuerpo se corta en el borde */
+.tarjeta-imagen .ilustracion-completo { height: 92%; }
+.tarjeta-imagen .ilustracion-pictograma { height: 60%; }
+.tarjeta-imagen img { width: 100%; height: 100%; object-fit: cover; }
+
+/* En el detalle: la misma ilustración, grande y con el cuerpo completo, en una columna a la
+   izquierda del texto (la figura es vertical). En teléfono va arriba, a todo el ancho. */
+.detalle-principal { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: var(--esp-4); align-items: start; }
+.detalle-info { display: grid; gap: var(--esp-4); min-width: 0; }
+.detalle-imagen {
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--esp-3);
+    background: var(--color-ilustracion-fondo);
+    border-radius: var(--radio-m);
+}
+.detalle-imagen:has(.ilustracion-pictograma) { height: 220px; }     /* el pictograma es cuadrado */
+.detalle-imagen .ilustracion-pictograma { width: 64%; height: auto; }
+.detalle-imagen img { width: 100%; height: 100%; object-fit: contain; }
+@media (max-width: 640px) {
+    .detalle-principal { grid-template-columns: minmax(0, 1fr); }
+    .detalle-imagen { height: 340px; }
+    .detalle-imagen:has(.ilustracion-pictograma) { height: 200px; }
+    .detalle-imagen .ilustracion-pictograma { width: auto; height: 70%; }
 }

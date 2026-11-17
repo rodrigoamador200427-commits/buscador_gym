@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
     <title>Buscador Gym</title>
     <link rel="stylesheet" href="assets/estilos.css">
 </head>
@@ -141,6 +142,8 @@
 
     <div id="aviso" class="aviso" role="status" hidden></div>
 
+<!-- ilustracion(origen, grupo_id_o_tema): dibujos propios de assets/anatomia y assets/temas -->
+<script src="assets/ilustraciones.js"></script>
 <script>
     // =========================================================================
     // Regla de seguridad: TODO texto que viene del servidor pasa por esc() antes de
@@ -216,7 +219,15 @@
                     title="Filtrar por ${esc(e.nombre)}">${esc(e.nombre)}${conteo === undefined ? '' : ` <span class="n">${Number(conteo)}</span>`}</button></li>`;
     }
 
-    // Misma estructura siempre: tipo + me gusta, título, resumen (3 líneas), metadatos, etiquetas.
+    // Ilustración del documento: el músculo del ejercicio o el tema del artículo.
+    // `encuadre: 'medio'` acerca el cuerpo en las tarjetas; el detalle lo muestra completo.
+    function imagenHTML(d, opciones) {
+        const origen = claveDoc(d).split(':')[0];
+        return ilustracion(origen, origen === 'ejercicios' ? d.grupo_id : d.tema, opciones);
+    }
+
+    // Misma estructura siempre: imagen (recuadro 16:9), tipo + me gusta, título, resumen
+    // (3 líneas), metadatos y etiquetas.
     function tarjetaHTML(d) {
         recordar(d);
         const clave = claveDoc(d);
@@ -226,6 +237,7 @@
         const chips = (d.etiquetas || []).filter(e => e.tipo === 'tema' || e.tipo === 'modalidad').slice(0, 4);
         return `
             <article class="tarjeta" data-doc="${clave}">
+                <div class="tarjeta-imagen">${imagenHTML(d, { encuadre: 'medio' })}</div>
                 <div class="tarjeta-cab">
                     <span class="tipo tipo-${origen}">${esc(d.tipo)}</span>
                     <button type="button" class="btn-gusta" data-gusta aria-pressed="${d.liked ? 'true' : 'false'}"
@@ -506,12 +518,17 @@
         const metaFilas = [['Músculo', meta.musculo], ['Equipamiento', meta.equipamiento], ['Nivel', meta.nivel]]
             .filter(f => f[1]).map(f => `<div><dt>${f[0]}</dt><dd>${esc(f[1])}</dd></div>`).join('');
         $('detalleCuerpo').innerHTML = `
-            <div class="detalle-acciones">
-                <button type="button" class="btn btn-gusta-texto" id="detalleGusta" aria-pressed="false"></button>
+            <div class="detalle-principal">
+                <div class="detalle-imagen">${imagenHTML(d)}</div>
+                <div class="detalle-info">
+                    <div class="detalle-acciones">
+                        <button type="button" class="btn btn-gusta-texto" id="detalleGusta" aria-pressed="false"></button>
+                    </div>
+                    ${d.ruta ? `<div><h3>Ubicación en el árbol</h3>${rutaHTML(d.ruta.nodos, 'Ubicación en el árbol')}</div>` : ''}
+                    ${metaFilas ? `<dl class="tarjeta-meta" style="border-top:0; padding-top:0">${metaFilas}</dl>` : ''}
+                    <p class="detalle-texto">${esc(d.texto)}</p>
+                </div>
             </div>
-            ${d.ruta ? `<div><h3>Ubicación en el árbol</h3>${rutaHTML(d.ruta.nodos, 'Ubicación en el árbol')}</div>` : ''}
-            ${metaFilas ? `<dl class="tarjeta-meta" style="border-top:0; padding-top:0">${metaFilas}</dl>` : ''}
-            <p class="detalle-texto">${esc(d.texto)}</p>
             ${(d.etiquetas || []).length ? `<div><h3>Etiquetas</h3><ul class="etiquetas">${d.etiquetas.map(e => etiquetaHTML(e)).join('')}</ul></div>` : ''}
             ${(r.relacionados || []).length ? `<div><h3>Documentos relacionados</h3><div class="relacionados">${r.relacionados.slice(0, 4).map(x => `
                 <button type="button" class="relacionado" data-relacionado="${claveDoc(x)}">
