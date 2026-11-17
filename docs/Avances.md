@@ -651,6 +651,7 @@ consultas marcadas REVISAR y notas.
 | Lote | Ids | Palabras | Sim. máx | Pares 0,6-0,8 | REVISAR | Notas |
 |---|---|---|---|---|---|---|
 | 02 | 443-542 | 38-42,5-49 | 0,614 | 1 | 1 (n.º 12, mejora) | Hubo que reescribir 4 por pares parecidos o por palabras; 1 por ejercicio sin registros |
+| 03 | 543-642 | 38-42,6-50 | 0,613 | 2 | 2 (n.º 6 y 12, siguen siendo relevantes) | Se corrigieron 11 errores de longitud, título largo, tema o promesa |
 
 ## 6. Pendientes
 
