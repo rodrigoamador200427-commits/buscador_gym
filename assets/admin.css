@@ -1,0 +1,140 @@
+/* =============================================================================
+   admin.css — estilos del panel de administrador (admin.php)
+   Se carga DESPUÉS de estilos.css y usa solo sus variables: no define colores propios,
+   así que sigue el tema claro u oscuro del sistema igual que la aplicación.
+   ============================================================================= */
+
+.admin-barra { justify-content: space-between; display: flex; }
+.admin-barra a.btn { display: inline-block; color: var(--color-texto); text-decoration: none; }
+.admin-marca-aparte { font-weight: 600; color: var(--color-texto-suave); margin-left: var(--esp-2); }
+
+/* ---------------------------------------------------------------- disposición */
+.admin-disposicion {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: var(--esp-5);
+    align-items: start;
+    padding-top: var(--esp-4);
+    padding-bottom: var(--esp-6);
+}
+.admin-nav {
+    position: sticky;
+    top: calc(var(--alto-barra) + var(--esp-4));
+    display: grid;
+    gap: var(--esp-1);
+}
+.admin-nav button {
+    text-align: left;
+    padding: var(--esp-2) var(--esp-3);
+    border: 1px solid transparent;
+    border-radius: var(--radio-m);
+    background: none;
+    font-weight: 600;
+    color: var(--color-texto-suave);
+}
+.admin-nav button:hover { background: var(--color-acento-suave); color: var(--color-texto); }
+.admin-nav button[aria-current="page"] { background: var(--color-acento-suave); border-color: var(--color-acento); color: var(--color-acento-fuerte); }
+.admin-principal { min-width: 0; }
+.admin-titulo { font-size: var(--texto-xl); margin-bottom: var(--esp-3); }
+.admin-titulo:focus { outline: none; }
+
+/* Selector de período: siempre visible al hacer scroll */
+.admin-selector {
+    position: sticky;
+    top: var(--alto-barra);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--esp-3);
+    padding: var(--esp-3) 0;
+    margin-bottom: var(--esp-3);
+    background: var(--color-fondo);
+    border-bottom: 1px solid var(--color-borde);
+}
+.admin-selector-titulo { font-weight: 700; }
+.admin-periodos { display: inline-flex; border: 1px solid var(--color-borde); border-radius: var(--radio-m); overflow: hidden; }
+.admin-periodos button { padding: var(--esp-2) var(--esp-4); border: 0; border-right: 1px solid var(--color-borde); background: var(--color-superficie); font-weight: 600; }
+.admin-periodos button:last-child { border-right: 0; }
+.admin-periodos button[aria-pressed="true"] { background: var(--color-acento); color: var(--color-sobre-acento); }
+.admin-selector .conteo { margin-left: auto; }
+
+/* ---------------------------------------------------------------- tarjetas de números */
+.tarjetas-numeros { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--esp-3); margin-bottom: var(--esp-4); }
+.tarjeta-numero { padding: var(--esp-4); background: var(--color-superficie); border: 1px solid var(--color-borde); border-radius: var(--radio-l); box-shadow: var(--sombra); min-width: 0; }
+.tarjeta-numero h2 { font-size: var(--texto-s); color: var(--color-texto-suave); font-weight: 600; margin-bottom: var(--esp-1); }
+.tarjeta-numero .valor { font-size: 2rem; line-height: 1.15; font-weight: 800; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.tarjeta-numero .valor-texto { font-size: var(--texto-l); line-height: 1.3; }
+.tarjeta-numero .detalle-numero { margin-top: var(--esp-1); font-size: var(--texto-xs); color: var(--color-texto-suave); }
+.tarjeta-numero .detalle-numero strong { color: var(--color-texto); }
+
+.aviso-panel { padding: var(--esp-3) var(--esp-4); margin-bottom: var(--esp-4); border: 1px solid var(--color-borde); border-left: 4px solid var(--color-acento); border-radius: var(--radio-m); background: var(--color-superficie); }
+.aviso-panel h2 { font-size: var(--texto-m); margin-bottom: var(--esp-1); }
+
+/* ---------------------------------------------------------------- gráficas */
+.graficas-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--esp-4); margin-bottom: var(--esp-5); }
+.grafica { min-width: 0; padding: var(--esp-4); background: var(--color-superficie); border: 1px solid var(--color-borde); border-radius: var(--radio-l); box-shadow: var(--sombra); }
+.grafica-ancha { grid-column: 1 / -1; }
+.grafica h2 { font-size: var(--texto-m); line-height: 1.35; margin-bottom: var(--esp-1); text-wrap: balance; }
+.grafica .nota { font-size: var(--texto-xs); color: var(--color-texto-suave); margin-bottom: var(--esp-2); }
+.grafica-lienzo { width: 100%; min-height: 80px; }
+.grafica-lienzo svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+.leyenda { display: flex; flex-wrap: wrap; gap: var(--esp-2) var(--esp-4); margin: var(--esp-2) 0; font-size: var(--texto-s); }
+.leyenda li { display: inline-flex; align-items: center; gap: var(--esp-2); }
+.leyenda svg { width: 28px; height: 12px; flex: none; }
+
+/* SVG: todo se pinta con las variables de estilos.css */
+.g-texto { fill: var(--color-texto); font-size: 13px; font-family: var(--fuente); }
+.g-suave { fill: var(--color-texto-suave); font-size: 12px; font-family: var(--fuente); }
+.g-valor { fill: var(--color-texto); font-size: 13px; font-weight: 700; font-family: var(--fuente); font-variant-numeric: tabular-nums; }
+.g-eje { stroke: var(--color-borde); stroke-width: 1; }
+.g-rejilla { stroke: var(--color-borde); stroke-width: 1; stroke-dasharray: 3 4; opacity: .7; }
+.g-barra { fill: var(--color-acento); }
+.g-a { fill: var(--color-acento); }
+.g-b { fill: var(--color-serie-b); }
+.g-linea { fill: none; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.g-linea.g-a { stroke: var(--color-acento); }
+.g-linea.g-b { stroke: var(--color-serie-b); }
+.g-linea.g-c { stroke: var(--color-texto-suave); stroke-dasharray: 6 4; }
+.g-punto.g-a { fill: var(--color-acento); }
+.g-punto.g-b { fill: var(--color-serie-b); }
+.g-punto.g-c { fill: var(--color-texto-suave); }
+.g-zona { fill: transparent; }
+.g-zona:hover, .g-zona:focus { fill: var(--color-acento-suave); opacity: .55; outline: none; }
+.g-guia { stroke: var(--color-texto-suave); stroke-width: 1; opacity: 0; }
+
+.tooltip {
+    position: fixed; z-index: 30; max-width: 240px; padding: var(--esp-2) var(--esp-3);
+    background: var(--color-texto); color: var(--color-superficie);
+    border-radius: var(--radio-s); font-size: var(--texto-xs); line-height: 1.45; pointer-events: none;
+}
+.tooltip strong { display: block; }
+
+/* ---------------------------------------------------------------- tablas */
+.tabla-bloque { margin-bottom: var(--esp-5); }
+.tabla-cab { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--esp-2); margin-bottom: var(--esp-2); }
+.tabla-cab h2 { font-size: var(--texto-l); }
+.tabla-envoltura { overflow-x: auto; border: 1px solid var(--color-borde); border-radius: var(--radio-m); background: var(--color-superficie); }
+.tabla-envoltura table { width: 100%; border-collapse: collapse; font-size: var(--texto-s); }
+.tabla-envoltura caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.tabla-envoltura th, .tabla-envoltura td { padding: var(--esp-2) var(--esp-3); text-align: left; border-bottom: 1px solid var(--color-borde); vertical-align: top; }
+.tabla-envoltura th { background: var(--color-fondo); font-weight: 700; white-space: nowrap; }
+.tabla-envoltura tr:last-child td { border-bottom: 0; }
+.tabla-envoltura .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tabla-vacia { padding: var(--esp-4); color: var(--color-texto-suave); }
+
+/* ---------------------------------------------------------------- teléfono */
+@media (max-width: 900px) {
+    .admin-disposicion { grid-template-columns: minmax(0, 1fr); gap: var(--esp-3); }
+    .admin-nav { position: static; display: flex; overflow-x: auto; gap: var(--esp-1); padding-bottom: var(--esp-1); border-bottom: 1px solid var(--color-borde); }
+    .admin-nav button { white-space: nowrap; }
+    .graficas-grid { grid-template-columns: minmax(0, 1fr); }
+    .admin-selector .conteo { margin-left: 0; width: 100%; }
+}
+@media (max-width: 640px) {
+    .admin-marca-aparte { display: none; }
+    .tarjeta-numero .valor { font-size: 1.6rem; }
+    .tarjeta-numero .valor-texto { font-size: var(--texto-l); }   /* va después: si no, la regla de arriba la pisa */
+    .admin-selector { top: 0; position: static; }
+}

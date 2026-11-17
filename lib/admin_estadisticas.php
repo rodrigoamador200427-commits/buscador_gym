@@ -226,7 +226,7 @@ function seccion_menos_consumidos(PDO $db, int $dias, int $limite = 10): array
         }
     }
     return ['poco_abiertos' => $pocoAbiertos, 'nunca_mostrados' => $nunca, 'nunca_mostrados_total' => $totales,
-            'etiquetas_a_revisar' => $revisar];
+            'etiquetas_a_revisar' => $revisar, 'minimo_impresiones' => MIN_IMPRESIONES_POCO_ABIERTO];
 }
 
 // --------------------------------------------------------------------------- 4. Edad
@@ -419,10 +419,12 @@ function seccion_cobertura(PDO $db, int $dias): array
     };
     $marcar = function (array $lista) use ($mediana): array {
         $medDocs = $mediana($lista, 'documentos');
-        $medInt = $mediana($lista, 'interacciones');
+        // Si la mayoría no tiene ninguna interacción la mediana es 0 y "menos de la mitad" no
+        // marcaría nada: por eso el umbral mínimo es 1 (quien no tiene ninguna siempre se marca).
+        $umbralInteraccion = max(1.0, $mediana($lista, 'interacciones') / 2);
         foreach ($lista as &$x) {
             $x['pocos_documentos'] = $x['documentos'] < $medDocs / 2;
-            $x['poca_interaccion'] = $x['interacciones'] < $medInt / 2;
+            $x['poca_interaccion'] = $x['interacciones'] < $umbralInteraccion;
         }
         return $lista;
     };

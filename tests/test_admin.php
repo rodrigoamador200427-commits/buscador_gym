@@ -210,6 +210,9 @@ $tem = array_combine($nombres($c7['temas']), $c7['temas']);
 comprobar('temas: Fuerza con 2 artículos y 3 interacciones; Recuperación con 1 (el 303) y 0, marcada con poca interacción',
     $tem['Fuerza']['documentos'] === 2 && $tem['Fuerza']['interacciones'] === 3 && $tem['Recuperación']['documentos'] === 1 && $tem['Recuperación']['interacciones'] === 0
     && $tem['Recuperación']['poca_interaccion'] === true, json_encode($c7['temas']));
+$tecnica = $tem['Técnica y biomecánica'] ?? null;
+comprobar('un tema sin ninguna interacción siempre se marca con poca interacción, aunque la mediana sea 0',
+    $tecnica === null || ($tecnica['interacciones'] === 0 && $tecnica['poca_interaccion'] === true), json_encode($tecnica));
 comprobar('cada fila dice si tiene pocos documentos o poca interacción', !array_filter(array_merge($c7['musculos'], $c7['temas']), fn($x) => !array_key_exists('pocos_documentos', $x) || !array_key_exists('poca_interaccion', $x)));
 
 // ----------------------------------------------------------------------------- sesión de 15 minutos
