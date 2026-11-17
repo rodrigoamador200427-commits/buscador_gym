@@ -15,7 +15,7 @@ if ($datos === null || !in_array($datos['status'] ?? '', ['success', 'cold_start
     responder_error(502, 'El recomendador no respondió', ['ref' => $ref]);
 }
 if ($datos['status'] === 'cold_start') {
-    responder(['status' => 'cold_start', 'mensaje' => $datos['mensaje'] ?? '']);
+    responder(['status' => 'cold_start']);   // la interfaz pone su propia frase
 }
 
 $recs = $datos['recomendaciones'] ?? [];
@@ -24,7 +24,7 @@ $resultados = [];
 foreach ($recs as $r) {
     $d = $docs[$r['origen'] . ':' . $r['doc_id']] ?? null;
     if ($d) {
-        $d['score'] = 'Similitud: ' . round((float)$r['similitud'] * 100, 1) . '%';
+        $d['similitud'] = round((float)$r['similitud'], 4);
         $d['liked'] = false;                   // el recomendador excluye lo que ya tiene like
         $resultados[] = $d;
     }
@@ -33,5 +33,6 @@ foreach ($recs as $r) {
 responder([
     'status'           => 'success',
     'perfil_semantico' => $datos['perfil_semantico'] ?? [],
+    'perfil_terminos'  => $datos['perfil_terminos'] ?? [],   // [{termino, palabra, peso}] para la gráfica
     'recomendaciones'  => $resultados,
 ]);

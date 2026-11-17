@@ -189,3 +189,48 @@ EXPANSION_TEMA = {
     "Prevención y movilidad": ["movilidad", "prevencion", "lesiones"],
     "Planificación": ["planificacion", "progresion"],
 }
+
+
+# ---------------------------------------------------------------------------
+# ETIQUETAS (tablas etiquetas / documento_etiquetas; las genera generar_etiquetas.py)
+# ---------------------------------------------------------------------------
+# Valores del dataset (en inglés) -> nombre visible en español.
+NIVELES = {"Beginner": "Principiante", "Intermediate": "Intermedio", "Expert": "Avanzado"}
+MODALIDADES = {
+    "Strength": "Fuerza", "Powerlifting": "Powerlifting", "Strongman": "Strongman",
+    "Olympic Weightlifting": "Halterofilia", "Plyometrics": "Pliometría",
+    "Cardio": "Cardio", "Stretching": "Estiramiento",
+}
+# Equipamiento que no describe nada útil: no genera etiqueta.
+EQUIPAMIENTO_SIN_ETIQUETA = {"Other", ""}
+
+# Sinónimos (ya normalizados) -> forma canónica. Los plurales simples ("rodillas",
+# "mancuernas") se unen solos si existe el singular; aquí van los que no siguen la regla
+# o cuyo singular no aparece en el contenido.
+SINONIMOS_ETIQUETA = {
+    "pectoral": "pecho", "pectorales": "pecho",
+    "deltoides": "hombro",
+    "gemelos": "pantorrilla", "gemelo": "pantorrilla",
+    "abdominales": "abdomen",
+    "antebrazos": "antebrazo",
+    "gluteos": "gluteo",
+    "femoral": "isquiotibiales",
+    "mancuernas": "mancuerna", "bandas": "banda", "kettlebells": "kettlebell",
+    "estiramientos": "estiramiento", "elongacion": "estiramiento",
+    "lesiones": "lesion",
+    "chin-ups": "dominadas",
+    "barra ez": "barra z",
+}
+
+# Claves de etiquetas de artículos que son músculos o equipamiento (el resto son temas).
+# Los 11 músculos de MUSCULOS ya cuentan; aquí van los demás términos anatómicos.
+TERMINOS_MUSCULO = {
+    "dorsal", "lumbar", "trapecio", "romboides", "serrato", "erectores", "oblicuos",
+    "aductores", "manguito rotador", "soleo", "core", "gluteo mayor", "gluteo medio",
+    "recto femoral", "recto abdominal", "vastos",
+}
+TERMINOS_EQUIPAMIENTO = {
+    "barra", "mancuerna", "maquina", "polea", "banda", "banda elastica", "banco",
+    "kettlebell", "paralelas", "correas", "balon medicinal", "rodillo", "barra hexagonal",
+    "barra z",
+}

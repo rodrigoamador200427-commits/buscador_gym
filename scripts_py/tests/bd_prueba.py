@@ -22,7 +22,8 @@ if SCRIPTS_PY not in sys.path:
 
 import db_config  # noqa: E402
 
-TABLAS = ["eventos", "consultas", "interacciones", "intentos_login", "perfiles", "cuentas",
+TABLAS = ["documento_etiquetas", "etiquetas", "documento_rutas",
+          "eventos", "consultas", "interacciones", "intentos_login", "perfiles", "cuentas",
           "postings", "diccionario", "ejercicios", "articulos"]
 
 
@@ -91,11 +92,13 @@ def preparar_bd(conn):
     cur.execute("SET FOREIGN_KEY_CHECKS = 1")
     with open(os.path.join(AQUI, "fixtures", "contenido_test.sql"), encoding="utf-8") as f:
         ejecutar_script_sql(cur, f.read())
-    for esquema in ("esquema_cuentas.sql", "esquema_estadisticas.sql"):
+    for esquema in ("esquema_cuentas.sql", "esquema_estadisticas.sql", "esquema_etiquetas.sql"):
         with open(os.path.join(RAIZ, "sql", esquema), encoding="utf-8") as f:
             ejecutar_script_sql(cur, f.read())
     conn.commit()
     cur.close()
+    from generar_etiquetas import generar          # etiquetas y rutas del contenido sintético
+    generar(conn)
 
 
 if __name__ == "__main__":

@@ -54,9 +54,7 @@ if (($motor['status'] ?? '') !== 'success') {
                 'destino_arbol' => $d['destino']['arbol'] ?? '',
                 'lift' => $d['lift'] ?? null,
                 'razon_algoritmica' => $d['razon'] ?? '',
-                'score' => 'Salto Semántico',
             ];
-            $articulo_serendipia['snippet'] = mb_substr($a['snippet'], 0, 150, 'UTF-8') . '...';
         }
     }
 

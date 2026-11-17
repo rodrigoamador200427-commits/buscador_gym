@@ -5,6 +5,7 @@
 declare(strict_types=1);
 require_once __DIR__ . '/lib/bootstrap.php';
 require_once __DIR__ . '/lib/python.php';
+require_once __DIR__ . '/lib/documentos.php';
 
 $accion = $_GET['accion'] ?? 'catalogo';
 
@@ -20,30 +21,32 @@ if ($accion === 'catalogo') {
 $conexion = conexion();
 
 // Artículos puente: ids validados como enteros, consulta preparada
-$ids = array_values(array_filter(array_map('intval', explode(',', (string)($_GET['ids'] ?? '')))));
-$ids = array_slice($ids, 0, 100);
-$articulos = [];
-if ($ids) {
-    $ph = implode(',', array_fill(0, count($ids), '?'));
-    $s = $conexion->prepare("SELECT id, titulo, etiquetas, contenido FROM articulos WHERE id IN ($ph) ORDER BY id");
-    $s->execute($ids);
-    foreach ($s->fetchAll() as $a) {
-        $articulos[] = ['doc_id' => (int)$a['id'], 'origen' => 'articulos', 'tipo' => 'Teoría',
-                        'titulo' => $a['titulo'], 'tags' => explode(',', (string)$a['etiquetas'])[0],
-                        'snippet' => mb_substr((string)$a['contenido'], 0, 150) . '...'];
+$ids = array_values(array_filter(array_map('intval', explode(',', (string)($_GET['ids'] ?? ''))), fn($i) => $i > 0));
+$ids = array_slice(array_unique($ids), 0, 100);
+sort($ids);
+$refs = array_map(fn($i) => ['doc_id' => $i, 'origen' => 'articulos'], $ids);
+
+// Ejercicios del músculo elegido (menú A), orden estable
+$gid = (int)($_GET['m'] ?? 0);
+if ($gid > 0) {
+    $s = $conexion->prepare('SELECT id FROM ejercicios WHERE grupo_id = ? ORDER BY id LIMIT 6');
+    $s->execute([$gid]);
+    foreach ($s->fetchAll(PDO::FETCH_COLUMN) as $id) {
+        $refs[] = ['doc_id' => (int)$id, 'origen' => 'ejercicios'];
     }
 }
 
-// Ejercicios del músculo elegido (menú A), orden estable
-$ejercicios = [];
-$gid = (int)($_GET['m'] ?? 0);
-if ($gid > 0) {
-    $s = $conexion->prepare("SELECT id, nombre_es, equipamiento, descripcion_es FROM ejercicios WHERE grupo_id = ? ORDER BY id LIMIT 6");
-    $s->execute([$gid]);
-    foreach ($s->fetchAll() as $e) {
-        $ejercicios[] = ['doc_id' => (int)$e['id'], 'origen' => 'ejercicios', 'tipo' => 'Ejercicios',
-                         'titulo' => $e['nombre_es'], 'tags' => $e['equipamiento'],
-                         'snippet' => mb_substr((string)$e['descripcion_es'], 0, 150) . '...'];
+// Mismas tarjetas que la búsqueda (con metadatos y etiquetas), en el orden de $refs
+$tarjetas = hidratar_documentos($conexion, $refs);
+$articulos = $ejercicios = [];
+foreach ($refs as $r) {
+    $t = $tarjetas[$r['origen'] . ':' . $r['doc_id']] ?? null;
+    if ($t) {
+        if ($r['origen'] === 'articulos') {
+            $articulos[] = $t;
+        } else {
+            $ejercicios[] = $t;
+        }
     }
 }
 

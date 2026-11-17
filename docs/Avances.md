@@ -222,3 +222,137 @@ SELECT * FROM consultas ORDER BY id DESC LIMIT 5;
 - Las recomendaciones (`recomendaciones.php`) no registran impresiones: no se pidió.
 - No hay todavía consultas ni pantalla de estadísticas: solo se recogen los datos.
 - La purga no está programada: hay que correrla a mano o con el Programador de tareas.
+
+---
+
+# Fase 3 — Interfaz, etiquetas y detalle de tarjeta
+
+**Fecha:** 14 al 16 de noviembre de 2026. **Rama:** `fase-3-interfaz`.
+
+## 1. Qué se hizo
+
+**Etiquetas** (`sql/esquema_etiquetas.sql`, idempotente, sin `USE`):
+
+| Tabla | Para qué |
+|---|---|
+| `etiquetas` | `nombre_normalizado` (único), `nombre_visible`, `tipo` (musculo, equipamiento, nivel, modalidad, tema) |
+| `documento_etiquetas` | Qué etiquetas tiene cada documento (`origen`, `doc_id`, `etiqueta_id`) |
+| `documento_rutas` | Ruta de cada documento en su árbol, por ejemplo "Cuerpo humano > Tren superior > Pecho > Barra" |
+
+Las tres son tablas derivadas. `scripts_py/generar_etiquetas.py` las llena de nuevo completas en
+una sola transacción y conserva los `id` de las etiquetas que siguen existiendo.
+
+- **Ejercicios:** músculo, equipamiento, nivel y modalidad salen de sus columnas, con nombres en
+  español definidos en `taxonomia.py` (Beginner pasa a Principiante, Dumbbell a Mancuernas).
+  "Other" y el equipamiento vacío no generan etiqueta.
+- **Artículos:** su columna `etiquetas`. El tipo es músculo o equipamiento si la etiqueta está
+  en los diccionarios de `taxonomia.py`; si no, tema.
+- **Normalización:** sin acentos, en minúsculas, con sinónimos unidos (pectoral y pecho, gemelos
+  y pantorrilla) y plurales unidos cuando existe el singular (rodillas y rodilla).
+- **Un nombre, una etiqueta:** "Fuerza" (modalidad de un ejercicio) y "fuerza" (etiqueta de un
+  artículo) son la misma. Si un nombre aparece con dos tipos gana músculo, luego equipamiento,
+  nivel, modalidad y tema.
+- **Acentos:** las etiquetas de los artículos vienen sin acento. El nombre visible se recupera
+  con la forma más frecuente de cada palabra en el texto de los documentos ("sueno" se muestra
+  como "Sueño").
+- Con el contenido real salen 930 etiquetas y 13 491 asignaciones (simulación de solo lectura).
+
+**Backend:**
+
+| Archivo | Cambio |
+|---|---|
+| `lib/documentos.php` | `hidratar_documentos()` devuelve la misma tarjeta en todas partes: tipo, título, resumen de hasta 280 caracteres, `meta` (músculo, equipamiento, nivel) y `etiquetas`. Nuevas `etiquetas_de_documentos()`, `documentos_relacionados()` y `ruta_documento()` |
+| `detalle.php` (nuevo) | GET: texto completo, todas las etiquetas, ruta en el árbol, si el perfil de la sesión le dio "me gusta" y hasta 4 relacionados |
+| `etiquetas.php` (nuevo) | GET: catálogo de etiquetas con su conteo. Acepta `?tipo=` validado contra una lista |
+| `recommender.py` | Devuelve `perfil_terminos`: los 8 términos más fuertes con su peso y la palabra completa ("pech" se muestra como "pecho"), tomada del texto de los documentos con "me gusta" |
+| `buscar.php`, `recomendaciones.php`, `menus.php` | Usan las tarjetas nuevas. El servidor ya no manda textos técnicos ("Salto Semántico", "Similitud: x%") ni el mensaje de perfil vacío |
+
+**Relacionados:** se ordenan por etiquetas en común. Cada etiqueta compartida suma su peso de
+tipo (músculo 3, tema 2, equipamiento 1.5, modalidad 1, nivel 0.5) dividido entre
+ln(1 + documentos con esa etiqueta), así que las etiquetas raras pesan más.
+
+**Interfaz** (`index.html` reescrito y `assets/estilos.css` nuevo):
+
+- Barra superior fija con el nombre del sitio, la búsqueda y el menú del perfil activo (cambiar
+  perfil, cerrar sesión). Pestañas "Búsqueda y recomendaciones" y "Explorar por árboles".
+- Panel lateral con filtros sobre los resultados cargados (tipo, nivel, equipamiento, etiquetas)
+  y la gráfica del perfil. En teléfono el panel se pliega.
+- Tarjetas con la misma altura y estructura: tipo, título, resumen de 3 líneas, metadatos y
+  etiquetas.
+- Detalle en un `<dialog>` modal: texto completo, etiquetas, ruta, "me gusta" y relacionados.
+  Se cierra con Escape y con un botón, y Tab no sale de la ventana. Al abrirlo se llama a
+  `registrar_evento.php`.
+- Clic en una etiqueta (tarjeta, panel o detalle) filtra los resultados. Nivel y equipamiento
+  aceptan cualquiera de los marcados; las demás etiquetas deben cumplirse todas.
+- Gráfica "Lo que más pesa en tus recomendaciones": barras horizontales en HTML y CSS, un solo
+  color, valor al lado. Se quitó Chart.js. Sin "me gusta" solo hay una frase.
+- Sistema de diseño con variables CSS de color, tipografía, espaciado y radios. Texto normal con
+  contraste 15:1 y texto secundario 7.5:1 sobre blanco.
+- Sin emojis ni textos de relleno. "Razón algorítmica" pasó a "Por qué aparece esto", "Salto
+  semántico" a "Relacionado con tu búsqueda", y "cold start" no se muestra.
+- El perfil sin "me gusta" ve una frase que dice qué hacer y los músculos del catálogo como
+  punto de partida (cada uno lanza esa búsqueda).
+
+## 2. Qué falló durante el desarrollo
+
+1. **Relacionados mal ordenados (código).** Para el press de banca salía la sentadilla con barra
+   antes que las aperturas de pecho, porque "Barra" era más rara que "Pecho". Se corrigió con el
+   peso por tipo de etiqueta.
+2. **El foco salía del detalle (código).** `<dialog>` impide llegar al contenido de atrás, pero
+   Tab en el último elemento pasaba a la barra del navegador. Ahora Tab cicla dentro.
+3. **Detalle atascado en "Cargando…" (código).** Si se reabría un documento justo después de
+   cerrar el detalle, el evento `close` llegaba tarde y borraba el estado del que se acababa de
+   abrir. Ahora cada apertura lleva su número y el cierre no toca un detalle ya reabierto. Lo
+   encontró la prueba de teclado, que al principio fallaba de forma intermitente.
+4. **Contenido de prueba con músculos mal numerados.** `contenido_test.sql` usaba la numeración
+   antigua (pecho con `grupo_id` 5). Se alineó con `taxonomia.MUSCULOS`.
+5. **La prueba de interfaz se colgó una vez** más de 10 minutos: las órdenes a Edge no tenían
+   tiempo límite. Ahora cada orden vence a los 30 s y la prueba completa a los 5 minutos.
+6. **El disco C: se llenó** durante la fase (0 MB libres) y hubo que parar hasta liberar espacio.
+   Las pruebas usan la carpeta temporal de C:.
+
+## 3. Cómo probarlo
+
+```
+D:\Tools\SHAMP\mysql\bin\mysql.exe -uroot gym_buscador < sql\esquema_etiquetas.sql
+python scripts_py\generar_etiquetas.py                      llena etiquetas y rutas
+
+cd scripts_py && python -m pytest tests -q                  74 pasan, 8 se saltan (piden CSV)
+D:\Tools\SHAMP\php\php.exe tests\test_autorizacion.php      24 comprobaciones
+D:\Tools\SHAMP\php\php.exe tests\test_estadisticas.php      49 comprobaciones
+D:\Tools\SHAMP\php\php.exe tests\test_etiquetas.php         34 comprobaciones
+D:\Tools\SHAMP\php\php.exe tests\test_interfaz.php          72 del navegador + 3 de la BD
+```
+
+`test_interfaz.php` necesita Node 22 o posterior y Edge (o Chrome; ruta alternativa en
+`EDGE_PATH`). No instala nada: maneja Edge sin ventana con el protocolo de DevTools. Con
+`CAPTURAS=<carpeta>` guarda capturas de pantalla. Comprueba, entre otras cosas:
+
+- El detalle se abre con Enter, Tab no sale de él, Escape y "Cerrar" lo cierran y el foco vuelve
+  a la tarjeta.
+- El filtro por etiqueta reduce los resultados desde la tarjeta, el panel y el detalle.
+- Un documento con HTML en título, texto y etiquetas se muestra como texto: no se crea ningún
+  nodo ni corre su script. Con `esc()` desactivado a propósito, estas comprobaciones fallan.
+- A 375 px no hay desplazamiento horizontal en ninguna vista y el detalle cabe en pantalla.
+- Todas las tarjetas miden lo mismo y el resumen no pasa de 3 líneas.
+- Ninguna pantalla tiene emojis ni vocabulario técnico.
+
+## 4. Pendientes
+
+- **El esquema de etiquetas solo está aplicado en `gym_buscador_test`.** Hasta aplicarlo y
+  correr `generar_etiquetas.py` en `gym_buscador`, la búsqueda y las recomendaciones de esta
+  rama fallan contra la BD real, porque leen `documento_etiquetas`.
+- Si cambia el contenido (ejercicios o artículos), hay que volver a correr
+  `generar_etiquetas.py`.
+- Algunas etiquetas quedan sin acento ("Fisiologia", "Planificacion") porque así están escritas
+  en el texto de los artículos.
+- Los ejercicios solo tienen 4 etiquetas, así que muchos empatan como relacionados y el
+  desempate es por `id`.
+- El filtro actúa sobre los resultados ya cargados (hasta 20 en una búsqueda), no sobre todo el
+  catálogo. Fue la opción elegida.
+- Cuando la búsqueda no encuentra relación entre dos conceptos ya no se muestra la explicación;
+  ese caso sigue visible en "Explorar por árboles".
+- No hay modo oscuro. Los colores ya están en variables, así que agregarlo es redefinirlas.
+- La prueba de interfaz solo corre en Edge o Chrome; no se probó en Firefox ni Safari.
+- Las búsquedas contra la BD real siguen tardando unos 13 s por `motor_arboles.py` (problema
+  anterior a esta fase).
