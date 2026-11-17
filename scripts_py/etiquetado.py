@@ -16,6 +16,7 @@ from collections import Counter, defaultdict
 from arboles.taxonomia import (
     EQUIPAMIENTO, EQUIPAMIENTO_SIN_ETIQUETA, MODALIDADES, MUSCULOS, NIVELES,
     SINONIMOS_ETIQUETA, TERMINOS_EQUIPAMIENTO, TERMINOS_MUSCULO, normalizar, separar_etiquetas,
+    ALIAS_MUSCULO, ETIQUETA_A_MUSCULO, TEMAS, VOCABULARIO_EXTRA,
 )
 
 PRIORIDAD_TIPO = ["musculo", "equipamiento", "nivel", "modalidad", "tema"]
@@ -28,6 +29,34 @@ def clave(texto):
     """Forma normalizada de una etiqueta, antes de unir plurales."""
     k = re.sub(r"\s+", " ", normalizar(texto)).strip()
     return SINONIMOS_ETIQUETA.get(k, k)
+
+
+def vocabulario_controlado():
+    """Etiquetas permitidas en los artículos generados, normalizadas con clave().
+
+    Vocabulario de taxonomia.py (etiquetas que definen cada tema, términos de músculo y de
+    equipamiento, niveles, modalidades y sinónimos) más VOCABULARIO_EXTRA. Devuelve
+    {clave: tipo} con tipo en tema, musculo, equipamiento, nivel, modalidad o extra.
+    """
+    voc = {}
+    for _, _, etiquetas in TEMAS:
+        for t in etiquetas:
+            voc.setdefault(clave(t), "tema")
+    for t in ETIQUETA_A_MUSCULO:
+        voc.setdefault(clave(t), "musculo")
+    for t in list(MUSCULOS.values()) + list(TERMINOS_MUSCULO) + list(ALIAS_MUSCULO):
+        voc.setdefault(clave(t), "musculo")
+    for t in list(EQUIPAMIENTO.values()) + list(TERMINOS_EQUIPAMIENTO):
+        voc.setdefault(clave(t), "equipamiento")
+    for t in NIVELES.values():
+        voc.setdefault(clave(t), "nivel")
+    for t in MODALIDADES.values():
+        voc.setdefault(clave(t), "modalidad")
+    for t in VOCABULARIO_EXTRA:
+        voc.setdefault(clave(t), "extra")
+    for t in SINONIMOS_ETIQUETA:
+        voc.setdefault(clave(t), voc.get(SINONIMOS_ETIQUETA[t], "extra"))
+    return voc
 
 
 def unir_plurales(claves):

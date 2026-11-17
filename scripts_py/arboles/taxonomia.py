@@ -234,3 +234,22 @@ TERMINOS_EQUIPAMIENTO = {
     "kettlebell", "paralelas", "correas", "balon medicinal", "rodillo", "barra hexagonal",
     "barra z",
 }
+
+# ---------------------------------------------------------------------------
+# VOCABULARIO CONTROLADO AMPLIADO (fase 6A: corpus de artículos generados)
+# ---------------------------------------------------------------------------
+# Etiquetas que los artículos originales ya usan 4 veces o más y que NO están en TEMAS,
+# ETIQUETA_A_MUSCULO ni los diccionarios de arriba. Se agregan aparte a propósito: si
+# entraran en TEMAS cambiaría el tema que el árbol asigna a los 341 artículos originales.
+# Se dejaron fuera las que tocan salud o medicina (dosis, cortisol, inflamacion, inmunidad,
+# hormonas, mtor, melatonina, atp, dolor): un artículo generado no debe apoyarse en ellas.
+VOCABULARIO_EXTRA = {
+    "rendimiento", "fisiologia", "entrenamiento", "sobreentrenamiento", "asimetrias",
+    "principiantes", "pelvis", "macros", "tendones", "saciedad", "sudoracion", "bienestar",
+    "deficit", "ritmo circadiano", "peso muerto", "aminoacidos", "glucogeno", "salud",
+    "masa magra", "fibras tipo 2", "rango", "profundidad", "bisagra", "grasa", "leucina",
+    "electrolitos", "sodio", "tension mecanica", "autorregulacion", "vfc", "rigidez",
+    "sueno profundo", "rango de movimiento", "hueso", "seguridad", "evidencia", "oxigeno",
+    "fibra", "digestion", "micronutrientes", "coordinacion", "perdida de grasa",
+    "mitocondrias", "articulaciones", "rutina nocturna",
+}

@@ -1,0 +1,23 @@
+{
+ "descripcion": "18 consultas de referencia de la fase 6A. Se ejecutan con scripts_py/consultas_referencia.py antes y después de cada lote para detectar que un lote desplace resultados que ya eran buenos. Búsqueda TF-IDF sobre los postings (la misma consulta SQL de buscar.php, con las raíces de nlp_processor), sin la expansión por árboles.",
+ "consultas": [
+  {"id": 1,  "consulta": "press de banca pecho",            "cubre": "músculo Pecho, ejercicio"},
+  {"id": 2,  "consulta": "sentadilla profundidad",          "cubre": "músculo Cuádriceps, técnica"},
+  {"id": 3,  "consulta": "dominadas espalda",               "cubre": "músculo Espalda, ejercicio"},
+  {"id": 4,  "consulta": "peso muerto cadera",              "cubre": "Isquiotibiales y glúteo, técnica"},
+  {"id": 5,  "consulta": "hipertrofia biceps",              "cubre": "tema Hipertrofia con músculo"},
+  {"id": 6,  "consulta": "proteina despues de entrenar",    "cubre": "tema Alimentación"},
+  {"id": 7,  "consulta": "dormir recuperacion muscular",    "cubre": "tema Recuperación"},
+  {"id": 8,  "consulta": "creatina",                        "cubre": "tema Suplementación"},
+  {"id": 9,  "consulta": "calentamiento antes de entrenar", "cubre": "tema Prevención y movilidad"},
+  {"id": 10, "consulta": "movilidad de hombro",             "cubre": "Prevención con músculo Hombro"},
+  {"id": 11, "consulta": "periodizacion del entrenamiento", "cubre": "tema Planificación"},
+  {"id": 12, "consulta": "correr resistencia cardio",       "cubre": "tema Resistencia"},
+  {"id": 13, "consulta": "gluteo puente",                   "cubre": "músculo Glúteo"},
+  {"id": 14, "consulta": "abdomen plancha",                 "cubre": "músculo Abdomen"},
+  {"id": 15, "consulta": "dolor de rodilla sentadilla",     "cubre": "Prevención y Cuádriceps"},
+  {"id": 16, "consulta": "cafeina antes de entrenar",       "cubre": "Suplementación con entrenamiento"},
+  {"id": 17, "consulta": "hidratacion sudor",               "cubre": "Alimentación e hidratación"},
+  {"id": 18, "consulta": "triceps extension",               "cubre": "músculo Tríceps"}
+ ]
+}

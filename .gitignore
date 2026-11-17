@@ -15,3 +15,6 @@ articulos.csv
 # Configuración con secretos (credenciales BD y clave AES) — nunca a Git
 config/config.local.ini.php
 config/config.test.ini.php
+
+# Copias de seguridad de la BD (no van a Git)
+/backups/

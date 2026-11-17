@@ -1,0 +1,139 @@
+{
+ "descripcion": "Metas de la fase 6A (aprobadas): 1659 artículos nuevos hasta 2000. 'matriz_nuevos' = artículos nuevos por tema y por músculo principal (clave vacía = sin músculo); 'tema' y 'musculo' = totales finales.",
+ "total_final": 2000,
+ "nuevos": 1659,
+ "tema": {
+  "Fuerza": 270,
+  "Hipertrofia": 270,
+  "Resistencia": 170,
+  "Técnica y biomecánica": 280,
+  "Planificación": 160,
+  "Recuperación": 220,
+  "Prevención y movilidad": 230,
+  "Alimentación": 280,
+  "Suplementación": 120
+ },
+ "musculo": {
+  "Pecho": 110,
+  "Espalda": 130,
+  "Hombro": 110,
+  "Bíceps": 80,
+  "Tríceps": 80,
+  "Cuádriceps": 130,
+  "Isquiotibiales": 70,
+  "Pantorrilla": 40,
+  "Glúteo": 90,
+  "Abdomen": 120,
+  "Antebrazos": 35
+ },
+ "matriz_nuevos": {
+  "Técnica y biomecánica": {
+   "Pecho": 31,
+   "Espalda": 18,
+   "Hombro": 20,
+   "Bíceps": 22,
+   "Tríceps": 22,
+   "Cuádriceps": 21,
+   "Isquiotibiales": 14,
+   "Pantorrilla": 8,
+   "Glúteo": 15,
+   "Abdomen": 30,
+   "Antebrazos": 4,
+   "": 8
+  },
+  "Fuerza": {
+   "Pecho": 25,
+   "Espalda": 15,
+   "Hombro": 15,
+   "Bíceps": 17,
+   "Tríceps": 17,
+   "Cuádriceps": 17,
+   "Isquiotibiales": 11,
+   "Pantorrilla": 4,
+   "Glúteo": 12,
+   "Abdomen": 23,
+   "Antebrazos": 4,
+   "": 56
+  },
+  "Hipertrofia": {
+   "Pecho": 24,
+   "Espalda": 14,
+   "Hombro": 16,
+   "Bíceps": 18,
+   "Tríceps": 17,
+   "Cuádriceps": 17,
+   "Isquiotibiales": 12,
+   "Pantorrilla": 4,
+   "Glúteo": 13,
+   "Abdomen": 24,
+   "Antebrazos": 1,
+   "": 61
+  },
+  "Prevención y movilidad": {
+   "Pecho": 6,
+   "Espalda": 28,
+   "Hombro": 28,
+   "Bíceps": 6,
+   "Tríceps": 6,
+   "Cuádriceps": 26,
+   "Isquiotibiales": 12,
+   "Pantorrilla": 10,
+   "Glúteo": 14,
+   "Abdomen": 8,
+   "Antebrazos": 6,
+   "": 66
+  },
+  "Recuperación": {
+   "Pecho": 5,
+   "Espalda": 7,
+   "Hombro": 5,
+   "Bíceps": 4,
+   "Tríceps": 4,
+   "Cuádriceps": 9,
+   "Isquiotibiales": 5,
+   "Pantorrilla": 4,
+   "Glúteo": 5,
+   "Abdomen": 8,
+   "Antebrazos": 4,
+   "": 84
+  },
+  "Alimentación": {
+   "Pecho": 7,
+   "Espalda": 7,
+   "Hombro": 5,
+   "Bíceps": 5,
+   "Tríceps": 4,
+   "Cuádriceps": 10,
+   "Isquiotibiales": 5,
+   "Pantorrilla": 3,
+   "Glúteo": 8,
+   "Abdomen": 12,
+   "Antebrazos": 4,
+   "": 163
+  },
+  "Resistencia": {
+   "Cuádriceps": 3,
+   "Isquiotibiales": 1,
+   "Pantorrilla": 3,
+   "Glúteo": 1,
+   "Abdomen": 2,
+   "": 147
+  },
+  "Planificación": {
+   "Pecho": 1,
+   "Espalda": 1,
+   "Hombro": 1,
+   "Bíceps": 1,
+   "Tríceps": 1,
+   "Cuádriceps": 1,
+   "Isquiotibiales": 1,
+   "Glúteo": 1,
+   "Abdomen": 1,
+   "Antebrazos": 1,
+   "": 139
+  },
+  "Suplementación": {
+   "": 110
+  }
+ }
+}
