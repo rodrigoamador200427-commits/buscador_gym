@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <meta name="robots" content="noindex">
+    <title>Administración · Buscador Gym</title>
+    <link rel="stylesheet" href="assets/estilos.css">
+    <link rel="stylesheet" href="assets/admin.css">
+</head>
+<body>
+    <header class="barra">
+        <div class="contenedor barra-contenido admin-barra">
+            <div class="marca">Buscador Gym <span class="admin-marca-aparte">Administración</span></div>
+            <a class="btn" href="index.html">Volver a la aplicación</a>
+        </div>
+    </header>
+
+    <div class="contenedor admin-disposicion" id="panel">
+        <nav class="admin-nav" aria-label="Secciones del panel" id="navegacion"></nav>
+
+        <main class="admin-principal">
+            <div class="admin-selector" role="group" aria-label="Período">
+                <span class="admin-selector-titulo" id="tituloPeriodo">Período</span>
+                <div class="admin-periodos" id="periodos"></div>
+                <span class="conteo" id="actualizado" role="status"></span>
+            </div>
+
+            <h1 id="tituloSeccion" class="admin-titulo" tabindex="-1"></h1>
+            <div id="tarjetas" class="tarjetas-numeros"></div>
+            <div id="avisos"></div>
+            <div id="graficas" class="graficas-grid"></div>
+            <div id="tablas"></div>
+        </main>
+    </div>
+
+    <div id="tooltip" class="tooltip" role="tooltip" hidden></div>
+    <script src="assets/admin.js"></script>
+</body>
+</html>

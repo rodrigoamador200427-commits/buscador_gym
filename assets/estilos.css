@@ -35,6 +35,9 @@
     --color-ilustracion-resaltado: var(--color-acento);
     --color-ilustracion-tinta: var(--color-texto-suave);
 
+    /* Segunda serie de las gráficas del panel de administrador (contraste 5:1 sobre blanco) */
+    --color-serie-b: #b45309;
+
     /* Tipografía */
     --fuente: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     --texto-xs: 0.8125rem;
@@ -88,6 +91,7 @@
         --color-articulo-texto: #dcc7ff;
         --color-ilustracion-fondo: #222b3c;
         --color-ilustracion-base: #465476;
+        --color-serie-b: #fbbf24;
         --sombra: 0 1px 3px rgba(0, 0, 0, 0.4);
         --sombra-flotante: 0 8px 24px rgba(0, 0, 0, 0.5);
         --color-velo: rgba(0, 0, 0, 0.65);
