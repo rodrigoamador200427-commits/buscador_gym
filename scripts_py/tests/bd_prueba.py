@@ -92,7 +92,8 @@ def preparar_bd(conn):
     cur.execute("SET FOREIGN_KEY_CHECKS = 1")
     with open(os.path.join(AQUI, "fixtures", "contenido_test.sql"), encoding="utf-8") as f:
         ejecutar_script_sql(cur, f.read())
-    for esquema in ("esquema_cuentas.sql", "esquema_estadisticas.sql", "esquema_etiquetas.sql"):
+    for esquema in ("esquema_cuentas.sql", "esquema_estadisticas.sql", "esquema_etiquetas.sql",
+                    "esquema_admin.sql"):
         with open(os.path.join(RAIZ, "sql", esquema), encoding="utf-8") as f:
             ejecutar_script_sql(cur, f.read())
     conn.commit()

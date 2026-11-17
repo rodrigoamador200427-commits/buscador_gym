@@ -6,7 +6,8 @@
 declare(strict_types=1);
 
 const SESION_NOMBRE = 'BGSESION';
-const SESION_INACTIVIDAD_SEG = 1800;   // 30 min sin actividad -> sesión cerrada
+const SESION_INACTIVIDAD_SEG = 1800;         // 30 min sin actividad -> sesión cerrada
+const SESION_INACTIVIDAD_ADMIN_SEG = 900;    // 15 min para una cuenta de administrador
 
 function es_https(): bool
 {
@@ -42,21 +43,29 @@ function iniciar_sesion(): void
     session_start();
 
     $ultima = $_SESSION['ultima_actividad'] ?? null;
-    if ($ultima !== null && time() - $ultima > SESION_INACTIVIDAD_SEG) {
+    $limite = ($_SESSION['rol'] ?? 'usuario') === 'admin' ? SESION_INACTIVIDAD_ADMIN_SEG : SESION_INACTIVIDAD_SEG;
+    if ($ultima !== null && time() - $ultima > $limite) {
         cerrar_sesion();
         session_start();
     }
     $_SESSION['ultima_actividad'] = time();
 }
 
-/** Llamar justo después de autenticar: un ID nuevo invalida cualquier ID previo (fijación). */
+/**
+ * Llamar justo después de autenticar: un ID nuevo invalida cualquier ID previo (fijación).
+ * El rol se lee de la BD aquí y se guarda en la sesión solo para elegir el tiempo de
+ * inactividad; la autorización del panel (requerir_admin) lo vuelve a leer de la BD.
+ */
 function abrir_sesion_de_cuenta(int $cuentaId): void
 {
     iniciar_sesion();
     session_regenerate_id(true);
+    $s = conexion()->prepare('SELECT rol FROM cuentas WHERE id = ?');
+    $s->execute([$cuentaId]);
     $_SESSION = [
         'cuenta_id'        => $cuentaId,
         'perfil_id'        => null,        // se elige con seleccionar_perfil.php
+        'rol'              => $s->fetchColumn() === 'admin' ? 'admin' : 'usuario',
         'ultima_actividad' => time(),
     ];
 }
@@ -90,6 +99,23 @@ function requerir_cuenta(): int
         cerrar_sesion();
         responder_error(401, 'Inicia sesión');
     }
+    return $cuentaId;
+}
+
+/**
+ * AUTORIZACIÓN DEL PANEL: cuenta con sesión (401 si no) y rol 'admin' leído de la BD en
+ * cada petición (403 si no). El rol guardado en la sesión no basta: si el rol se quita en
+ * la BD, la siguiente petición ya recibe 403. El 403 no dice que exista un panel distinto.
+ */
+function requerir_admin(): int
+{
+    $cuentaId = requerir_cuenta();
+    $s = conexion()->prepare('SELECT rol FROM cuentas WHERE id = ?');
+    $s->execute([$cuentaId]);
+    if ($s->fetchColumn() !== 'admin') {
+        responder_error(403, 'No tienes acceso');
+    }
+    $_SESSION['rol'] = 'admin';
     return $cuentaId;
 }
 
