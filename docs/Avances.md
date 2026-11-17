@@ -642,6 +642,16 @@ D:\Tools\SHAMP\php\php.exe tests\test_ilustraciones.php       85 del navegador +
 Para verlo: iniciar sesión en `http://localhost/buscador_gym/` con la cuenta de administrador y abrir
 `http://localhost/buscador_gym/admin.php`. Con `CAPTURAS=<carpeta>` la prueba del navegador guarda capturas.
 
+### Registro de lotes 2 a 17
+
+Cada lote se redactó, validó (0 errores), importó como `generado`, se reindexó y se comparó con las 18 consultas de
+referencia. Columnas: ids importados, palabras (mín-media-máx), similitud máxima con su vecino, pares entre 0,6 y 0,8,
+consultas marcadas REVISAR y notas.
+
+| Lote | Ids | Palabras | Sim. máx | Pares 0,6-0,8 | REVISAR | Notas |
+|---|---|---|---|---|---|---|
+| 02 | 443-542 | 38-42,5-49 | 0,614 | 1 | 1 (n.º 12, mejora) | Hubo que reescribir 4 por pares parecidos o por palabras; 1 por ejercicio sin registros |
+
 ## 6. Pendientes
 
 - **El esquema ya está aplicado en `gym_buscador` (17 de noviembre), pero todavía no existe ninguna cuenta
