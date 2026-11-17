@@ -47,7 +47,17 @@ $s = stream_socket_server('tcp://127.0.0.1:0');
 $puerto = (int)substr(strrchr(stream_socket_get_name($s, false), ':'), 1);
 fclose($s);
 $nulo = PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null';
-$servidor = proc_open([PHP_BINARY, '-S', "127.0.0.1:$puerto", '-t', $RAIZ],
+// Carpeta de sesiones propia: así una prueba puede envejecer una sesión (test_admin.php).
+// La ruta va entre comillas: la ~ de las rutas cortas de Windows (ANAKAR~1) rompe el valor de -d.
+$RUTA_SESIONES = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'bg-sesiones-' . bin2hex(random_bytes(4));
+mkdir($RUTA_SESIONES);
+register_shutdown_function(function () use ($RUTA_SESIONES) {
+    foreach (glob("$RUTA_SESIONES/*") ?: [] as $f) {
+        @unlink($f);
+    }
+    @rmdir($RUTA_SESIONES);
+});
+$servidor = proc_open([PHP_BINARY, '-d', "session.save_path=\"$RUTA_SESIONES\"", '-S', "127.0.0.1:$puerto", '-t', $RAIZ],
     [0 => ['file', $nulo, 'r'], 1 => ['file', $nulo, 'w'], 2 => ['file', $nulo, 'w']],
     $tuberias, $RAIZ, ['BUSCADOR_ENTORNO' => 'pruebas'] + getenv());
 register_shutdown_function(fn() => is_resource($servidor) && proc_terminate($servidor));
@@ -74,6 +84,21 @@ final class Cliente
 
     /** Cabeceras de la última respuesta, en minúsculas: ['content-length' => '123', ...] */
     public array $cabeceras = [];
+    /** Cuerpo sin decodificar de la última respuesta (para páginas HTML). */
+    public string $cuerpoCrudo = '';
+
+    /** ID de la sesión PHP de este cliente, leído de su archivo de cookies (o null). */
+    public function idSesion(): ?string
+    {
+        foreach (file($this->jar, FILE_IGNORE_NEW_LINES) ?: [] as $linea) {
+            $linea = preg_replace('/^#HttpOnly_/', '', $linea);
+            $c = explode("\t", $linea);
+            if (count($c) >= 7 && $c[5] === 'BGSESION') {
+                return urldecode($c[6]);       // la cookie guarda la coma del ID como %2C
+            }
+        }
+        return null;
+    }
 
     /** @return array{0:int,1:array} */
     public function pedir(string $ruta, ?array $json = null): array
@@ -108,6 +133,7 @@ final class Cliente
         $cuerpo = curl_exec($c);
         $codigo = curl_getinfo($c, CURLINFO_RESPONSE_CODE);
         curl_close($c);
+        $this->cuerpoCrudo = (string)$cuerpo;
         return [$codigo, json_decode((string)$cuerpo, true) ?? []];
     }
 
