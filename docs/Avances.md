@@ -665,6 +665,7 @@ consultas marcadas REVISAR y notas.
 | 14 | 1643-1742 | 38-41,8-50 | 0,664 | 14 | ver Avances | 21 errores corregidos (títulos largos, longitud, tema/músculo, tres pares casi duplicados) |
 | 15 | 1743-1842 | 38-41,6-48 | 0,700 | 20 | ver Avances | 24 errores corregidos, sobre todo títulos largos; 4 temas casi duplicados rehechos |
 | 16 | 1843-1942 | 38-41,7-52 | 0,690 | 20 | ver Avances | 24 errores y 9 temas casi duplicados (hasta 0,82) rehechos; el espacio de temas por músculo está casi agotado |
+| 17 | 1943-2001 | 38-40,6-45 | 0,697 | 11 | ver Avances | Último lote (59): 11 errores corregidos; total 2 000 artículos |
 
 ## 6. Pendientes
 
