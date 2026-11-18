@@ -655,6 +655,7 @@ consultas marcadas REVISAR y notas.
 | 04 | 643-742 | 38-42,5-47 | 0,660 | 6 | 5 (n.º 1, 6, 8, 12, 14; relevantes, en el 1 un artículo desplaza a un ejercicio) | Se arregló la regex de «escalador» del validador; 9 errores de longitud, título o músculo corregidos |
 | 05 | 743-842 | 38-42,5-47 | 0,693 | 8 | 4 (n.º 6, 8, 12, 14) | Los artículos de creatina empiezan a desplazar a los originales del top 5 en la consulta n.º 8 |
 | 06 | 843-942 | 38-42-47 | 0,696 | 10 | 5 (n.º 1, 6, 8, 12, 14) | 14 errores (longitud, títulos, tema, músculo, una promesa); se sustituyó un tema duplicado |
+| 07 | 943-1042 | 38-42,7-47 | 0,680 | 7 | 5 (n.º 1, 6, 8, 12, 14) | 10 errores corregidos; aparecen temas casi repetidos en banda y polea, se sustituyeron dos |
 
 ## 6. Pendientes
 
