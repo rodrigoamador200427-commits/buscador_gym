@@ -1,0 +1,2567 @@
+[
+ {
+  "id": 1,
+  "consulta": "press de banca pecho",
+  "resultados": [
+   {
+    "origen": "articulos",
+    "doc_id": 884,
+    "score": 0.3,
+    "titulo": "Press de banca inclinado: el ángulo del banco",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 667,
+    "score": 0.2944,
+    "titulo": "Press de banca declinado: la parte baja del pecho",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 589,
+    "score": 0.2896,
+    "titulo": "Press de banca: dónde tocar el pecho con la barra",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1538,
+    "score": 0.2668,
+    "titulo": "Press de banca con barra - Agarre ancho",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1545,
+    "score": 0.2668,
+    "titulo": "Press de banca con agarre cerrado TBS",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1548,
+    "score": 0.2668,
+    "titulo": "Press de banca con agarre cerrado (UP)",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 382,
+    "score": 0.2664,
+    "titulo": "Press de banca inclinado: volumen para el pecho alto",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1537,
+    "score": 0.2614,
+    "titulo": "Press de banca con tabla",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 993,
+    "score": 0.253,
+    "titulo": "Press con mancuernas: cómo colocarlas al empezar",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1165,
+    "score": 0.2506,
+    "titulo": "Pecho: combinar press y aperturas en la sesión",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 554,
+    "score": 0.2391,
+    "titulo": "Press de banca con pausa: fuerza sin rebote",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 344,
+    "score": 0.2346,
+    "titulo": "Press de banca: base estable antes de empujar",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 853,
+    "score": 0.233,
+    "titulo": "Press de banca con agarre cerrado: pecho y tríceps",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1534,
+    "score": 0.233,
+    "titulo": "Press de banca inclinado con barra, agarre medio",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1542,
+    "score": 0.233,
+    "titulo": "Press de banca inclinado de Paul Carter",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1550,
+    "score": 0.233,
+    "titulo": "Press de banca inclinado con barra King Maker",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1530,
+    "score": 0.2304,
+    "titulo": "Press de banca con barra - Agarre medio",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1546,
+    "score": 0.2304,
+    "titulo": "Press de banca plano con barra (AM)",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1547,
+    "score": 0.2304,
+    "titulo": "Press de banca hacia arriba",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1549,
+    "score": 0.2304,
+    "titulo": "Press de banca con barra King Maker",
+    "generado": false
+   }
+  ]
+ },
+ {
+  "id": 2,
+  "consulta": "sentadilla profundidad",
+  "resultados": [
+   {
+    "origen": "articulos",
+    "doc_id": 99,
+    "score": 0.2042,
+    "titulo": "Movilidad de tobillo y profundidad de sentadilla",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 911,
+    "score": 0.1924,
+    "titulo": "Sentadilla profunda: cuándo bajar menos",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 414,
+    "score": 0.1902,
+    "titulo": "Sentadilla segura: profundidad progresiva",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 114,
+    "score": 0.1696,
+    "titulo": "Sentadilla con cajón: control de profundidad",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 2,
+    "score": 0.1641,
+    "titulo": "Profundidad óptima en la sentadilla trasera",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1066,
+    "score": 0.1641,
+    "titulo": "Sentadilla a cajón para glúteo: profundidad y tensión",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 649,
+    "score": 0.1594,
+    "titulo": "Sentadilla a cajón: fuerza con profundidad controlada",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 612,
+    "score": 0.1545,
+    "titulo": "Calentar las rodillas con sentadillas sin peso",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 350,
+    "score": 0.1373,
+    "titulo": "Sentadilla: repartir el peso en todo el pie",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 753,
+    "score": 0.1371,
+    "titulo": "Crujiente suspendido-",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 754,
+    "score": 0.1318,
+    "titulo": "crunch oblicuo suspendido",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2396,
+    "score": 0.1266,
+    "titulo": "Sentadilla con barra lateral",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1179,
+    "score": 0.1208,
+    "titulo": "Errores en la sentadilla: rodillas hacia dentro y talones elevados",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2351,
+    "score": 0.1208,
+    "titulo": "Sentadilla profunda con una sola pierna",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2765,
+    "score": 0.1208,
+    "titulo": "Sentadilla con elevación alterna de pierna lateral",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2485,
+    "score": 0.1196,
+    "titulo": "Sentadilla con mancuerna tipo copa",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2489,
+    "score": 0.1196,
+    "titulo": "Sentadilla dividida con mancuernas",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2839,
+    "score": 0.1196,
+    "titulo": "Sentadilla búlgara con las piernas separadas",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2702,
+    "score": 0.1187,
+    "titulo": "Salto de profundidad, salto de caja",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 966,
+    "score": 0.1137,
+    "titulo": "Sentadilla con banda sobre las rodillas: glúteo medio",
+    "generado": true
+   }
+  ]
+ },
+ {
+  "id": 3,
+  "consulta": "dominadas espalda",
+  "resultados": [
+   {
+    "origen": "articulos",
+    "doc_id": 849,
+    "score": 0.2578,
+    "titulo": "Dominadas con agarre supino: fuerza de espalda y brazos",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2119,
+    "score": 0.1979,
+    "titulo": "Dominadas negativas",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 484,
+    "score": 0.1928,
+    "titulo": "Dominadas: arrancar bajando los hombros",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2058,
+    "score": 0.1926,
+    "titulo": "Dominadas alrededor del mundo",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2053,
+    "score": 0.1829,
+    "titulo": "Dominadas con peso",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2118,
+    "score": 0.1796,
+    "titulo": "Burpee con dominada",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1455,
+    "score": 0.1787,
+    "titulo": "Dominadas TBS",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2120,
+    "score": 0.1787,
+    "titulo": "Dominadas",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 434,
+    "score": 0.1772,
+    "titulo": "Energía para un día de tirones: remos y dominadas",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 362,
+    "score": 0.1747,
+    "titulo": "Dominadas: progresar la fuerza paso a paso",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2125,
+    "score": 0.1718,
+    "titulo": "Saltar para hacer dominadas",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1149,
+    "score": 0.1704,
+    "titulo": "Fuerza de espalda: equilibrar empujes y tirones",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1053,
+    "score": 0.1701,
+    "titulo": "dominadas y abdominales",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 12,
+    "score": 0.1681,
+    "titulo": "Pull-ups vs chin-ups: reclutamiento muscular",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 880,
+    "score": 0.1677,
+    "titulo": "Dominadas: bajar hasta estirar los brazos",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 106,
+    "score": 0.1657,
+    "titulo": "Dominadas lastradas: progresión de carga",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 252,
+    "score": 0.1616,
+    "titulo": "Muscle-up: transición y tracción explosiva",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2012,
+    "score": 0.1591,
+    "titulo": "Dominadas asistidas con banda",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2013,
+    "score": 0.1557,
+    "titulo": "Dominadas asistidas",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2235,
+    "score": 0.1524,
+    "titulo": "Dominadas asistidas con banda",
+    "generado": false
+   }
+  ]
+ },
+ {
+  "id": 4,
+  "consulta": "peso muerto cadera",
+  "resultados": [
+   {
+    "origen": "articulos",
+    "doc_id": 5,
+    "score": 0.2251,
+    "titulo": "Peso muerto convencional: bisagra de cadera",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1831,
+    "score": 0.2193,
+    "titulo": "peso muerto con tracción de cable",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1019,
+    "score": 0.2107,
+    "titulo": "Peso muerto: calentar con series ligeras de bisagra",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2144,
+    "score": 0.1956,
+    "titulo": "Tirador de cremallera",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2185,
+    "score": 0.1956,
+    "titulo": "Tirador de cremallera - Variación Gethin",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2252,
+    "score": 0.1956,
+    "titulo": "Peso muerto con déficit TBS",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2426,
+    "score": 0.1956,
+    "titulo": "Peso muerto con soporte - Variación Gethin",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2266,
+    "score": 0.1931,
+    "titulo": "Peso muerto con piernas rígidas y kettlebell con déficit (UP)",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2514,
+    "score": 0.1918,
+    "titulo": "Peso muerto con piernas rígidas y un solo brazo",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2286,
+    "score": 0.1885,
+    "titulo": "Peso muerto con mancuernas y piernas rígidas",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 60,
+    "score": 0.1859,
+    "titulo": "Peso muerto rumano: tensión en isquiotibiales",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2507,
+    "score": 0.1853,
+    "titulo": "Peso muerto rumano con mancuerna a una pierna",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 351,
+    "score": 0.1696,
+    "titulo": "Peso muerto rumano: bajar con la cadera hacia atrás",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 697,
+    "score": 0.1678,
+    "titulo": "Elevación de cadera con mancuernas y piernas rectas",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2513,
+    "score": 0.1637,
+    "titulo": "peso muerto con mancuernas",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1219,
+    "score": 0.1509,
+    "titulo": "Espalda baja: cuándo detener el peso muerto",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 683,
+    "score": 0.1467,
+    "titulo": "Peso muerto: arrancar con la barra pegada a las espinillas",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1906,
+    "score": 0.1467,
+    "titulo": "Peso muerto con barra y piernas rígidas",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1907,
+    "score": 0.1467,
+    "titulo": "Peso muerto rumano",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1911,
+    "score": 0.1467,
+    "titulo": "Peso muerto con piernas rígidas",
+    "generado": false
+   }
+  ]
+ },
+ {
+  "id": 5,
+  "consulta": "hipertrofia biceps",
+  "resultados": [
+   {
+    "origen": "ejercicios",
+    "doc_id": 1449,
+    "score": 0.3409,
+    "titulo": "Rizos con máquina de predicador",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1372,
+    "score": 0.1705,
+    "titulo": "Curl de bíceps con mancuernas sentado - Variación Gethin",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 256,
+    "score": 0.1698,
+    "titulo": "Curl inclinado: bíceps en máxima elongación",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1357,
+    "score": 0.1627,
+    "titulo": "Flexión de bíceps con mancuernas en banco inclinado de Paul Carter",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1367,
+    "score": 0.1627,
+    "titulo": "Curl de bíceps con mancuernas en banco inclinado TBS",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1370,
+    "score": 0.1627,
+    "titulo": "Curl inclinado con mancuernas - Variación Gethin",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1390,
+    "score": 0.1432,
+    "titulo": "Curl de bíceps con brazo derecho pesado de Holman",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1158,
+    "score": 0.1409,
+    "titulo": "Bíceps: variar la posición del brazo en el curl",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1303,
+    "score": 0.1404,
+    "titulo": "Curl de bíceps con banda elástica en posición de sentadilla",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1426,
+    "score": 0.1404,
+    "titulo": "Curl de bíceps con barra EZ y cable - Variación Gethin",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 763,
+    "score": 0.1333,
+    "titulo": "Curl sentado con espalda apoyada: bíceps sin trampas",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1063,
+    "score": 0.1333,
+    "titulo": "Curl arrastrando la barra: bíceps sin ayuda del hombro",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1049,
+    "score": 0.1326,
+    "titulo": "Curl martillo pesado: agarre y bíceps a la vez",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1452,
+    "score": 0.1279,
+    "titulo": "Curl de arrastre en máquina Smith",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1413,
+    "score": 0.1256,
+    "titulo": "Estiramiento de bíceps de pie",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1311,
+    "score": 0.1193,
+    "titulo": "Rizos de predicador",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1327,
+    "score": 0.1193,
+    "titulo": "Curl de bíceps con barra sentado",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1332,
+    "score": 0.1193,
+    "titulo": "Curl de bíceps \"21s\"",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1448,
+    "score": 0.1193,
+    "titulo": "Curl de bíceps en máquina",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 375,
+    "score": 0.1174,
+    "titulo": "Curl inclinado: más estiramiento para el bíceps",
+    "generado": true
+   }
+  ]
+ },
+ {
+  "id": 6,
+  "consulta": "proteina despues de entrenar",
+  "resultados": [
+   {
+    "origen": "articulos",
+    "doc_id": 635,
+    "score": 0.1894,
+    "titulo": "Después del pecho: proteína y carbohidrato sencillos",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 631,
+    "score": 0.1868,
+    "titulo": "Después de entrenar el core: una comida completa",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 834,
+    "score": 0.1868,
+    "titulo": "Desayunar bien antes de entrenar espalda temprano",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 933,
+    "score": 0.1774,
+    "titulo": "Hombros fuertes: proteína repartida y buen descanso",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 425,
+    "score": 0.1661,
+    "titulo": "Después de entrenar: comer sin complicarte",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 524,
+    "score": 0.1641,
+    "titulo": "Legumbres: proteína y fibra a buen precio",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 272,
+    "score": 0.1627,
+    "titulo": "Proteína de guisante: perfil de aminoácidos",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1129,
+    "score": 0.162,
+    "titulo": "Merienda antes del entrenamiento de brazos",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1130,
+    "score": 0.1548,
+    "titulo": "Piernas y apetito: cuando el hambre aprieta tras entrenar",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 522,
+    "score": 0.1518,
+    "titulo": "Desayuno para entrenar por la mañana",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 78,
+    "score": 0.1508,
+    "titulo": "Ayuno intermitente y entrenamiento de fuerza",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 534,
+    "score": 0.1487,
+    "titulo": "Proteína y glúteo: repartir bien el día",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 625,
+    "score": 0.1487,
+    "titulo": "Pescado: proteína y grasas que sumar a la semana",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 19,
+    "score": 0.1471,
+    "titulo": "Ventana anabólica: mito y realidad",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 725,
+    "score": 0.1448,
+    "titulo": "Fruta antes o después de entrenar",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 126,
+    "score": 0.1442,
+    "titulo": "Efecto térmico de los alimentos",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 729,
+    "score": 0.1442,
+    "titulo": "Lácteos y alternativas vegetales: cómo elegir",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1228,
+    "score": 0.1442,
+    "titulo": "Proteína animal y vegetal: cómo se complementan",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 336,
+    "score": 0.1438,
+    "titulo": "Proteína y nutrición durante una lesión",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 433,
+    "score": 0.1425,
+    "titulo": "Qué comer tras un día de sentadillas y piernas",
+    "generado": true
+   }
+  ]
+ },
+ {
+  "id": 7,
+  "consulta": "dormir recuperacion muscular",
+  "resultados": [
+   {
+    "origen": "articulos",
+    "doc_id": 1206,
+    "score": 0.2458,
+    "titulo": "Hombros cargados: dormir sin presionar la articulación",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 805,
+    "score": 0.1865,
+    "titulo": "Alcohol y recuperación: moderación",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 52,
+    "score": 0.1668,
+    "titulo": "Proteína antes de dormir y síntesis nocturna",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 500,
+    "score": 0.1607,
+    "titulo": "Dormir lo suficiente: el mejor aliado del entrenamiento",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 903,
+    "score": 0.1559,
+    "titulo": "Dormir cómodo: cuidar la postura de la espalda",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1199,
+    "score": 0.1559,
+    "titulo": "Ritual tranquilo antes de dormir",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 804,
+    "score": 0.1513,
+    "titulo": "Entrenar tarde y dormir bien",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 337,
+    "score": 0.1482,
+    "titulo": "Descanso digital y recuperación mental",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 898,
+    "score": 0.1285,
+    "titulo": "Leer antes de dormir: una pausa sin pantallas",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1104,
+    "score": 0.1285,
+    "titulo": "Diario de recuperación: anotar cómo duermes y te sientes",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 35,
+    "score": 0.1281,
+    "titulo": "Sueño y recuperación muscular",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 401,
+    "score": 0.1255,
+    "titulo": "Rutina nocturna para dormir mejor tras entrenar",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 405,
+    "score": 0.1249,
+    "titulo": "Siestas cortas: cuándo ayudan y cuándo estorban",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 147,
+    "score": 0.1183,
+    "titulo": "Vida media de la cafeína y calidad del sueño",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 317,
+    "score": 0.1183,
+    "titulo": "Journaling nocturno y reducción de rumiación",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 189,
+    "score": 0.1167,
+    "titulo": "HIIT: intervalos de alta intensidad eficientes",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1197,
+    "score": 0.1167,
+    "titulo": "Sueño, comida y entreno: la recuperación es un conjunto",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 142,
+    "score": 0.1156,
+    "titulo": "Alcohol y arquitectura del sueño",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 95,
+    "score": 0.1124,
+    "titulo": "Respiración diafragmática y activación parasimpática",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 92,
+    "score": 0.1112,
+    "titulo": "Compresión y prendas de recuperación",
+    "generado": false
+   }
+  ]
+ },
+ {
+  "id": 8,
+  "consulta": "creatina",
+  "resultados": [
+   {
+    "origen": "articulos",
+    "doc_id": 841,
+    "score": 0.2659,
+    "titulo": "Creatina en polvo o en cápsulas: la forma importa menos",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 538,
+    "score": 0.241,
+    "titulo": "Creatina: constancia más que el momento del día",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 442,
+    "score": 0.2337,
+    "titulo": "Creatina: qué es y qué preguntar antes de usarla",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1240,
+    "score": 0.2337,
+    "titulo": "Creatina y vegetarianos: preguntar a un profesional",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 736,
+    "score": 0.2268,
+    "titulo": "Creatina y agua: constancia en la hidratación",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 270,
+    "score": 0.2084,
+    "titulo": "Creatina en vegetarianos y veganos",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1042,
+    "score": 0.2084,
+    "titulo": "Creatina en deportes de equipo: hablar con el entrenador",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 14,
+    "score": 0.2029,
+    "titulo": "Creatina monohidratada: dosis y eficacia",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 271,
+    "score": 0.2029,
+    "titulo": "Creatina y función cognitiva",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 172,
+    "score": 0.1793,
+    "titulo": "Creatina: mitos sobre retención hídrica",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 269,
+    "score": 0.0676,
+    "titulo": "Beta-hidroxibutirato y cetonas exógenas",
+    "generado": false
+   }
+  ]
+ },
+ {
+  "id": 9,
+  "consulta": "calentamiento antes de entrenar",
+  "resultados": [
+   {
+    "origen": "articulos",
+    "doc_id": 1175,
+    "score": 0.1525,
+    "titulo": "Calentar antes de una sesión de cardio intenso",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 813,
+    "score": 0.1302,
+    "titulo": "Calentar las rodillas con bicicleta suave",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2757,
+    "score": 0.1285,
+    "titulo": "Estiramiento alterno de rodillas de pie",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 711,
+    "score": 0.1263,
+    "titulo": "Muñecas listas: calentar antes de agarrar pesado",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 408,
+    "score": 0.1244,
+    "titulo": "Calentamiento general: subir la temperatura antes de entrenar",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1022,
+    "score": 0.1226,
+    "titulo": "Hombro y press de banca: calentar con rotaciones",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1223,
+    "score": 0.1226,
+    "titulo": "Pantorrillas listas: calentar con elevaciones suaves antes de correr",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1803,
+    "score": 0.1219,
+    "titulo": "Halo de placa",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 508,
+    "score": 0.1113,
+    "titulo": "Calentamiento específico: la primera serie ligera",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 48,
+    "score": 0.1097,
+    "titulo": "Calentamiento específico y series de aproximación",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 47,
+    "score": 0.1084,
+    "titulo": "Estiramiento estático y rendimiento",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 420,
+    "score": 0.1068,
+    "titulo": "Calentar los isquiotibiales antes de correr rápido",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2117,
+    "score": 0.1068,
+    "titulo": "Estiramiento de flexión lateral de pie",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 3241,
+    "score": 0.1047,
+    "titulo": "Combinación de elevación, rodillo y alcance",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1838,
+    "score": 0.0992,
+    "titulo": "Extensión de cadera de pie",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 720,
+    "score": 0.0982,
+    "titulo": "Fortalecer la parte trasera del muslo para correr con seguridad",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1222,
+    "score": 0.0982,
+    "titulo": "No estirar los isquiotibiales en frío",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 808,
+    "score": 0.0903,
+    "titulo": "Calentar con cardio ligero antes de las pesas",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1023,
+    "score": 0.0896,
+    "titulo": "Dominadas: calentar los hombros con colgados suaves",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1116,
+    "score": 0.0896,
+    "titulo": "Tirones al correr: progresar las salidas con tiempo",
+    "generado": true
+   }
+  ]
+ },
+ {
+  "id": 10,
+  "consulta": "movilidad de hombro",
+  "resultados": [
+   {
+    "origen": "articulos",
+    "doc_id": 1115,
+    "score": 0.2104,
+    "titulo": "Rotaciones de hombro con bastón: movilidad suave",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 3325,
+    "score": 0.1729,
+    "titulo": "Ángel del suelo",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 811,
+    "score": 0.1622,
+    "titulo": "Movilidad corta antes de dormir",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1626,
+    "score": 0.1597,
+    "titulo": "Flexión escapular",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 911,
+    "score": 0.1571,
+    "titulo": "Sentadilla profunda: cuándo bajar menos",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1023,
+    "score": 0.1518,
+    "titulo": "Dominadas: calentar los hombros con colgados suaves",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 268,
+    "score": 0.15,
+    "titulo": "Sentadilla overhead: movilidad torácica y estabilidad",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 518,
+    "score": 0.1487,
+    "titulo": "Mochila y bolsa: repartir el peso sobre los hombros",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 418,
+    "score": 0.1391,
+    "titulo": "Movilidad del hombro: círculos y rotaciones suaves",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 514,
+    "score": 0.134,
+    "titulo": "Más recorrido en la sentadilla: ganar movilidad",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 819,
+    "score": 0.1301,
+    "titulo": "Peso muerto rumano: ajustar el rango a tu movilidad",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1218,
+    "score": 0.1301,
+    "titulo": "Talones planos en la sentadilla: cuándo usar cuñas",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2127,
+    "score": 0.1265,
+    "titulo": "Estiramiento de la cruz de hierro",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 716,
+    "score": 0.1251,
+    "titulo": "Trapecio y cuello tensos: pausas de movilidad",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 916,
+    "score": 0.1221,
+    "titulo": "No encogerte al empujar o tirar",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 3232,
+    "score": 0.1152,
+    "titulo": "Estiramiento de extensión de hombro con barra",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 617,
+    "score": 0.115,
+    "titulo": "Dominadas y hombros: salir de la posición colgada con control",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 818,
+    "score": 0.115,
+    "titulo": "Hombros al nadar: calentar y variar los estilos",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 239,
+    "score": 0.1139,
+    "titulo": "Estiramientos y movilidad al final del día",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 99,
+    "score": 0.1111,
+    "titulo": "Movilidad de tobillo y profundidad de sentadilla",
+    "generado": false
+   }
+  ]
+ },
+ {
+  "id": 11,
+  "consulta": "periodizacion del entrenamiento",
+  "resultados": [
+   {
+    "origen": "articulos",
+    "doc_id": 191,
+    "score": 0.1984,
+    "titulo": "Periodización lineal para principiantes",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 46,
+    "score": 0.1926,
+    "titulo": "Periodización ondulante diaria",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 497,
+    "score": 0.1168,
+    "titulo": "Bloques de entrenamiento con un único objetivo",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 599,
+    "score": 0.1001,
+    "titulo": "Entrenamiento por fases: construir antes de afinar",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 692,
+    "score": 0.0947,
+    "titulo": "Empuje, tirón y piernas: cómo funciona esa rutina",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 225,
+    "score": 0.0899,
+    "titulo": "Entrenamiento y ciclo menstrual: ajustes prácticos",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 997,
+    "score": 0.0892,
+    "titulo": "Fijar un día para revisar y descargar",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1092,
+    "score": 0.0892,
+    "titulo": "Rutina de piernas: dónde colocarla en la semana",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 892,
+    "score": 0.0866,
+    "titulo": "Intensidad por sesión: pesada, media y ligera",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1188,
+    "score": 0.0866,
+    "titulo": "Calendario de competiciones y descansos",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2262,
+    "score": 0.0843,
+    "titulo": "Remo renegado alterno con pesa rusa",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1187,
+    "score": 0.0841,
+    "titulo": "Planificar el año: bloques y objetivos",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 398,
+    "score": 0.0818,
+    "titulo": "Preparar una competición: lo básico del calendario",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 192,
+    "score": 0.0795,
+    "titulo": "Entrenamiento por bloques: acumulación e intensificación",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 893,
+    "score": 0.0795,
+    "titulo": "Dos objetivos a la vez: cómo repartir el esfuerzo",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 799,
+    "score": 0.0755,
+    "titulo": "Semanas ondulantes: alternar cargas altas y bajas",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 395,
+    "score": 0.0736,
+    "titulo": "Semanas de descarga: bajar para seguir avanzando",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1798,
+    "score": 0.0725,
+    "titulo": "Paseo del granjero con mancuernas",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 3193,
+    "score": 0.0725,
+    "titulo": "Paseo del granjero con mancuernas de Total Fitness",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 3198,
+    "score": 0.0725,
+    "titulo": "King Maker Mancuerna Granjero's Carry",
+    "generado": false
+   }
+  ]
+ },
+ {
+  "id": 12,
+  "consulta": "correr resistencia cardio",
+  "resultados": [
+   {
+    "origen": "articulos",
+    "doc_id": 388,
+    "score": 0.2374,
+    "titulo": "Cardio después de pesas: cómo ordenarlo",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 669,
+    "score": 0.1877,
+    "titulo": "Cinta de correr: inclinación y ritmo a tu medida",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 476,
+    "score": 0.176,
+    "titulo": "Calzado para correr: qué mirar antes de elegir",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 874,
+    "score": 0.176,
+    "titulo": "Postura y mirada al correr",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 672,
+    "score": 0.1603,
+    "titulo": "Cardio por la mañana: despertar el cuerpo",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 873,
+    "score": 0.1583,
+    "titulo": "Variar el cardio para no aburrirte",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 386,
+    "score": 0.1564,
+    "titulo": "Intervalos suaves para empezar a correr",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 871,
+    "score": 0.1554,
+    "titulo": "Beber durante el cardio largo",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 974,
+    "score": 0.1554,
+    "titulo": "Cardio y fuerza separados en el día",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 470,
+    "score": 0.1522,
+    "titulo": "Cuestas suaves: variar el esfuerzo al correr",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 580,
+    "score": 0.1522,
+    "titulo": "Parques y terreno variable: correr con más estímulo",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1079,
+    "score": 0.1509,
+    "titulo": "Estirar suave tras el cardio: bajar el ritmo",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1171,
+    "score": 0.1509,
+    "titulo": "Cardio tras un parón: volver con calma",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1172,
+    "score": 0.1466,
+    "titulo": "Escuchar música o pódcast mientras haces cardio",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 677,
+    "score": 0.1386,
+    "titulo": "Cardio con música: mantener el compás",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 976,
+    "score": 0.135,
+    "titulo": "Cardio tras el trabajo: soltar la tensión del día",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 190,
+    "score": 0.1249,
+    "titulo": "Cardio de baja intensidad en definición",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1075,
+    "score": 0.1225,
+    "titulo": "Plan gradual para correr sin parar",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 670,
+    "score": 0.1187,
+    "titulo": "Respiración rítmica al correr",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 521,
+    "score": 0.1183,
+    "titulo": "Tobillos firmes para correr y saltar con seguridad",
+    "generado": true
+   }
+  ]
+ },
+ {
+  "id": 13,
+  "consulta": "gluteo puente",
+  "resultados": [
+   {
+    "origen": "ejercicios",
+    "doc_id": 1835,
+    "score": 0.2892,
+    "titulo": "Puente de glúteos con una sola pierna",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 208,
+    "score": 0.2714,
+    "titulo": "Puente de glúteo con pausa isométrica",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 684,
+    "score": 0.2636,
+    "titulo": "Puente de glúteos: pies cerca o lejos de la cadera",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 951,
+    "score": 0.2636,
+    "titulo": "Puente de glúteos con pies elevados: más recorrido y carga",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 651,
+    "score": 0.2552,
+    "titulo": "Puente de glúteos con mancuerna: cargar sin barra",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 353,
+    "score": 0.2439,
+    "titulo": "Puente de glúteos: empujar con los talones",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 566,
+    "score": 0.241,
+    "titulo": "Puente de glúteos a una pierna: más exigencia",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 664,
+    "score": 0.2345,
+    "titulo": "Puente de glúteos con banda: añadir tensión lateral",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1052,
+    "score": 0.2234,
+    "titulo": "Puente de glúteos con barra: ajustar la altura del banco",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1854,
+    "score": 0.2158,
+    "titulo": "Elevación de glúteos e isquiotibiales - Variación Gethin",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1856,
+    "score": 0.2158,
+    "titulo": "Elevación natural de glúteos y jamón - Variación Gethin",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1951,
+    "score": 0.2158,
+    "titulo": "Elevación de glúteos e isquiotibiales",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1969,
+    "score": 0.2158,
+    "titulo": "Elevación natural de glúteos y jamón",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 917,
+    "score": 0.2116,
+    "titulo": "Puente de glúteos con paso hacia afuera",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 363,
+    "score": 0.211,
+    "titulo": "Puente de glúteos con carga para ganar fuerza",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1814,
+    "score": 0.2066,
+    "titulo": "Puente de glúteos con bandas FYR2",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1870,
+    "score": 0.2066,
+    "titulo": "Puente de glúteos de la ONU",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 751,
+    "score": 0.2053,
+    "titulo": "Puente de glúteos con banda y carga: fuerza con estabilidad",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 816,
+    "score": 0.1968,
+    "titulo": "Activar el glúteo antes de correr",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1813,
+    "score": 0.1886,
+    "titulo": "Puente de glúteos con bandas UNS",
+    "generado": false
+   }
+  ]
+ },
+ {
+  "id": 14,
+  "consulta": "abdomen plancha",
+  "resultados": [
+   {
+    "origen": "articulos",
+    "doc_id": 961,
+    "score": 0.2517,
+    "titulo": "Plancha con carga: añadir un disco con ayuda",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 547,
+    "score": 0.2377,
+    "titulo": "Plancha con apoyos alternos: más exigencia sin peso",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 646,
+    "score": 0.2321,
+    "titulo": "Plancha con brazos adelantados: más palanca para el abdomen",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1177,
+    "score": 0.2321,
+    "titulo": "Errores en la plancha: cadera caída o demasiado alta",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 781,
+    "score": 0.1984,
+    "titulo": "Plancha: respirar sin perder la tensión",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 581,
+    "score": 0.193,
+    "titulo": "Plancha: manos bajo los hombros y mirada al suelo",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 930,
+    "score": 0.193,
+    "titulo": "Salida con tablones",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 66,
+    "score": 0.1922,
+    "titulo": "Plancha y estabilidad antiextensión",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1146,
+    "score": 0.1888,
+    "titulo": "Cuánto trabajo de fuerza necesita el abdomen",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1249,
+    "score": 0.1847,
+    "titulo": "tablón de cambio manual",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 761,
+    "score": 0.1831,
+    "titulo": "Plancha con tensión total: apretar glúteos y puños",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 899,
+    "score": 0.1827,
+    "titulo": "gato de tablón araña",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1252,
+    "score": 0.1807,
+    "titulo": "Tabla de Copenhague",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 354,
+    "score": 0.1785,
+    "titulo": "Plancha: pelvis neutra y costillas recogidas",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 877,
+    "score": 0.1675,
+    "titulo": "Plancha: dónde mirar y cómo colocar los pies",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1046,
+    "score": 0.1646,
+    "titulo": "Tablón lateral de banco con los pies elevados",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 447,
+    "score": 0.1627,
+    "titulo": "Plancha lateral: fuerza para los oblicuos",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1215,
+    "score": 0.1582,
+    "titulo": "Planchas largas: cuándo parar para cuidar la espalda baja",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1211,
+    "score": 0.1528,
+    "titulo": "Pulsación de plancha lateral",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1080,
+    "score": 0.1499,
+    "titulo": "Plancha lateral: apoyo del codo y posición de los pies",
+    "generado": true
+   }
+  ]
+ },
+ {
+  "id": 15,
+  "consulta": "dolor de rodilla sentadilla",
+  "resultados": [
+   {
+    "origen": "articulos",
+    "doc_id": 1179,
+    "score": 0.2093,
+    "titulo": "Errores en la sentadilla: rodillas hacia dentro y talones elevados",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 513,
+    "score": 0.1952,
+    "titulo": "Rodillas alineadas al bajar en sentadilla",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2993,
+    "score": 0.1951,
+    "titulo": "Sentadilla de marica",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1212,
+    "score": 0.1819,
+    "titulo": "Dolor agudo: detenerte y no aguantar",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 43,
+    "score": 0.1762,
+    "titulo": "Liberación miofascial y rodillo de espuma",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 144,
+    "score": 0.1733,
+    "titulo": "Dolor versus molestia: criterios de entrenamiento",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 612,
+    "score": 0.1719,
+    "titulo": "Calentar las rodillas con sentadillas sin peso",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 881,
+    "score": 0.1685,
+    "titulo": "Sentadilla sumo: posición del pie y de las rodillas",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 966,
+    "score": 0.1635,
+    "titulo": "Sentadilla con banda sobre las rodillas: glúteo medio",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1017,
+    "score": 0.1635,
+    "titulo": "Sentadilla con banda sobre las rodillas: aprender la alineación",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 601,
+    "score": 0.1537,
+    "titulo": "Rodillo de espuma: un masaje sencillo después de entrenar",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 246,
+    "score": 0.1508,
+    "titulo": "Sentadilla sissy: aislamiento del recto femoral",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1181,
+    "score": 0.1463,
+    "titulo": "Errores en la sentadilla sumo: pies y rodillas",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 321,
+    "score": 0.1399,
+    "titulo": "Retorno gradual tras una lesión",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 879,
+    "score": 0.1383,
+    "titulo": "Sentadilla: anchura de los pies y dirección de las puntas",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 94,
+    "score": 0.1364,
+    "titulo": "Masaje deportivo y dolor muscular tardío",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 929,
+    "score": 0.1311,
+    "titulo": "Pulso de rodilla a nariz",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 2,
+    "score": 0.1301,
+    "titulo": "Profundidad óptima en la sentadilla trasera",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2597,
+    "score": 0.1301,
+    "titulo": "Sentadilla con toque de rodilla a una pierna",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2760,
+    "score": 0.1301,
+    "titulo": "Sentadilla a una pierna con toque de rodilla",
+    "generado": false
+   }
+  ]
+ },
+ {
+  "id": 16,
+  "consulta": "cafeina antes de entrenar",
+  "resultados": [
+   {
+    "origen": "articulos",
+    "doc_id": 539,
+    "score": 0.2777,
+    "titulo": "Cafeína y sueño: cuidar la última hora",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1239,
+    "score": 0.2498,
+    "titulo": "Cafeína y entrenamientos de fuerza: observar tu respuesta",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 836,
+    "score": 0.2475,
+    "titulo": "Cafeína en chicles y geles: vigilar la suma",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 20,
+    "score": 0.2397,
+    "titulo": "Cafeína como ayuda ergogénica",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 439,
+    "score": 0.2252,
+    "titulo": "Cafeína antes de entrenar: sensibilidad y horario",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 737,
+    "score": 0.2252,
+    "titulo": "Cafeína: observar cómo cambia tu pulso",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1036,
+    "score": 0.2216,
+    "titulo": "Cafeína y ansiedad: reducir si te inquieta",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1137,
+    "score": 0.2146,
+    "titulo": "Cafeína en pastillas: cuidado con la suma",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 638,
+    "score": 0.1962,
+    "titulo": "Bebidas energéticas: leer antes de tomar",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 175,
+    "score": 0.1856,
+    "titulo": "Cafeína y tolerancia: estrategias de ciclado",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 147,
+    "score": 0.1807,
+    "titulo": "Vida media de la cafeína y calidad del sueño",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 224,
+    "score": 0.1675,
+    "titulo": "Cafeína en mujeres: ciclo menstrual y rendimiento",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 936,
+    "score": 0.1469,
+    "titulo": "Suplementos estimulantes por la tarde: cuidado con el sueño",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 197,
+    "score": 0.1224,
+    "titulo": "Fatiga central y percepción del esfuerzo",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 277,
+    "score": 0.109,
+    "titulo": "Té verde y EGCG: efectos modestos",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1005,
+    "score": 0.1074,
+    "titulo": "Mañana tras entrenar tarde: cómo empezar el día",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2262,
+    "score": 0.0843,
+    "titulo": "Remo renegado alterno con pesa rusa",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1025,
+    "score": 0.0789,
+    "titulo": "Infusiones y té: otras formas de hidratarte",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1798,
+    "score": 0.0725,
+    "titulo": "Paseo del granjero con mancuernas",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 3193,
+    "score": 0.0725,
+    "titulo": "Paseo del granjero con mancuernas de Total Fitness",
+    "generado": false
+   }
+  ]
+ },
+ {
+  "id": 17,
+  "consulta": "hidratacion sudor",
+  "resultados": [
+   {
+    "origen": "articulos",
+    "doc_id": 632,
+    "score": 0.3454,
+    "titulo": "Hidratación en días de piernas largas",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 177,
+    "score": 0.2647,
+    "titulo": "Electrolitos en entrenamientos prolongados",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 79,
+    "score": 0.2375,
+    "titulo": "Sodio y rendimiento: más allá del mito",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 309,
+    "score": 0.2316,
+    "titulo": "Aclimatación al calor: adaptaciones en 10 a 14 días",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1135,
+    "score": 0.2183,
+    "titulo": "Hidratarte antes de un día de press",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 871,
+    "score": 0.2161,
+    "titulo": "Beber durante el cardio largo",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 736,
+    "score": 0.1883,
+    "titulo": "Creatina y agua: constancia en la hidratación",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1123,
+    "score": 0.1883,
+    "titulo": "Hidratar con alimentos: fruta y verdura de verano",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 426,
+    "score": 0.188,
+    "titulo": "Hidratación diaria: señales y hábitos",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 146,
+    "score": 0.1828,
+    "titulo": "Rehidratación tras sudoración elevada",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 308,
+    "score": 0.1782,
+    "titulo": "Termorregulación y rendimiento en calor",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 326,
+    "score": 0.1525,
+    "titulo": "Color de la orina como indicador de hidratación",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 529,
+    "score": 0.1323,
+    "titulo": "Beber durante el entrenamiento: sorbos regulares",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 143,
+    "score": 0.1294,
+    "titulo": "Sauna y recuperación cardiovascular",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 122,
+    "score": 0.1281,
+    "titulo": "Zinc y salud hormonal del atleta",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 22,
+    "score": 0.1256,
+    "titulo": "Hidratación y rendimiento de fuerza",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1214,
+    "score": 0.122,
+    "titulo": "Hidratación y rendimiento: empezar la sesión con agua",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 434,
+    "score": 0.1154,
+    "titulo": "Energía para un día de tirones: remos y dominadas",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 119,
+    "score": 0.1123,
+    "titulo": "Alcohol y síntesis proteica muscular",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 928,
+    "score": 0.1067,
+    "titulo": "Agua con sabor natural: ideas sencillas",
+    "generado": true
+   }
+  ]
+ },
+ {
+  "id": 18,
+  "consulta": "triceps extension",
+  "resultados": [
+   {
+    "origen": "ejercicios",
+    "doc_id": 3445,
+    "score": 0.4724,
+    "titulo": "Extensión de tríceps en máquina",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 3449,
+    "score": 0.4724,
+    "titulo": "Extensión de tríceps en máquina - Variación Gethin",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 3450,
+    "score": 0.4724,
+    "titulo": "Extensión de tríceps en máquina por encima de la cabeza - Variación Gethin",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1957,
+    "score": 0.2956,
+    "titulo": "Extensión de pierna de Paul Carter",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 1962,
+    "score": 0.2956,
+    "titulo": "Extensión de piernas - Variación Gethin",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2644,
+    "score": 0.2956,
+    "titulo": "Extensiones de piernas",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2656,
+    "score": 0.2956,
+    "titulo": "Extensiones de piernas - Variación Gethin",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 2671,
+    "score": 0.2956,
+    "titulo": "Extensión cuádruple hacia arriba",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 3400,
+    "score": 0.2204,
+    "titulo": "Extensión de tríceps en máquina",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 571,
+    "score": 0.1989,
+    "titulo": "Extensión de tríceps con cuerda: abrir las manos al final",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 995,
+    "score": 0.1942,
+    "titulo": "Extensión de tríceps tumbado: agarre de la mancuerna",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1225,
+    "score": 0.1885,
+    "titulo": "Codos y tríceps: calentar con extensiones ligeras",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1166,
+    "score": 0.1843,
+    "titulo": "Tríceps: sus tres cabezas y cómo trabajarlas",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 792,
+    "score": 0.1831,
+    "titulo": "Extensión de tríceps con barra Z: ancho de agarre",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 1186,
+    "score": 0.1831,
+    "titulo": "Errores en la extensión de tríceps: codos abiertos y rebote",
+    "generado": true
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 3364,
+    "score": 0.18,
+    "titulo": "Extensión de tríceps con mancuernas de pie",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 3369,
+    "score": 0.18,
+    "titulo": "Extensión de tríceps con mancuerna en pronación a una mano",
+    "generado": false
+   },
+   {
+    "origen": "ejercicios",
+    "doc_id": 3411,
+    "score": 0.18,
+    "titulo": "Extensión de tríceps con cable bajo",
+    "generado": false
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 690,
+    "score": 0.178,
+    "titulo": "Extensión de tríceps tumbado: codos quietos hacia arriba",
+    "generado": true
+   },
+   {
+    "origen": "articulos",
+    "doc_id": 793,
+    "score": 0.178,
+    "titulo": "Extensión de tríceps en polea: cuerda o barra",
+    "generado": true
+   }
+  ]
+ }
+]

@@ -657,6 +657,7 @@ consultas marcadas REVISAR y notas.
 | 06 | 843-942 | 38-42-47 | 0,696 | 10 | 5 (n.º 1, 6, 8, 12, 14) | 14 errores (longitud, títulos, tema, músculo, una promesa); se sustituyó un tema duplicado |
 | 07 | 943-1042 | 38-42,7-47 | 0,680 | 7 | 5 (n.º 1, 6, 8, 12, 14) | 10 errores corregidos; aparecen temas casi repetidos en banda y polea, se sustituyeron dos |
 | 08 | 1043-1142 | 38-42,4-49 | 0,679 | 7 | 5 (n.º 1, 6, 8, 12, 14) | 12 errores corregidos; muchos temas de ejercicio se repiten, los próximos lotes cambian de enfoque |
+| 09 | 1143-1242 | 38-42,3-47 | 0,692 | 5 | 5 (n.º 1, 6, 8, 12, 14) | 14 errores corregidos (títulos largos, la palabra «estudio», un tema duplicado); nuevo enfoque: errores comunes, programación y cuidados por músculo |
 
 ## 6. Pendientes
 
