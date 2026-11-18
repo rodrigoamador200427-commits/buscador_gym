@@ -662,6 +662,7 @@ consultas marcadas REVISAR y notas.
 | 11 | 1343-1442 | 38-42,5-48 | 0,679 | 12 | ver Avances | Aparecen pares casi duplicados (hasta 0,79) en pantorrilla, bíceps y abdomen: se rehicieron 7 |
 | 12 | 1443-1542 | 38-42,2-49 | 0,680 | 15 | ver Avances | 18 errores: títulos, longitud y músculo sin indicar en la columna del plan; 6 temas casi duplicados rehechos |
 | 13 | 1543-1642 | 38-41,8-49 | 0,678 | 10 | ver Avances | 15 errores corregidos; enfoque de mitos, preguntas frecuentes y escenarios |
+| 14 | 1643-1742 | 38-41,8-50 | 0,664 | 14 | ver Avances | 21 errores corregidos (títulos largos, longitud, tema/músculo, tres pares casi duplicados) |
 
 ## 6. Pendientes
 
