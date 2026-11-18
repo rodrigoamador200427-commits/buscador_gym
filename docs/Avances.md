@@ -663,6 +663,7 @@ consultas marcadas REVISAR y notas.
 | 12 | 1443-1542 | 38-42,2-49 | 0,680 | 15 | ver Avances | 18 errores: títulos, longitud y músculo sin indicar en la columna del plan; 6 temas casi duplicados rehechos |
 | 13 | 1543-1642 | 38-41,8-49 | 0,678 | 10 | ver Avances | 15 errores corregidos; enfoque de mitos, preguntas frecuentes y escenarios |
 | 14 | 1643-1742 | 38-41,8-50 | 0,664 | 14 | ver Avances | 21 errores corregidos (títulos largos, longitud, tema/músculo, tres pares casi duplicados) |
+| 15 | 1743-1842 | 38-41,6-48 | 0,700 | 20 | ver Avances | 24 errores corregidos, sobre todo títulos largos; 4 temas casi duplicados rehechos |
 
 ## 6. Pendientes
 
