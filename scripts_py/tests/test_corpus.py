@@ -184,6 +184,16 @@ def test_articulo_de_tecnica_de_un_musculo_debe_nombrar_un_ejercicio_que_exista_
     assert any("no nombra ninguna" in m for m in errores_de(lote_de(contenido=con_otra, titulo="Control del descenso al empujar")))
 
 
+def test_cada_familia_de_ejercicio_se_reconoce_por_su_propio_nombre():
+    """Una regex mal escrita (p. ej. «escaladores?», que no casaba con «escalador») deja a los artículos
+    sin forma de cumplir la regla de ejercicios; cada familia debe reconocerse con su nombre escrito tal cual."""
+    import re
+    for nombre, patron, _ in vl.FAMILIAS:
+        assert re.search(patron, nombre), f"la regex de la familia «{nombre}» no reconoce «{nombre}»"
+    for nombre in ("escalador", "escaladores", "elevacion de piernas", "plancha lateral"):
+        assert any(re.search(rx, nombre) for _, rx, _ in vl.FAMILIAS), nombre
+
+
 # --------------------------------------------------------------------------- validar: plan
 
 def test_plan_comprueba_tema_y_musculo_que_resultan_de_las_etiquetas():

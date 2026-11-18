@@ -652,6 +652,7 @@ consultas marcadas REVISAR y notas.
 |---|---|---|---|---|---|---|
 | 02 | 443-542 | 38-42,5-49 | 0,614 | 1 | 1 (n.º 12, mejora) | Hubo que reescribir 4 por pares parecidos o por palabras; 1 por ejercicio sin registros |
 | 03 | 543-642 | 38-42,6-50 | 0,613 | 2 | 2 (n.º 6 y 12, siguen siendo relevantes) | Se corrigieron 11 errores de longitud, título largo, tema o promesa |
+| 04 | 643-742 | 38-42,5-47 | 0,660 | 6 | 5 (n.º 1, 6, 8, 12, 14; relevantes, en el 1 un artículo desplaza a un ejercicio) | Se arregló la regex de «escalador» del validador; 9 errores de longitud, título o músculo corregidos |
 
 ## 6. Pendientes
 

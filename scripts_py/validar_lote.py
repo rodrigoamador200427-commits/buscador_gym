@@ -82,7 +82,7 @@ FAMILIAS = [
     ("abdominales", r"\babdominales\b", ["%abdominales%"]),
     ("crunch", r"\bcrunch(?:es)?\b", ["%crunch%"]),
     ("elevacion de piernas", r"elevacion(?:es)? de piernas?", ["%elevacion de pierna%"]),
-    ("escalador", r"escaladores?", ["%escalador%"]),
+    ("escalador", r"escalador(?:es)?", ["%escalador%"]),
     ("flexion de muneca", r"(?:flexion(?:es)?|curl(?:s)?) de muneca", ["%flexion de muneca%", "%curl de muneca%"]),
     # --- ejercicios conocidos que la tabla NO tiene (o tiene menos de 5): mencionarlos es un error
     ("hip thrust", r"hip thrust", ["%hip thrust%"]),
