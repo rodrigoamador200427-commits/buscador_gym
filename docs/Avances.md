@@ -660,6 +660,7 @@ consultas marcadas REVISAR y notas.
 | 09 | 1143-1242 | 38-42,3-47 | 0,692 | 5 | 5 (n.º 1, 6, 8, 12, 14) | 14 errores corregidos (títulos largos, la palabra «estudio», un tema duplicado); nuevo enfoque: errores comunes, programación y cuidados por músculo |
 | 10 | 1243-1342 | 38-42,6-48 | 0,675 | 12 | ver consultas | Se rehicieron 13 artículos: títulos largos, duplicados de tema, falta de cuota |
 | 11 | 1343-1442 | 38-42,5-48 | 0,679 | 12 | ver Avances | Aparecen pares casi duplicados (hasta 0,79) en pantorrilla, bíceps y abdomen: se rehicieron 7 |
+| 12 | 1443-1542 | 38-42,2-49 | 0,680 | 15 | ver Avances | 18 errores: títulos, longitud y músculo sin indicar en la columna del plan; 6 temas casi duplicados rehechos |
 
 ## 6. Pendientes
 
