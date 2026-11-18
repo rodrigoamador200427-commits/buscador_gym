@@ -664,6 +664,7 @@ consultas marcadas REVISAR y notas.
 | 13 | 1543-1642 | 38-41,8-49 | 0,678 | 10 | ver Avances | 15 errores corregidos; enfoque de mitos, preguntas frecuentes y escenarios |
 | 14 | 1643-1742 | 38-41,8-50 | 0,664 | 14 | ver Avances | 21 errores corregidos (títulos largos, longitud, tema/músculo, tres pares casi duplicados) |
 | 15 | 1743-1842 | 38-41,6-48 | 0,700 | 20 | ver Avances | 24 errores corregidos, sobre todo títulos largos; 4 temas casi duplicados rehechos |
+| 16 | 1843-1942 | 38-41,7-52 | 0,690 | 20 | ver Avances | 24 errores y 9 temas casi duplicados (hasta 0,82) rehechos; el espacio de temas por músculo está casi agotado |
 
 ## 6. Pendientes
 

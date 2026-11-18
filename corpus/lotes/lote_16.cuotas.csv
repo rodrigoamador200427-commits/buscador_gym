@@ -1,48 +1,63 @@
 tema,musculo,n
-Fuerza,,4
+Fuerza,,3
 Fuerza,Abdomen,1
-Fuerza,Antebrazos,1
 Fuerza,Bíceps,1
 Fuerza,Cuádriceps,1
-Fuerza,Espalda,1
-Fuerza,Glúteo,1
-Fuerza,Hombro,1
-Fuerza,Isquiotibiales,1
-Fuerza,Pantorrilla,1
 Fuerza,Pecho,1
 Fuerza,Tríceps,1
-Hipertrofia,,4
+Hipertrofia,,3
 Hipertrofia,Abdomen,1
-Hipertrofia,Antebrazos,1
 Hipertrofia,Bíceps,1
 Hipertrofia,Cuádriceps,1
+Hipertrofia,Espalda,1
+Hipertrofia,Glúteo,1
 Hipertrofia,Hombro,1
+Hipertrofia,Isquiotibiales,1
+Hipertrofia,Pantorrilla,1
 Hipertrofia,Pecho,1
 Hipertrofia,Tríceps,1
-Resistencia,,9
-Técnica y biomecánica,Abdomen,2
-Técnica y biomecánica,Bíceps,2
-Técnica y biomecánica,Cuádriceps,2
-Técnica y biomecánica,Espalda,2
-Técnica y biomecánica,Hombro,2
-Técnica y biomecánica,Pecho,2
-Técnica y biomecánica,Tríceps,2
-Planificación,,9
-Recuperación,,6
+Resistencia,,8
+Técnica y biomecánica,Abdomen,1
+Técnica y biomecánica,Bíceps,1
+Técnica y biomecánica,Cuádriceps,1
+Técnica y biomecánica,Espalda,1
+Técnica y biomecánica,Hombro,1
+Técnica y biomecánica,Pecho,1
+Técnica y biomecánica,Tríceps,1
+Planificación,,8
+Planificación,Abdomen,1
+Planificación,Antebrazos,1
+Planificación,Bíceps,1
+Planificación,Cuádriceps,1
+Planificación,Espalda,1
+Planificación,Glúteo,1
+Planificación,Hombro,1
+Planificación,Isquiotibiales,1
+Planificación,Pecho,1
+Planificación,Tríceps,1
+Recuperación,,5
+Recuperación,Abdomen,1
+Recuperación,Antebrazos,1
+Recuperación,Bíceps,1
+Recuperación,Cuádriceps,1
+Recuperación,Espalda,1
+Recuperación,Glúteo,1
+Recuperación,Hombro,1
+Recuperación,Isquiotibiales,1
+Recuperación,Pantorrilla,1
+Recuperación,Pecho,1
+Recuperación,Tríceps,1
 Prevención y movilidad,,4
-Prevención y movilidad,Cuádriceps,2
-Prevención y movilidad,Espalda,2
-Prevención y movilidad,Hombro,2
+Prevención y movilidad,Abdomen,1
+Prevención y movilidad,Antebrazos,1
+Prevención y movilidad,Bíceps,1
+Prevención y movilidad,Cuádriceps,1
+Prevención y movilidad,Espalda,1
+Prevención y movilidad,Glúteo,1
+Prevención y movilidad,Hombro,1
+Prevención y movilidad,Isquiotibiales,1
+Prevención y movilidad,Pantorrilla,1
+Prevención y movilidad,Pecho,1
+Prevención y movilidad,Tríceps,1
 Alimentación,,9
-Alimentación,Abdomen,1
-Alimentación,Antebrazos,1
-Alimentación,Bíceps,1
-Alimentación,Cuádriceps,1
-Alimentación,Espalda,1
-Alimentación,Glúteo,1
-Alimentación,Hombro,1
-Alimentación,Isquiotibiales,1
-Alimentación,Pantorrilla,1
-Alimentación,Pecho,1
-Alimentación,Tríceps,1
 Suplementación,,6
