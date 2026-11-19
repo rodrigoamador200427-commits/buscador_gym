@@ -1,4 +1,25 @@
-# Avances — Módulo de cuentas y perfiles con protección de información
+# Avances del proyecto buscador_gym
+
+Una sección por fase: qué se hizo, qué falló y cómo se resolvió, cómo probarlo y los números de las pruebas.
+Las pruebas de cada fase son las de ese momento; el recuento completo y actual está al final de la fase 7.
+
+| Fase | Tema | Rama |
+|---|---|---|
+| 1 | Cuentas y perfiles con protección de información | `feature/cuentas-perfiles` (en `main`) |
+| 2 | Registro de eventos para estadísticas | `fase-2-estadisticas` (en `main`) |
+| 3 | Interfaz, etiquetas y detalle de tarjeta | `fase-3-interfaz` (en `main`) |
+| 4 | Ilustraciones por músculo y por tema | `fase-4-ilustraciones` (en `main`) |
+| 5 | Panel de administrador | `fase-5-admin` (en `main`) |
+| 6A | Corpus de 341 a 2 000 artículos | `fase-6a-corpus` (sin fusionar, sin push) |
+| 6B | Árboles de Equipamiento, Nivel y Patrón de movimiento; motor de N árboles | `fase-6b-arboles` (sin fusionar, sin push) |
+| 7 | Revisión final: pruebas, seguridad, interfaz, rendimiento y documentación | `fase-7-revision` (sin fusionar, sin push) |
+
+Otros documentos: [DEMO.md](DEMO.md) (guion para mostrarlo), [rendimiento.md](rendimiento.md) (medición y propuesta),
+[patron_sin_clasificar.md](patron_sin_clasificar.md) (reporte del árbol de patrones) y `../CLAUDE.md` (estructura y reglas).
+
+---
+
+# Fase 1 — Módulo de cuentas y perfiles con protección de información
 
 **Tema:** protección de información en un sistema de Recuperación de la Información.
 **Fecha:** 11 de noviembre de 2026.
@@ -1246,3 +1267,129 @@ cd scripts_py && python -m pytest tests -v
 - Los artículos solo se enlazan a los patrones por 36 etiquetas; Temas x Patrón tiene 53 aristas y Nivel x Patrón 11 artículos.
 - `max_allowed_packet` sigue en 1 MB: otros `INSERT` masivos futuros tendrían el mismo límite.
 - La latencia de 7,6 s por consulta (NLTK) sigue pendiente, y los lotes de la fase 6A siguen sin fusionar y sin push.
+
+---
+
+# Fase 7 — Revisión final, pruebas y documentación
+
+**Fecha:** 19 de noviembre de 2026. Rama `fase-7-revision` (sobre `fase-6b-arboles`). Sin push.
+
+## 1. Qué se hizo
+
+1. Se corrieron todas las pruebas, una suite tras otra (nunca dos a la vez: todas recrean la BD de pruebas).
+2. Revisión de seguridad de todo lo nuevo (panel, eventos, etiquetas, detalle, árboles). Dos hallazgos reales, corregidos.
+3. Revisión de la interfaz: emojis y relleno, 375 px y escritorio, y recorrido solo con teclado. Un hallazgo, corregido.
+4. Medición de rendimiento con el corpus completo. Una búsqueda tarda unos 6 s: se identificó dónde y se propone una
+   solución, **sin aplicarla** ([rendimiento.md](rendimiento.md)).
+5. `CLAUDE.md` con la estructura final, las decisiones de diseño y los pendientes; este archivo completo.
+6. [DEMO.md](DEMO.md): guion paso a paso, verificado contra el corpus real.
+
+## 2. Pruebas
+
+Todas sobre `gym_buscador_test`. Corrida final, con todo el código de la fase ya hecho:
+
+| Suite | Antes de la fase 7 | Final |
+|---|---|---|
+| pytest (`scripts_py/tests`, con `CSV_EJERCICIOS` y `CSV_ARTICULOS`) | 263 | **283** (20 nuevas: `test_exposicion_y_texto.py`) |
+| `test_autorizacion.php` | 24 | 24 |
+| `test_estadisticas.php` | 49 | 49 |
+| `test_etiquetas.php` | 34 | **36** |
+| `test_arboles_n.php` | 34 | **35** |
+| `test_admin.php` | 77 | 77 |
+| `test_ilustraciones.php` | 85 | 85 |
+| `test_admin_interfaz.php` | 73 | 73 |
+| `test_interfaz.php` | 96 | **114** |
+| **Total** | 263 + 472 | **283 + 493** |
+
+Además, el lanzador PHP de las tres pruebas de navegador cuenta 16 comprobaciones propias (12 + 1 + 3), iguales antes y después.
+Sin fallos al terminar. Durante la corrida final, `test_admin_interfaz.php` falló **una vez** («con el teclado (foco en un día)
+también aparece el tooltip», que espera 3 s) y pasó 3 de 3 al repetirlo solo: es la intermitencia por tiempo ya conocida de las
+pruebas de navegador con la máquina cargada. No se tocó la prueba.
+
+No se borró ni se debilitó ninguna prueba. Las de `test_etiquetas.php` y `test_arboles_n.php` que antes llamaban a `menus.php` y
+`etiquetas.php` sin sesión ahora lo hacen con una cuenta (esos endpoints dejaron de ser públicos, ver 3), y se añadió la
+comprobación contraria: sin sesión, 401.
+
+## 3. Revisión de seguridad: lista de hallazgos
+
+| Punto | Resultado |
+|---|---|
+| Consultas preparadas | Sin hallazgos. Todo valor va como parámetro (`PDO::ATTR_EMULATE_PREPARES = false`). Las pocas consultas sin preparar (tres con `query()` en `lib/admin_estadisticas.php` y un `exec()` en `lib/intentos.php`) son de texto constante, sin entrada del usuario; las únicas interpolaciones en SQL son un alias interno constante, un nombre de tabla tomado de una lista fija y un `LIMIT` entero acotado. |
+| Todo lo que se muestra en HTML se escapa | Sin hallazgos. Se revisó cada `innerHTML` de `index.html`, `admin.js` e `ilustraciones.js`: el texto del servidor pasa por `esc()` o `textContent`; los ids, por `Number()`. El CSV del panel neutraliza celdas que empiezan por `= + - @`. La prueba con HTML en título, texto y etiquetas sigue pasando. |
+| Sesión y rol en cada endpoint | **Hallazgo 1 (corregido).** El resto exige sesión, perfil activo o rol `admin` según corresponda. |
+| Datos personales y `perfil_id` hacia el administrador | Sin hallazgos. `admin_estadisticas.php` devuelve solo agregados y su barrera final rechaza diez claves prohibidas; `cuenta_id` solo se usa dentro del servidor para contar cuentas distintas. |
+| Los errores no exponen mensajes internos | Sin hallazgos. No hay `getMessage()` en PHP; `registrar_fallo` registra clase, SQLSTATE y referencia; el stderr de Python se descarta; `debug_motor` solo trae `{codigo, ref}`; el manejador global responde `Error interno` con una referencia. |
+| Qué se sirve por HTTP | **Hallazgo 2 (corregido).** |
+
+**Hallazgo 1 (media): `menus.php` y `etiquetas.php` no exigían sesión.** Eran públicos a propósito («contenido público»), pero
+cada llamada a `menus.php` lanza un proceso de Python de 1 s y un anónimo podía lanzar cientos. Ahora exigen `requerir_cuenta()`
+(cualquier cuenta, sin perfil) y sueltan el bloqueo de sesión antes de ejecutar Python. La interfaz solo los pide ya dentro de la
+sesión, así que no cambia nada para el usuario. Prueba: 401 sin sesión en el catálogo, el cruce y las etiquetas.
+
+**Hallazgo 2 (alta): el repositorio y el código se podían leer por HTTP.** Con Apache, `curl` devolvía 200 para `scripts_py/`,
+`backups/` (con listado de carpeta), `unirdataset/`, `docs/`, `CLAUDE.md`, `articulos.csv`, `stopwords.txt`, `PROYECTO3.docx` y
+`.git/config` (que trae el correo del autor y el remoto). No había secretos expuestos (la configuración con la clave AES y la
+contraseña de la BD ya estaba bloqueada y fuera de Git), pero sí todo el código, los datos y una copia de la BD. Se añadió un
+`.htaccess` en la raíz (sin listado de carpetas, 404 para `.git` y las carpetas internas, 403 para documentos y datos sueltos) y
+uno por carpeta interna. Comprobado con `curl`: todo 403 o 404, y `index.html`, `assets/` y los endpoints siguen respondiendo.
+Prueba estática: `test_exposicion_y_texto.py` (`php -S` ignora los `.htaccess`, así que el 403 real solo se comprueba con Apache).
+
+Observaciones sin corregir (quedan en los pendientes de `CLAUDE.md`):
+- `registro.php` responde 409 a un correo ya registrado (revela que existe) y no limita las altas. Es el compromiso habitual de
+  un registro con correo único; el acceso (`login.php`) sí usa un mensaje igual exista o no la cuenta y limita los intentos.
+- Un usuario con sesión puede lanzar varias búsquedas seguidas de 6 s cada una. La solución es la de rendimiento (punto 5).
+
+## 4. Revisión de la interfaz
+
+- **Emojis y relleno:** barrido de `index.html`, `admin_panel.html`, los JS, los CSS y los SVG: ninguno. La prueba
+  `test_interfaz.php` ya miraba el texto visible de cada pantalla; ahora también lo hace una prueba estática.
+- **Teléfono (375 px) y escritorio (1 280 px):** sin desplazamiento horizontal en ninguna vista; en escritorio las tarjetas se
+  reparten en 3 o más columnas. El panel ya tenía sus propias pruebas a 1 280 y 375 px.
+- **Solo con teclado** (nuevo en `interfaz.mjs`): escribir y Enter busca; Tab llega a una tarjeta; Enter abre el detalle y Escape
+  lo cierra devolviendo el foco; en «Explorar por árboles», Tab recorre los selectores, la flecha abajo cambia el árbol B y
+  Enter en «Ver documentos» muestra el resultado. El panel ya se recorría con Tab (navegación, período, tooltip de la gráfica).
+- **Hallazgo 3 (baja, corregido): 18 pulsaciones de Tab** separaban el cuadro de búsqueda de la primera tarjeta, por los
+  filtros. Se añadió el enlace «Saltar a los resultados» (fuera de pantalla hasta recibir el foco): ahora son 5. Prueba incluida.
+
+## 5. Rendimiento
+
+Detalle y propuesta en [rendimiento.md](rendimiento.md). Resumen:
+
+- `buscar.php` y `recomendaciones.php` tardan **6,1 a 6,7 s** con el corpus completo (límite pedido: 2 s). El panel abre las seis
+  secciones en **0,7 s** con 40 000 eventos y 5 000 consultas; `detalle.php`, 0,02 s.
+- El tiempo no está donde se sospechaba. Reconstruir los árboles en cada consulta cuesta 0,6 s; **`import nltk` cuesta 5 s**
+  (arrastra `scipy.stats`), y además cada proceso hace una petición de red (`nltk.download`) que sin internet suma unos 2 s.
+- Propuesta, **sin aplicar**: sacar NLTK del camino de la consulta (stemmer `snowballstemmer` y lista de stopwords en un archivo
+  del proyecto, con una prueba de que las raíces no cambian) y guardar los árboles ya construidos. Unos 0,3 s por búsqueda.
+
+## 6. Qué falló o hubo que corregir
+
+1. **La medición de rendimiento falló varias veces antes de funcionar** (todo en mi script, no en el proyecto): la BD de pruebas
+   no tiene `grupos_musculares` y le faltan columnas que sí tiene la real (`idf`, `tf`, `nombre_en`…), así que se copió
+   estructura y datos con `mysqldump`; los nombres de cuenta solo admiten letras; y una conexión PDO abierta durante los
+   minutos de búsquedas se cerró («server has gone away»), por lo que se abre otra antes del tramo del panel. La BD real solo
+   se leyó.
+2. **Una expresión regular de mi prueba estática** marcaba como relleno la palabra «TODO» usada como énfasis en un comentario
+   de `index.html`; ahora solo cuenta `TODO:` o `FIXME:`.
+3. Un reemplazo con `sed` dejó `$anon$A->` en dos pruebas; se vio por la salida de `grep` y se corrigió antes de correrlas.
+4. «pecho kettlebell», que en la BD de pruebas sintética era el ejemplo de «sin relación», **sí** tiene 6 ejercicios en el
+   corpus real. El guion de la demo usa «pecho avanzado» (verificado: `sin_interseccion`) y «triceps kettlebell avanzado»
+   (`interseccion_parcial`).
+
+## 7. Cómo probarlo
+
+```
+cd scripts_py && CSV_EJERCICIOS=../unirdataset/ejercicios_final.csv CSV_ARTICULOS=../articulos.csv python -m pytest tests -q
+D:\Tools\SHAMP\php\php.exe tests\test_autorizacion.php        # y las demás de CLAUDE.md, una a la vez
+D:\Tools\SHAMP\php\php.exe tests\medir_rendimiento.php        # rendimiento de punta a punta (solo BD de pruebas)
+python scripts_py\perfil_motor.py                             # rendimiento por fases dentro de Python (solo lee)
+curl -i http://localhost/buscador_gym/menus.php               # 401
+curl -i http://localhost/buscador_gym/CLAUDE.md               # 403
+curl -i http://localhost/buscador_gym/.git/config             # 404
+```
+El guion para mostrarlo está en [DEMO.md](DEMO.md).
+
+## 8. Pendientes
+
+Los de `CLAUDE.md`, sección «Pendientes». Los tres más importantes: **el rendimiento** (propuesta lista, sin aplicar), **los
+artículos generados que desplazan a los originales** (decisión del usuario) y **las ramas 6A, 6B y 7 sin fusionar y sin push**.

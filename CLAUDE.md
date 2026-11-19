@@ -69,7 +69,15 @@ PHP no está en el PATH: usar `D:\Tools\SHAMP\php\php.exe` y `D:\Tools\SHAMP\mys
   `importar_lote.py` y `consultas_referencia.py`.
 - `herramientas/crear_demo.php`: cuenta demo con perfiles "Pecho" y "Pierna" (solo CLI).
 - `herramientas/purgar_estadisticas.php`: borra `consultas` y `eventos` de más de 180 días (solo CLI).
-- `config/`, `lib/`, `herramientas/`, `sql/`, `tests/` tienen `.htaccess` con `Require all denied`.
+- `config/`, `lib/`, `herramientas/`, `sql/`, `tests/`, `corpus/`, `scripts_py/`, `unirdataset/` y `docs/` tienen `.htaccess` con
+  `Require all denied`. El `.htaccess` de la RAÍZ (fase 7) quita el listado de carpetas (`Options -Indexes`), responde 404 a `.git`,
+  `scripts_py`, `backups`, `unirdataset`, `docs`… y niega `.md .csv .docx .txt .py .sql .log .ini .json` sueltos y los archivos que
+  empiezan por punto. Solo se sirven `index.html`, los endpoints `.php` y `assets/`. `backups/` no va a Git: la regla de la raíz la cubre.
+  `php -S` ignora los `.htaccess`: esto solo se comprueba con Apache (`curl http://localhost/buscador_gym/CLAUDE.md` debe dar 403).
+- `docs/`: `Avances.md` (una sección por fase), `DEMO.md` (guion para mostrarlo), `rendimiento.md` (medición y propuesta de la fase 7)
+  y `patron_sin_clasificar.md` (generado por `scripts_py/patron_sin_clasificar.py`).
+- Herramientas de medición (no son pruebas que pasen o fallen): `tests/medir_rendimiento.php` (de punta a punta, solo BD de pruebas con
+  el contenido real copiado) y `scripts_py/perfil_motor.py` (por fases dentro de Python, solo lee la BD).
 
 ## Configuración (secretos fuera de Git)
 
@@ -112,15 +120,23 @@ Cambiar `aes_clave` vuelve ilegibles los datos ya cifrados.
    aperturas y «me gusta» de sus perfiles (`sin_eventos_de_admin()` en cada consulta de eventos). Sus
    búsquedas e impresiones sí suman: no llevan perfil, a propósito.
 
+11. Sesión en TODO endpoint salvo los de acceso (`registro`, `login`, `logout`, `sesion`). `menus.php` y `etiquetas.php` exigen
+   `requerir_cuenta()` (cualquier cuenta, sin perfil) y sueltan el bloqueo de sesión (`session_write_close()`) antes de ejecutar
+   Python: antes eran públicos y cada llamada a `menus.php` lanzaba un proceso de Python para un anónimo. Todo endpoint que lance
+   Python debe hacer lo mismo (sesión primero, `session_write_close()` después).
+12. Nada que no sea página, endpoint o asset se sirve por HTTP (ver el párrafo de `.htaccess` en Arquitectura). Una carpeta nueva
+   con código o datos necesita su propio `.htaccess` con `Require all denied`; `test_exposicion_y_texto.py` revisa la lista.
+
 ## Pruebas
 
 ```
-cd scripts_py && python -m pytest tests -v                  # incluye test_aislamiento.py
+cd scripts_py && python -m pytest tests -v                  # incluye test_aislamiento.py y test_exposicion_y_texto.py
+# con CSV_EJERCICIOS=../unirdataset/ejercicios_final.csv CSV_ARTICULOS=../articulos.csv se corren también las pruebas con datos reales
 D:\Tools\SHAMP\php\php.exe tests\test_autorizacion.php       # HTTP: 403, sesión, aislamiento
 D:\Tools\SHAMP\php\php.exe tests\test_estadisticas.php       # HTTP: eventos, consultas, purga
 D:\Tools\SHAMP\php\php.exe tests\test_etiquetas.php          # HTTP: etiquetas, detalle, gráfica
 D:\Tools\SHAMP\php\php.exe tests\test_arboles_n.php          # HTTP: catálogo de 4 árboles, cruce, descubrimiento, rutas
-D:\Tools\SHAMP\php\php.exe tests\test_interfaz.php           # navegador: teclado, filtros, XSS, 375 px, contraste claro/oscuro
+D:\Tools\SHAMP\php\php.exe tests\test_interfaz.php           # navegador: teclado (búsqueda, detalle, explorador), filtros, XSS, 1280 y 375 px, contraste claro/oscuro
 D:\Tools\SHAMP\php\php.exe tests\test_ilustraciones.php      # navegador: captura cada ilustración y cuenta píxeles
 D:\Tools\SHAMP\php\php.exe tests\test_admin.php               # HTTP: panel, 401/403, sin datos personales, totales a mano
 D:\Tools\SHAMP\php\php.exe tests\test_admin_interfaz.php      # navegador: panel, gráficas, CSV, 375 px, modo oscuro
@@ -188,4 +204,43 @@ php herramientas/crear_demo.php        # imprime la contraseña demo una sola ve
   ilustraciones; `tests/test_ilustraciones.php` lo comprueba contando píxeles.
 - Un comentario XML no admite dos guiones seguidos: en los SVG no se pueden escribir los nombres
   de las variables CSS (`--ilu-...`) dentro de `<!-- -->`.
-- Avances del proyecto: `docs/Avances.md`. Estructura de los árboles: `ESTRUCTURA.md`.
+- Avances del proyecto: `docs/Avances.md`. Estructura de los árboles: `ESTRUCTURA.md`. Guion de la demo: `docs/DEMO.md`.
+
+## Decisiones de diseño
+
+- **Aislamiento por perfil:** el perfil activo sale solo de la sesión y el centroide se recalcula en cada petición, no se guarda
+  (nunca queda desactualizado y el aislamiento es fácil de demostrar y de probar).
+- **Datos personales:** solo el nombre completo y la fecha de nacimiento van cifrados (AES-256-GCM, con el campo como contexto). El
+  correo va en claro porque es único y es el usuario de acceso. No se guardan datos de salud.
+- **Etiquetas y rutas son tablas derivadas:** la fuente de verdad es el contenido y `taxonomia.py`; `generar_etiquetas.py` las regenera.
+- **Un motor para N árboles:** anatomía × temas se comporta como en la fase 1. Una consulta que nombra varios conceptos cruza sus
+  árboles; si no hay documentos en común se dice (`sin_interseccion`) y no se inventa nada. Las respuestas son deterministas.
+- **Lo aproximado se avisa:** el árbol de Patrón de movimiento infiere el patrón del nombre del ejercicio; lo que no reconoce queda en
+  «Sin clasificar» y la interfaz y la API lo marcan como aproximado siempre que se muestra.
+- **Estadísticas que no estorban ni identifican:** se registran después de responder; las impresiones y las consultas no llevan perfil
+  ni texto original; el panel solo recibe agregados, oculta rangos de edad con menos de 5 cuentas y excluye a los administradores.
+- **El panel no confía en la sesión:** el rol se lee de la BD en cada petición y solo `crear_admin.php` (CLI) lo escribe.
+- **Contenido generado marcado:** los artículos de la fase 6A llevan `origen_contenido = 'generado'` para poder separarlos.
+- **Interfaz sin dependencias:** ninguna librería ni recurso de otro sitio, gráficas e ilustraciones propias en SVG, colores solo por
+  variables CSS (modo oscuro), sin emojis.
+- **Pruebas aisladas:** solo sobre `gym_buscador_test` con contenido sintético; el arnés se niega a usar la BD real.
+- **Python por `shell_exec`, un proceso por petición:** simple y aislado, pero lento (ver el primer pendiente).
+
+## Pendientes
+
+1. **Rendimiento (el más importante).** Cada búsqueda y cada recomendación tarda unos 6 s (el límite era 2 s): 5 s son `import nltk`,
+   0,6 s reconstruir los árboles y hay un `nltk.download` por red en cada proceso. Medición y propuesta (sacar NLTK de la consulta,
+   guardar los árboles ya construidos) en `docs/rendimiento.md`. NO está aplicada.
+2. **Los artículos `generado` desplazan a los originales** en TF-IDF en varias consultas de referencia (fase 6A). Decidir: ordenar por
+   `origen_contenido`, darles menos peso o reemplazarlos por contenido real.
+3. **Ramas sin fusionar:** `fase-6a-corpus`, `fase-6b-arboles` y `fase-7-revision` están apiladas sobre `fase-5-admin` y no se han
+   subido (el usuario pidió no hacer push). `main` (y `origin/main`) llegan hasta la fase 5 (PR #5).
+4. `registro.php` responde 409 a un correo ya registrado (revela que existe) y no limita las altas por origen.
+5. Patrón de movimiento: 19,6 % sin clasificar, unos 5 de cada 60 clasificados a ojo están mal y 9 patrones no se pueden nombrar en
+   una consulta (comparten raíz con un músculo o un tema).
+6. `stopwords.txt` de la raíz no lo lee ningún código (no es la lista de NLTK).
+7. No hay eliminar cuenta ni recuperar contraseña. La purga de estadísticas es manual (`herramientas/purgar_estadisticas.php`).
+8. La cookie no lleva `Secure` en local; se activa sola con HTTPS.
+9. El MariaDB de SHAMP se ha caído varias veces durante el proyecto (ver el aviso de `console` en `my.ini`): ante un
+   «Lost connection» o «server has gone away» repetir la prueba o reiniciarlo antes de buscar un fallo en el código.
+10. Las pruebas de navegador usan solo Edge y pueden fallar por tiempo con la máquina cargada: repetirlas antes de investigar.
