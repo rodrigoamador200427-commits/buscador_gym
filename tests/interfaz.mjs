@@ -11,7 +11,7 @@ import { abrirNavegador, crearInforme } from './navegador.mjs';
 const BASE = process.argv[2];
 if (!BASE) { console.error('uso: node tests/interfaz.mjs <url base>'); process.exit(3); }
 
-const { cdp, js, esperar, hasta, pantalla, captura, tema, cerrar, ENTER, TAB, ESCAPE } = await abrirNavegador();
+const { cdp, js, esperar, hasta, pantalla, captura, tema, cerrar, ENTER, TAB, ESCAPE, ABAJO, ESCRIBIR } = await abrirNavegador();
 const informe = crearInforme();
 const comprobar = informe.comprobar;
 
@@ -323,6 +323,71 @@ try {
         await esperar(`[...document.querySelectorAll('#discoveryZone .ruta-arbol h3')].map(h => h.textContent).join() === 'Anatomía,Equipamiento,Nivel'`));
     const rutasTarjeta = await js(`[...document.querySelectorAll('#discoveryZone .ruta-arbol')].map(r => [...r.querySelectorAll('li')].map(l => l.textContent).join(' > '))`);
     comprobar('con la ruta completa de cada nodo', JSON.stringify(rutasTarjeta) === '["Cuerpo humano > Tren superior > Pecho","Equipamiento > Pesas libres > Barra","Nivel de experiencia > Principiante"]', rutasTarjeta);
+
+    // ========================================================================= solo teclado y escritorio (fase 7)
+    console.log('\n[Solo teclado y pantalla de escritorio]');
+    await pantalla(1280, 800);
+    await js(`document.querySelector('[data-vista="vistaBusqueda"]').click()`);
+    await js(`(() => { const i = document.getElementById('searchInput'); i.value = ''; i.focus(); })()`);
+    await ESCRIBIR('pecho');
+    await ENTER();
+    comprobar('escribir en la búsqueda y pulsar Enter busca, sin ratón',
+        await esperar(`document.getElementById('sectionTitle').textContent.includes('pecho') && __t.tarjetas().length > 0 && !document.querySelector('#resultsGrid .estado')`));
+    const esc = await js(`(() => ({ ancho: document.documentElement.scrollWidth, ventana: document.documentElement.clientWidth, fuera: __t.desbordes(),
+        columnas: new Set(__t.tarjetas().map(t => Math.round(t.getBoundingClientRect().left))).size }))()`);
+    comprobar('a 1280 px no hay desplazamiento horizontal y las tarjetas se reparten en varias columnas', esc.ancho <= esc.ventana && esc.fuera.length === 0 && esc.columnas >= 3, esc);
+    await comprobarTexto('escritorio');
+    await captura('7-escritorio');
+    comprobar('el enlace «Saltar a los resultados» está fuera de la pantalla mientras no tiene el foco',
+        await js(`document.getElementById('saltarResultados').getBoundingClientRect().bottom <= 0`));
+    await js(`document.getElementById('saltarResultados').focus()`);
+    comprobar('y se ve cuando recibe el foco', await js(`(() => { const r = document.getElementById('saltarResultados').getBoundingClientRect(); return r.top >= 0 && r.bottom > 0 && r.width > 0; })()`));
+    await ENTER();
+    comprobar('Enter sobre él lleva el foco al título de los resultados', await js(`document.activeElement.id === 'sectionTitle'`));
+    let pasos = 0;
+    for (; pasos < 60; pasos++) {
+        await TAB();
+        if (await js(`document.activeElement.matches('#resultsGrid [data-abrir]')`)) break;
+    }
+    comprobar(`desde ahí, con Tab se llega al título de la primera tarjeta en ${pasos + 1} pulsaciones (sin el enlace eran 18; como mucho 10)`, pasos < 10, pasos);
+    const tituloEnfocado = await js(`document.activeElement.closest('.tarjeta').dataset.doc`);
+    comprobar('el elemento enfocado se ve (tiene contorno de foco)',
+        await js(`(() => { const s = getComputedStyle(document.activeElement); return s.outlineStyle !== 'none' && parseFloat(s.outlineWidth) >= 2; })()`));
+    await ENTER();
+    comprobar('Enter abre el detalle de la tarjeta enfocada', await esperar(`document.getElementById('detalle').open && document.getElementById('detalleGusta')`));
+    await ESCAPE();
+    comprobar('Escape lo cierra y el foco vuelve a esa tarjeta',
+        await esperar(`!document.getElementById('detalle').open && document.activeElement.closest('.tarjeta')?.dataset.doc === ${JSON.stringify(tituloEnfocado)}`));
+
+    // Explorador de árboles, solo con Tab, flechas y Enter
+    await js(`document.querySelector('[data-vista="vistaArboles"]').focus()`);
+    await ENTER();
+    comprobar('Enter sobre la pestaña abre «Explorar por árboles»', await esperar(`__t.visible('#formAB')`));
+    await esperar(`document.querySelectorAll('#arbolB option').length > 1`);
+    const orden = [];
+    for (let i = 0; i < 12; i++) {
+        await TAB();
+        orden.push(await js(`document.activeElement.id || document.activeElement.tagName`));
+        if (orden.at(-1) === 'arbolB') break;
+    }
+    comprobar('Tab recorre Árbol A, concepto A y Árbol B, en ese orden', JSON.stringify(orden.filter(x => ['arbolA', 'menuA', 'arbolB'].includes(x))) === '["arbolA","menuA","arbolB"]', orden);
+    await js(`(() => { const b = document.getElementById('arbolB'); b.value = 'temas'; b.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+    await ABAJO();
+    comprobar('la flecha abajo cambia el Árbol B y el menú de conceptos se actualiza',
+        await esperar(`document.getElementById('arbolB').value === 'equipamiento' && document.getElementById('etiquetaB').textContent === 'Equipamiento'`));
+    await TAB();
+    await TAB();
+    comprobar('otras dos pulsaciones de Tab llegan a «Ver documentos»', await js(`document.activeElement.textContent.trim()`) === 'Ver documentos');
+    await ENTER();
+    comprobar('Enter en «Ver documentos» muestra la ruta de cada árbol elegido',
+        await esperar(`[...document.querySelectorAll('#resultadoAB .ruta-arbol h3')].map(h => h.textContent).join() === 'Anatomía,Equipamiento'`));
+    await comprobarTexto('árboles con teclado');
+    // dejar todo como estaba para las secciones siguientes
+    await js(`(() => { const b = document.getElementById('arbolB'); b.value = 'temas'; b.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+    await js(`document.querySelector('[data-vista="vistaBusqueda"]').click()`);
+    await js(`__t.buscar('pecho barra principiante')`);
+    await esperar(`document.querySelectorAll('#discoveryZone .ruta-arbol').length === 3`);
+    await cdp('Emulation.clearDeviceMetricsOverride');
 
     // ========================================================================= modo oscuro
     // Cada texto se mide contra su fondo real, en claro y en oscuro (WCAG: 4.5 normal, 7 reforzado)

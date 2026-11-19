@@ -74,6 +74,7 @@
 
         <!-- VISTA 1: búsqueda y recomendaciones -->
         <main class="contenedor disposicion" id="vistaBusqueda">
+            <a class="saltar" href="#sectionTitle" id="saltarResultados">Saltar a los resultados</a>
             <details class="lateral" id="lateral" open>
                 <summary>Filtros y perfil</summary>
                 <section class="panel" aria-labelledby="tituloFiltros">
@@ -105,7 +106,7 @@
 
             <section aria-labelledby="sectionTitle">
                 <div class="cabecera-seccion">
-                    <h1 id="sectionTitle"></h1>
+                    <h1 id="sectionTitle" tabindex="-1"></h1>
                     <div id="statsBar" class="conteo" role="status"></div>
                 </div>
                 <div id="discoveryZone"></div>
@@ -880,6 +881,8 @@
         $('vistaArboles').hidden = id !== 'vistaArboles';
     }
     document.querySelectorAll('[data-vista]').forEach(b => b.addEventListener('click', () => mostrarVista(b.dataset.vista)));
+    // «Saltar a los resultados»: lleva el foco al título de la sección sin cambiar la dirección de la página
+    $('saltarResultados').addEventListener('click', e => { e.preventDefault(); $('sectionTitle').focus(); });
     searchInput.addEventListener('focus', () => mostrarVista('vistaBusqueda'));   // buscar vuelve a la primera pestaña
 
     // En pantallas anchas el panel lateral siempre está abierto; en teléfono se pliega.

@@ -133,6 +133,9 @@ export async function abrirNavegador() {
         ENTER: () => tecla('Enter', 13, '\r'),
         TAB: () => tecla('Tab', 9),
         ESCAPE: () => tecla('Escape', 27),
+        ABAJO: () => tecla('ArrowDown', 40),
+        /** Escribe texto en el elemento con el foco, como lo haría el teclado (sin tocar el ratón). */
+        ESCRIBIR: texto => cdp('Input.insertText', { text: texto }),
     };
 }
 

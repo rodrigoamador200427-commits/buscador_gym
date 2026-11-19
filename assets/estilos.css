@@ -116,6 +116,15 @@ button, input, select { font: inherit; color: inherit; }
 button { cursor: pointer; }
 :focus-visible { outline: 3px solid var(--color-acento); outline-offset: 2px; border-radius: var(--radio-s); }
 
+/* Enlace para saltar los filtros con el teclado: fuera de la pantalla hasta que recibe el foco */
+.saltar {
+    position: fixed; top: -100px; left: var(--esp-4); z-index: 40;
+    padding: var(--esp-2) var(--esp-4);
+    background: var(--color-superficie); color: var(--color-texto);
+    border: 2px solid var(--color-acento); border-radius: var(--radio-s);
+}
+.saltar:focus { top: var(--esp-2); }
+
 .contenedor { max-width: var(--ancho-pagina); margin: 0 auto; padding: 0 var(--esp-4); }
 .panel {
     background: var(--color-superficie);
