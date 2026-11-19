@@ -149,10 +149,11 @@ function documentos_relacionados(PDO $db, string $origen, int $docId, int $limit
     ], $s->fetchAll());
 }
 
-// ORDEN_ARBOLES: los que admite la tabla documento_rutas; ARBOLES_ACTIVOS: los que el motor construye hoy
-// ('patron' está previsto en el esquema pero todavía no existe como árbol).
+// ORDEN_ARBOLES: los que admite la tabla documento_rutas; ARBOLES_ACTIVOS: los que el motor construye hoy.
 const ORDEN_ARBOLES = ['anatomia', 'temas', 'equipamiento', 'nivel', 'patron'];
-const ARBOLES_ACTIVOS = ['anatomia', 'temas', 'equipamiento', 'nivel'];
+const ARBOLES_ACTIVOS = ['anatomia', 'temas', 'equipamiento', 'nivel', 'patron'];
+// Árboles cuya clasificación es una aproximación (el patrón se infiere de palabras del nombre): la interfaz lo avisa.
+const ARBOLES_APROXIMADOS = ['patron'];
 const TITULO_ARBOL = ['anatomia' => 'Anatomía', 'temas' => 'Temas', 'equipamiento' => 'Equipamiento',
                       'nivel' => 'Nivel', 'patron' => 'Patrón de movimiento'];
 
@@ -163,6 +164,7 @@ function rutas_documento(PDO $db, string $origen, int $docId): array
         ORDER BY FIELD(arbol, 'anatomia', 'temas', 'equipamiento', 'nivel', 'patron')");
     $s->execute([$origen, $docId]);
     return array_map(fn($f) => ['arbol' => $f['arbol'], 'titulo' => TITULO_ARBOL[$f['arbol']] ?? $f['arbol'],
+                                'aproximado' => in_array($f['arbol'], ARBOLES_APROXIMADOS, true),
                                 'nodos' => explode(' > ', (string)$f['ruta'])], $s->fetchAll());
 }
 
@@ -181,6 +183,7 @@ function nodos_de_descubrimiento($nodos): array
         }
         $ruta = array_values(array_map(fn($x) => mb_substr($x, 0, 120, 'UTF-8'), array_filter($n['ruta'], 'is_string')));
         $res[] = ['arbol' => $n['arbol'], 'titulo' => TITULO_ARBOL[$n['arbol']], 'nombre' => mb_substr($n['nombre'], 0, 120, 'UTF-8'),
+                  'aproximado' => in_array($n['arbol'], ARBOLES_APROXIMADOS, true),
                   'ruta' => array_slice($ruta, 0, 6)];
     }
     return $res;

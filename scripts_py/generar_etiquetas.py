@@ -19,6 +19,15 @@ from arboles import (construir_arbol_anatomia, construir_arbol_equipamiento, con
 from etiquetado import construir_etiquetas, construir_rutas_arboles  # noqa: E402
 
 
+BLOQUE = 2000     # filas por INSERT: MariaDB corta la conexión si un paquete supera max_allowed_packet (1 MB por defecto)
+
+
+def insertar_en_bloques(cur, sql, filas):
+    """executemany en bloques. Siguen siendo parte de la misma transacción: si uno falla, todo se deshace."""
+    for i in range(0, len(filas), BLOQUE):
+        cur.executemany(sql, filas[i:i + BLOQUE])
+
+
 def leer_contenido(conn):
     cur = conn.cursor(dictionary=True)
     cur.execute("SELECT id, nombre_es, descripcion_es, grupo_id, equipamiento, nivel, modalidad FROM ejercicios")
@@ -61,13 +70,13 @@ def generar(conn):
         if sobrantes:
             cur.executemany("DELETE FROM etiquetas WHERE id = %s", sobrantes)
         if asignaciones:
-            cur.executemany(
-                "INSERT INTO documento_etiquetas (origen, doc_id, etiqueta_id) VALUES (%s, %s, %s)",
+            insertar_en_bloques(
+                cur, "INSERT INTO documento_etiquetas (origen, doc_id, etiqueta_id) VALUES (%s, %s, %s)",
                 sorted((o, d, ids[k]) for o, d, k in asignaciones),
             )
         if rutas:
-            cur.executemany(
-                "INSERT INTO documento_rutas (origen, doc_id, arbol, ruta) VALUES (%s, %s, %s, %s)",
+            insertar_en_bloques(
+                cur, "INSERT INTO documento_rutas (origen, doc_id, arbol, ruta) VALUES (%s, %s, %s, %s)",
                 sorted((o, d, a, r) for (o, d, a), r in rutas.items()),
             )
         conn.commit()

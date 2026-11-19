@@ -187,8 +187,8 @@ try {
     comprobar('es una ventana modal (<dialog> con showModal)', d.modal);
     comprobar('muestra el texto completo', d.titulo === 'Press de banca plano' && d.texto === 'Press de pecho en banco plano', d);
     comprobar('muestra la ruta en el árbol', JSON.stringify(d.ruta) === '["Cuerpo humano","Tren superior","Pecho","Barra"]', d.ruta);
-    comprobar('muestra una ubicación por árbol (anatomía, equipamiento y nivel)',
-        JSON.stringify(d.rutas) === '["Ubicación en Anatomía","Ubicación en Equipamiento","Ubicación en Nivel"]', d.rutas);
+    comprobar('muestra una ubicación por árbol y marca la de patrón como aproximada',
+        JSON.stringify(d.rutas) === '["Ubicación en Anatomía","Ubicación en Equipamiento","Ubicación en Nivel","Ubicación en Patrón de movimiento (aproximado)"]', d.rutas);
     comprobar('muestra todas las etiquetas', JSON.stringify(d.etiquetas) === '["Pecho","Barra","Principiante","Fuerza"]', d.etiquetas);
     comprobar('muestra hasta 4 relacionados, sin el propio documento',
         d.relacionados.length > 0 && d.relacionados.length <= 4 && !d.relacionados.includes('ejercicios:101'), d.relacionados);
@@ -305,6 +305,15 @@ try {
         await esperar(`document.querySelectorAll('#resultadoAB .tarjeta').length > 0 && [...document.querySelectorAll('#resultadoAB .ruta-arbol h3')].map(h => h.textContent).join() === 'Anatomía,Equipamiento'`));
     const rutasAB = await js(`[...document.querySelectorAll('#resultadoAB .ruta-arbol')].map(r => r.querySelector('h3').textContent + ': ' + [...r.querySelectorAll('li')].map(l => l.textContent).join(' > '))`);
     comprobar('las rutas llevan el nombre del árbol', JSON.stringify(rutasAB) === '["Anatomía: Cuerpo humano > Tren superior > Pecho","Equipamiento: Equipamiento > Pesas libres > Barra"]', rutasAB);
+    // Patrón de movimiento: clasificación aproximada, avisada en la interfaz
+    comprobar('sin patrón elegido no hay aviso de clasificación aproximada', await js(`document.getElementById('avisoAproximado').hidden`));
+    await js(`(() => { const a = document.getElementById('arbolB'); a.value = 'patron'; a.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+    comprobar('al elegir Patrón de movimiento se avisa que es aproximado y cuántos ejercicios no se clasificaron',
+        await esperar(`!document.getElementById('avisoAproximado').hidden && /aproximada/.test(document.getElementById('avisoAproximado').textContent) && /Sin clasificar/.test(document.getElementById('avisoAproximado').textContent)`));
+    comprobar('«Sin clasificar» es una opción del menú de patrones', await js(`[...document.querySelectorAll('#menuB option')].some(o => o.textContent.startsWith('Sin clasificar'))`));
+    await js(`(() => { const b = document.getElementById('menuB'); b.value = [...b.options].find(o => o.textContent.startsWith('Empuje horizontal (')).value; document.getElementById('formAB').requestSubmit(); })()`);
+    comprobar('el resultado repite el aviso y marca el árbol como aproximado',
+        await esperar(`document.querySelectorAll('#resultadoAB .tarjeta').length > 0 && document.querySelector('#resultadoAB .aviso-aproximado') && [...document.querySelectorAll('#resultadoAB .ruta-arbol h3')].some(h => h.textContent === 'Patrón de movimiento (aproximado)')`));
     await js(`(() => { const a = document.getElementById('arbolB'); a.value = 'temas'; a.dispatchEvent(new Event('change', { bubbles: true })); })()`);   // dejar el valor de siempre
 
     // La tarjeta «Relacionado con tu búsqueda» muestra la ruta del nodo en CADA árbol que participa (fase 6B)

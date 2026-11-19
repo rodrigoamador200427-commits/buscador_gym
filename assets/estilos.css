@@ -391,6 +391,7 @@ button { cursor: pointer; }
 .arboles-resultado h2 { font-size: var(--texto-l); }
 .rutas { display: grid; gap: var(--esp-2); }
 .ruta-arbol { display: grid; gap: var(--esp-1); }
+.aviso-aproximado { margin: 0; font-size: var(--texto-s); color: var(--color-texto-suave); }
 .ruta-arbol h3 { font-size: var(--texto-s); color: var(--color-texto-suave); font-weight: 600; margin: 0; }
 
 /* ---------------------------------------------------------------- 9. Teléfono */

@@ -155,14 +155,15 @@ def test_generar_llena_las_tablas_con_el_contenido_sintetico(conn):
     assert de101 == {"pecho", "barra", "principiante", "fuerza"}
     rutas = filas(conn, "SELECT origen, doc_id, ruta FROM documento_rutas ORDER BY origen, doc_id")
     assert ("ejercicios", 201, "Cuerpo humano > Tren inferior > Cuádriceps > Barra") in rutas
-    # Fase 6B: una ruta POR ÁRBOL. 10 ejercicios x 3 árboles (anatomía, equipamiento, nivel) y 2 artículos x temas
+    # Fase 6B: una ruta POR ÁRBOL. 10 ejercicios x 4 árboles (anatomía, equipamiento, nivel, patrón) y 2 artículos x temas
     por_arbol = dict(filas(conn, "SELECT arbol, COUNT(*) FROM documento_rutas GROUP BY arbol"))
-    assert por_arbol == {"anatomia": 10, "equipamiento": 10, "nivel": 10, "temas": 2}
-    assert len(rutas) == 32
+    assert por_arbol == {"anatomia": 10, "equipamiento": 10, "nivel": 10, "patron": 10, "temas": 2}
+    assert len(rutas) == 42
     de101 = {r[0]: r[1] for r in filas(conn, "SELECT arbol, ruta FROM documento_rutas WHERE origen = 'ejercicios' AND doc_id = %s", (101,))}
     assert de101 == {"anatomia": "Cuerpo humano > Tren superior > Pecho > Barra",
                      "equipamiento": "Equipamiento > Pesas libres > Barra",
-                     "nivel": "Nivel de experiencia > Principiante"}
+                     "nivel": "Nivel de experiencia > Principiante",
+                     "patron": "Patrón de movimiento > Empuje > Empuje horizontal"}
 
 
 def test_generar_es_idempotente_y_conserva_los_ids(conn):
@@ -191,3 +192,25 @@ def test_generar_borra_lo_que_ya_no_existe(conn):
                        "AND doc_id = %s", (205,)) == [(0,)]
     assert filas(conn, "SELECT COUNT(*) FROM documento_rutas WHERE doc_id = %s", (205,)) == [(0,)]
     bd_prueba.preparar_bd(conn)                       # dejar la BD como la esperan las demás pruebas
+
+
+def test_insertar_en_bloques_parte_las_filas_para_no_pasar_max_allowed_packet():
+    """Con el árbol de patrón había 13 392 rutas y un solo INSERT superó el 1 MB de max_allowed_packet:
+    MariaDB cortó la conexión. Ahora se parte en bloques (dentro de la misma transacción)."""
+    from generar_etiquetas import BLOQUE, insertar_en_bloques
+
+    class Cursor:
+        def __init__(self):
+            self.lotes = []
+
+        def executemany(self, sql, filas):
+            self.lotes.append(list(filas))
+
+    cur = Cursor()
+    filas = [(i,) for i in range(BLOQUE * 3 + 7)]
+    insertar_en_bloques(cur, "INSERT ...", filas)
+    assert [len(l) for l in cur.lotes] == [BLOQUE, BLOQUE, BLOQUE, 7]
+    assert [f for l in cur.lotes for f in l] == filas                  # nada se pierde ni se reordena
+    cur2 = Cursor()
+    insertar_en_bloques(cur2, "INSERT ...", [])
+    assert cur2.lotes == []

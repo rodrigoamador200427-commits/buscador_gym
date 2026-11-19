@@ -900,6 +900,249 @@
     ]
    },
    "cambia": true
+  },
+  {
+   "consulta": "jalon espalda polea",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Espalda",
+    "destino": "Temas: Planificación",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     66
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "interseccion",
+    "origen": "Anatomía: Espalda",
+    "destino": "Equipamiento: Polea",
+    "arboles": [
+     "Anatomía",
+     "Equipamiento",
+     "Patrón de movimiento"
+    ],
+    "documento": [
+     "ejercicios",
+     2080
+    ]
+   },
+   "cambia": true
+  },
+  {
+   "consulta": "bisagra gluteo",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Glúteo",
+    "destino": "Temas: Resistencia",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     113
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "interseccion",
+    "origen": "Anatomía: Glúteo",
+    "destino": "Patrón de movimiento: Bisagra de cadera",
+    "arboles": [
+     "Anatomía",
+     "Patrón de movimiento"
+    ],
+    "documento": [
+     "ejercicios",
+     1854
+    ]
+   },
+   "cambia": true
+  },
+  {
+   "consulta": "fondos triceps",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Tríceps",
+    "destino": "Temas: Fuerza",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     1557
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "interseccion",
+    "origen": "Anatomía: Tríceps",
+    "destino": "Patrón de movimiento: Extensión de codo",
+    "arboles": [
+     "Anatomía",
+     "Patrón de movimiento"
+    ],
+    "documento": [
+     "ejercicios",
+     3445
+    ]
+   },
+   "cambia": true
+  },
+  {
+   "consulta": "zancada cuadriceps mancuernas",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Cuádriceps",
+    "destino": "Temas: Resistencia",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     1476
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "interseccion",
+    "origen": "Anatomía: Cuádriceps",
+    "destino": "Equipamiento: Mancuernas",
+    "arboles": [
+     "Anatomía",
+     "Equipamiento",
+     "Patrón de movimiento"
+    ],
+    "documento": [
+     "ejercicios",
+     2552
+    ]
+   },
+   "cambia": true
+  },
+  {
+   "consulta": "tiron horizontal principiante",
+   "dos_arboles": {
+    "via": "recuperacion",
+    "origen": "Anatomía: Hombro",
+    "destino": "Temas: Prevención y movilidad",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     817
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "interseccion",
+    "origen": "Nivel: Principiante",
+    "destino": "Patrón de movimiento: Tirón horizontal",
+    "arboles": [
+     "Nivel",
+     "Patrón de movimiento"
+    ],
+    "documento": [
+     "articulos",
+     1551
+    ]
+   },
+   "cambia": true
+  },
+  {
+   "consulta": "press militar barra",
+   "dos_arboles": {
+    "via": "recuperacion",
+    "origen": "Temas: Técnica y biomecánica",
+    "destino": "Anatomía: Hombro",
+    "arboles": [
+     "Temas",
+     "Anatomía"
+    ],
+    "documento": [
+     "articulos",
+     6
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "interseccion",
+    "origen": "Equipamiento: Barra",
+    "destino": "Patrón de movimiento: Empuje vertical",
+    "arboles": [
+     "Equipamiento",
+     "Patrón de movimiento"
+    ],
+    "documento": [
+     "ejercicios",
+     3042
+    ]
+   },
+   "cambia": true
+  },
+  {
+   "consulta": "arrancada barra avanzado",
+   "dos_arboles": {
+    "via": "recuperacion",
+    "origen": "Temas: Fuerza",
+    "destino": "Anatomía: Tríceps",
+    "arboles": [
+     "Temas",
+     "Anatomía"
+    ],
+    "documento": [
+     "articulos",
+     1949
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "interseccion",
+    "origen": "Equipamiento: Barra",
+    "destino": "Nivel: Avanzado",
+    "arboles": [
+     "Equipamiento",
+     "Nivel",
+     "Patrón de movimiento"
+    ],
+    "documento": [
+     "ejercicios",
+     2372
+    ]
+   },
+   "cambia": true
+  },
+  {
+   "consulta": "saltos principiante",
+   "dos_arboles": {
+    "via": "recuperacion",
+    "origen": "Anatomía: Cuádriceps",
+    "destino": "Temas: Resistencia",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     1476
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "interseccion",
+    "origen": "Nivel: Principiante",
+    "destino": "Patrón de movimiento: Saltos y pliometría",
+    "arboles": [
+     "Nivel",
+     "Patrón de movimiento"
+    ],
+    "documento": [
+     "articulos",
+     1372
+    ]
+   },
+   "cambia": true
   }
  ],
  "pares": [
@@ -925,6 +1168,13 @@
    "articulos": 37
   },
   {
+   "par": "Anatomía x Patrón de movimiento",
+   "aristas": 148,
+   "documentos": 3124,
+   "ejercicios": 2848,
+   "articulos": 276
+  },
+  {
    "par": "Temas x Equipamiento",
    "aristas": 58,
    "documentos": 562,
@@ -939,11 +1189,32 @@
    "articulos": 237
   },
   {
+   "par": "Temas x Patrón de movimiento",
+   "aristas": 53,
+   "documentos": 289,
+   "ejercicios": 0,
+   "articulos": 289
+  },
+  {
    "par": "Equipamiento x Nivel",
    "aristas": 34,
    "documentos": 2882,
    "ejercicios": 2848,
    "articulos": 34
+  },
+  {
+   "par": "Equipamiento x Patrón de movimiento",
+   "aristas": 195,
+   "documentos": 3005,
+   "ejercicios": 2848,
+   "articulos": 157
+  },
+  {
+   "par": "Nivel x Patrón de movimiento",
+   "aristas": 53,
+   "documentos": 2859,
+   "ejercicios": 2848,
+   "articulos": 11
   }
  ],
  "metricas_referencia": {
@@ -972,25 +1243,25 @@
  },
  "metricas_nuevas": {
   "dos_arboles": {
-   "consultas": 12,
+   "consultas": 20,
    "por_via": {
-    "concepto": 11,
-    "recuperacion": 1
+    "concepto": 15,
+    "recuperacion": 5
    },
-   "fallback": 1,
-   "destinos_distintos": 6,
-   "documentos_distintos": 9
+   "fallback": 5,
+   "destinos_distintos": 8,
+   "documentos_distintos": 13
   },
   "cuatro_arboles": {
-   "consultas": 12,
+   "consultas": 20,
    "por_via": {
     "concepto": 1,
-    "interseccion": 10,
+    "interseccion": 18,
     "interseccion_parcial": 1
    },
    "fallback": 0,
-   "destinos_distintos": 10,
-   "documentos_distintos": 12
+   "destinos_distintos": 15,
+   "documentos_distintos": 20
   }
  }
 }

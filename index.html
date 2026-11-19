@@ -125,6 +125,7 @@
                     <label class="campo"><span id="etiquetaB">Tema</span> <select id="menuB"></select></label>
                     <button class="btn btn-primario" type="submit">Ver documentos</button>
                 </form>
+                <p id="avisoAproximado" class="aviso-aproximado" hidden></p>
                 <div id="resultadoAB" class="arboles-resultado"></div>
             </div>
         </main>
@@ -433,6 +434,8 @@
     });
     $('formBusqueda').addEventListener('submit', e => { e.preventDefault(); buscar(searchInput.value); });
 
+    const TEXTO_APROXIMADO = 'es una clasificación aproximada: se infiere de las palabras del nombre del ejercicio y puede equivocarse.';
+
     function rutaHTML(nodos, nombreArbol) {
         if (!nodos || !nodos.length) return '';
         return `<ul class="ruta" aria-label="${esc(nombreArbol)}">${nodos.map(n => `<li>${esc(n)}</li>`).join('')}</ul>`;
@@ -442,7 +445,9 @@
     function rutasNodosHTML(d) {
         const nodos = (d.nodos || []).filter(n => n && n.ruta && n.ruta.length);
         if (!nodos.length) return `${rutaHTML(d.origen_ruta, 'Ruta de origen')}${rutaHTML(d.destino_ruta, 'Ruta de destino')}`;
-        return nodos.map(n => `<div class="ruta-arbol"><h3>${esc(n.titulo || n.arbol)}</h3>${rutaHTML(n.ruta, 'Ruta en ' + (n.titulo || n.arbol))}</div>`).join('');
+        const aprox = nodos.filter(n => n.aproximado).map(n => n.titulo || n.arbol);
+        return nodos.map(n => `<div class="ruta-arbol"><h3>${esc(n.titulo || n.arbol)}${n.aproximado ? ' (aproximado)' : ''}</h3>${rutaHTML(n.ruta, 'Ruta en ' + (n.titulo || n.arbol))}</div>`).join('')
+            + (aprox.length ? `<p class="aviso-aproximado">${esc(aprox.join(' y '))} ${TEXTO_APROXIMADO}</p>` : '');
     }
 
     // Documento que el sistema relaciona con la búsqueda a través de los árboles.
@@ -534,7 +539,7 @@
                         <button type="button" class="btn btn-gusta-texto" id="detalleGusta" aria-pressed="false"></button>
                     </div>
                     ${(d.rutas && d.rutas.length)
-                        ? d.rutas.map(r => `<div><h3>Ubicación en ${esc(r.titulo)}</h3>${rutaHTML(r.nodos, 'Ubicación en ' + r.titulo)}</div>`).join('')
+                        ? d.rutas.map(r => `<div><h3>Ubicación en ${esc(r.titulo)}${r.aproximado ? ' (aproximado)' : ''}</h3>${rutaHTML(r.nodos, 'Ubicación en ' + r.titulo)}</div>`).join('')
                         : (d.ruta ? `<div><h3>Ubicación en el árbol</h3>${rutaHTML(d.ruta.nodos, 'Ubicación en el árbol')}</div>` : '')}
                     ${metaFilas ? `<dl class="tarjeta-meta" style="border-top:0; padding-top:0">${metaFilas}</dl>` : ''}
                     <p class="detalle-texto">${esc(d.texto)}</p>
@@ -752,7 +757,7 @@
     // pares: {"anatomia|temas": {"1|fuerza": [ejercicios, artículos]}}}. Las claves de los pares siguen el orden de `arboles`.
     let catalogoAB = null;
     const menuA = $('menuA'), menuB = $('menuB'), arbolA = $('arbolA'), arbolB = $('arbolB');
-    const ETIQUETA_CONCEPTO = { anatomia: 'Músculo', temas: 'Tema', equipamiento: 'Equipamiento', nivel: 'Nivel' };
+    const ETIQUETA_CONCEPTO = { anatomia: 'Músculo', temas: 'Tema', equipamiento: 'Equipamiento', nivel: 'Nivel', patron: 'Patrón' };
 
     const arbolDe = id => catalogoAB.arboles.find(a => a.id === id);
     const conceptoDe = (arbolId, clave) => arbolDe(arbolId).conceptos.find(c => c.clave === clave);
@@ -777,11 +782,24 @@
     function opcionesA() {
         llenar(menuA, arbolDe(arbolA.value).conceptos.map(c => [c.clave, `${c.nombre} (${cuenta(c.n)})`]), menuA.value);
         $('etiquetaA').textContent = ETIQUETA_CONCEPTO[arbolA.value] || 'Concepto';
+        pintarAviso();
     }
+    // Aviso cuando alguno de los dos árboles elegidos es aproximado (Patrón de movimiento)
+    function aproximadoAviso() {
+        const ids = [arbolA.value, arbolB.value].filter(i => arbolDe(i) && arbolDe(i).aproximado);
+        return ids.map(i => `${arbolDe(i).titulo} ${TEXTO_APROXIMADO} ${plural(Number(arbolDe(i).sin_clasificar || 0), 'ejercicio no se pudo clasificar', 'ejercicios no se pudieron clasificar')}: están en «Sin clasificar».`).join(' ');
+    }
+    function pintarAviso() {
+        const a = $('avisoAproximado'), texto = aproximadoAviso();
+        a.textContent = texto;
+        a.hidden = !texto;
+    }
+
     function opcionesB() {
         const a = arbolA.value, b = arbolB.value;
         llenar(menuB, arbolDe(b).conceptos.map(c => [c.clave, `${c.nombre} (${cuenta(cruce(a, menuA.value, b, c.clave))})`]), menuB.value);
         $('etiquetaB').textContent = ETIQUETA_CONCEPTO[b] || 'Concepto';
+        pintarAviso();
     }
     function opcionesArboles() {
         const previoB = arbolB.value;
@@ -824,8 +842,10 @@
         const a = arbolA.value, b = arbolB.value;
         const ca = conceptoDe(a, menuA.value), cb = conceptoDe(b, menuB.value);
         if (!ca || !cb) return;
+        const aviso = aproximadoAviso();
         const rutas = `<div class="rutas">${[[a, ca], [b, cb]].map(([id, c]) =>
-            `<div class="ruta-arbol"><h3>${esc(arbolDe(id).titulo)}</h3>${rutaHTML(c.ruta, 'Ruta en ' + arbolDe(id).titulo)}</div>`).join('')}</div>`;
+            `<div class="ruta-arbol"><h3>${esc(arbolDe(id).titulo)}${arbolDe(id).aproximado ? ' (aproximado)' : ''}</h3>${rutaHTML(c.ruta, 'Ruta en ' + arbolDe(id).titulo)}</div>`).join('')}</div>`
+            + (aviso ? `<p class="aviso-aproximado">${esc(aviso)}</p>` : '');
         const n = cruce(a, ca.clave, b, cb.clave);
 
         if (!n[0] && !n[1]) {

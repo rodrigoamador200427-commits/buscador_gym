@@ -25,6 +25,9 @@ CONSULTAS_6B = [
     "pecho mancuernas principiante", "press de banca con barra", "espalda polea", "triceps kettlebell avanzado",
     "sentadilla maquina principiante", "abdomen peso corporal", "ejercicios con bandas", "biceps mancuernas",
     "ganar fuerza con barra", "dieta para principiantes", "pecho kettlebell principiante", "pelota de ejercicio abdomen",
+    # Patrón de movimiento (clasificación aproximada)
+    "jalon espalda polea", "bisagra gluteo", "fondos triceps", "zancada cuadriceps mancuernas",
+    "tiron horizontal principiante", "press militar barra", "arrancada barra avanzado", "saltos principiante",
 ]
 
 
@@ -99,7 +102,7 @@ def main():
                                        "cuatro_arboles": metricas([f["cuatro_arboles"] for f in salida[clave]])}
     con.close()
 
-    for clave, titulo in (("referencia", "18 CONSULTAS DE REFERENCIA"), ("nuevas", "CONSULTAS NUEVAS (equipamiento y nivel)")):
+    for clave, titulo in (("referencia", "18 CONSULTAS DE REFERENCIA"), ("nuevas", "CONSULTAS NUEVAS (equipamiento, nivel y patrón)")):
         print(f"\n{titulo}\n{'#':>2} {'consulta':36} {'vía (2 árboles)':20} {'vía (4 árboles)':22} destino (4 árboles)")
         for i, f in enumerate(salida[clave], 1):
             d, c = f["dos_arboles"], f["cuatro_arboles"]

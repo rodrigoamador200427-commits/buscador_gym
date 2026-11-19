@@ -20,11 +20,11 @@ $perfil = crearPerfil($A, 'Pecho');
 $A->pedir('seleccionar_perfil.php', ['perfil_id' => $perfil]);
 
 // ----------------------------------------------------------------------------- catálogo
-echo "\n[menus.php?accion=catalogo: cuatro árboles]\n";
+echo "\n[menus.php?accion=catalogo: cinco árboles]\n";
 [$cod, $cat] = $anon->pedir('menus.php?accion=catalogo');
-comprobar('catálogo -> 200 con los cuatro árboles en orden', $cod === 200 && array_column($cat['arboles'] ?? [], 'id') === ['anatomia', 'temas', 'equipamiento', 'nivel'],
+comprobar('catálogo -> 200 con los cinco árboles en orden', $cod === 200 && array_column($cat['arboles'] ?? [], 'id') === ['anatomia', 'temas', 'equipamiento', 'nivel', 'patron'],
     json_encode(array_column($cat['arboles'] ?? [], 'id')));
-comprobar('un par por cada combinación de dos árboles (6)', count($cat['pares'] ?? []) === 6, json_encode(array_keys($cat['pares'] ?? [])));
+comprobar('un par por cada combinación de dos árboles (10)', count($cat['pares'] ?? []) === 10, json_encode(array_keys($cat['pares'] ?? [])));
 $eq = array_column(array_column($cat['arboles'], null, 'id')['equipamiento']['conceptos'] ?? [], null, 'clave');
 comprobar('equipamiento: claves sin acentos (maquina) y nombre visible con acento (Máquina)',
     ($eq['maquina']['nombre'] ?? '') === 'Máquina' && isset($eq['barra'], $eq['mancuernas']), json_encode(array_keys($eq)));
@@ -32,6 +32,12 @@ comprobar('cada concepto trae su ruta de la raíz al nodo', ($eq['barra']['ruta'
 comprobar('pares anatomia|equipamiento: pecho x barra = [ejercicios, artículos]',
     is_array($cat['pares']['anatomia|equipamiento']['1|barra'] ?? null) && $cat['pares']['anatomia|equipamiento']['1|barra'][0] >= 1,
     json_encode($cat['pares']['anatomia|equipamiento']['1|barra'] ?? null));
+$patron = array_column($cat['arboles'], null, 'id')['patron'] ?? [];
+comprobar('patrón: marcado como aproximado, con el número de ejercicios sin clasificar y «Sin clasificar» como concepto',
+    ($patron['aproximado'] ?? null) === true && is_int($patron['sin_clasificar'] ?? null)
+    && in_array('sin clasificar', array_column($patron['conceptos'] ?? [], 'clave'), true), json_encode([$patron['aproximado'] ?? null, $patron['sin_clasificar'] ?? null]));
+comprobar('los otros cuatro árboles no se marcan como aproximados',
+    !array_filter($cat['arboles'], fn($a) => $a['id'] !== 'patron' && isset($a['aproximado'])));
 comprobar('anatomia|temas solo tiene artículos (los ejercicios no entran en Temas)',
     !array_filter($cat['pares']['anatomia|temas'], fn($n) => $n[0] !== 0), json_encode($cat['pares']['anatomia|temas']));
 
@@ -48,7 +54,7 @@ comprobar('el cruce no depende del orden de los árboles', json_encode($anon->pe
 [, $m] = $anon->pedir('menus.php?accion=cruce&a=anatomia&x=1&b=temas&y=fuerza');
 comprobar('músculo x tema sigue mostrando los ejercicios del músculo', ($m['ejercicios_del_musculo'] ?? null) === true && count($m['articulos'] ?? []) >= 1, json_encode($m['ejercicios_del_musculo'] ?? null));
 comprobar('misma estructura de tarjeta que la búsqueda', !array_diff(['doc_id', 'origen', 'tipo', 'titulo', 'resumen', 'meta', 'etiquetas'], array_keys($c['ejercicios'][0] ?? [])));
-foreach (['a=patron&x=1&b=nivel&y=principiante' => 'árbol fuera de la lista (patron aún no existe)',
+foreach (['a=inventado&x=1&b=nivel&y=principiante' => 'árbol fuera de la lista',
           'a=anatomia&x=1&b=anatomia&y=2' => 'el mismo árbol dos veces',
           'a=anatomia&x=1&b=equipamiento&y=Barra' => 'clave con mayúsculas',
           "a=anatomia&x=1&b=nivel&y=" . rawurlencode("principiante' OR 1=1") => 'inyección en la clave',
@@ -56,6 +62,13 @@ foreach (['a=patron&x=1&b=nivel&y=principiante' => 'árbol fuera de la lista (pa
     comprobar("422: $que", $anon->pedir("menus.php?accion=cruce&$url")[0] === 422);
 }
 comprobar('concepto que no existe -> 404 (no se interpreta)', $anon->pedir('menus.php?accion=cruce&a=anatomia&x=99&b=nivel&y=principiante')[0] === 404);
+
+[$cod, $p] = $anon->pedir('menus.php?accion=cruce&a=anatomia&x=1&b=patron&y=empuje%20horizontal');
+comprobar('pecho x empuje horizontal -> 200, ejercicios de pecho y aviso de aproximado', $cod === 200 && count($p['ejercicios'] ?? []) >= 1
+    && ($p['aproximado'] ?? null) === true && array_column($p['nodos'] ?? [], 'aproximado') === [false, true], json_encode([$cod, $p['aproximado'] ?? null]));
+[, $p2] = $anon->pedir('menus.php?accion=cruce&a=anatomia&x=1&b=equipamiento&y=barra');
+comprobar('un cruce sin patrón no se marca como aproximado', ($p2['aproximado'] ?? null) === false);
+comprobar('«sin clasificar» se puede pedir como cualquier concepto', $anon->pedir('menus.php?accion=cruce&a=patron&x=sin%20clasificar&b=nivel&y=principiante')[0] === 200);
 
 // ----------------------------------------------------------------------------- buscar.php
 echo "\n[buscar.php: descubrimiento con la ruta de cada árbol]\n";
@@ -83,8 +96,11 @@ comprobar('misma consulta, misma respuesta (determinista)', json_encode($a1['des
 echo "\n[detalle.php: una ruta por árbol]\n";
 [, $e] = $A->pedir('detalle.php?origen=ejercicios&doc_id=101');
 $rutas = array_column($e['documento']['rutas'] ?? [], null, 'arbol');
-comprobar('un ejercicio: anatomía, equipamiento y nivel, en ese orden',
-    array_keys($rutas) === ['anatomia', 'equipamiento', 'nivel'], json_encode(array_keys($rutas)));
+comprobar('un ejercicio: anatomía, equipamiento, nivel y patrón, en ese orden',
+    array_keys($rutas) === ['anatomia', 'equipamiento', 'nivel', 'patron'], json_encode(array_keys($rutas)));
+comprobar('la ruta de patrón va marcada como aproximada y las demás no',
+    ($rutas['patron']['aproximado'] ?? null) === true && ($rutas['patron']['nodos'] ?? []) === ['Patrón de movimiento', 'Empuje', 'Empuje horizontal']
+    && !array_filter(['anatomia', 'equipamiento', 'nivel'], fn($k) => $rutas[$k]['aproximado'] !== false), json_encode($rutas['patron'] ?? null));
 comprobar('rutas completas', ($rutas['equipamiento']['nodos'] ?? []) === ['Equipamiento', 'Pesas libres', 'Barra'] && ($rutas['nivel']['titulo'] ?? '') === 'Nivel'
     && ($rutas['anatomia']['nodos'] ?? []) === ['Cuerpo humano', 'Tren superior', 'Pecho', 'Barra']);
 comprobar('`ruta` (la principal) se conserva igual que antes', ($e['documento']['ruta'] ?? null) === ['arbol' => 'anatomia', 'nodos' => ['Cuerpo humano', 'Tren superior', 'Pecho', 'Barra']]);

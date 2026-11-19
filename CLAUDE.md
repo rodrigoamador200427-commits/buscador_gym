@@ -36,14 +36,16 @@ PHP no está en el PATH: usar `D:\Tools\SHAMP\php\php.exe` y `D:\Tools\SHAMP\mys
   - `estadisticas.php` (`registrar_consulta`, `registrar_eventos`, `registrar_sin_fallar`)
   - `admin_estadisticas.php`: las consultas del panel (una función por sección). `sesion.php` trae
     `requerir_admin()`
-- `scripts_py/arboles/`: cuatro árboles (anatomía, temas, equipamiento, nivel; `taxonomia.py` es la fuente única de
+- `scripts_py/arboles/`: cinco árboles (anatomía, temas, equipamiento, nivel, patrón; `taxonomia.py` es la fuente única de
   nombres y vocabulario). `bosque.py`: `Bosque` = árboles + pertenencia de cada documento a nodos + una `AristasPar` por
   cada par de árboles (aristas derivadas, en memoria, con lift). `motor.py`: `MotorArboles`; la consulta «nombra» cero, uno o
   varios árboles (cero: recuperación en anatomía y temas; uno: salta al compañero; varios: intersección total, mejor par
   `interseccion_parcial` o `sin_interseccion`). El constructor de dos árboles se conserva. `catalogo.py`: catálogo y cruce
-  de cualquier par. El árbol de Patrón de movimiento NO existe todavía (el esquema ya lo admite).
+  de cualquier par. `patrones.py`: el árbol de Patrón de movimiento, una clasificación APROXIMADA del nombre del ejercicio
+  por reglas de palabras clave (gana la primera regla que coincide; lo que no se reconoce queda en «Sin clasificar», no se
+  adivina). Siempre que se muestre hay que avisar que es aproximado (`ARBOLES_APROXIMADOS`; la interfaz lo hace).
 - `scripts_py/`: motor TF-IDF, `motor_arboles.py` (entrada de PHP), `catalogo_arboles.py` y `puente_arboles.py` (menús
-  A+B de dos árboles cualesquiera), `medir_arboles.py` (medición de la fase 6B), `recommender.py` (centroide + coseno por
+  A+B de dos árboles cualesquiera), `medir_arboles.py` y `patron_sin_clasificar.py` (medición y reporte de la fase 6B), `recommender.py` (centroide + coseno por
   perfil), `db_config.py` (lee la misma config que PHP), `etiquetado.py` (lógica pura) y
   `generar_etiquetas.py` (llena las tablas de etiquetas y rutas; hay que volver a correrlo si
   cambia el contenido).
@@ -173,6 +175,10 @@ php herramientas/crear_demo.php        # imprime la contraseña demo una sola ve
   en la BD: un script que encadene los pasos debe abortar si falla uno (en el lote 15 no lo hizo). Los artículos
   `generado` son cortos y genéricos y, con TF-IDF, desplazan a originales más específicos en varias consultas de
   referencia (ver `docs/Avances.md`, fase 6A).
+- MariaDB (aquí): `max_allowed_packet` es 1 MB. Un `executemany` con miles de filas hace un solo `INSERT` que lo supera y el
+  servidor corta la conexión («Lost connection»); `generar_etiquetas.py` inserta en bloques de 2 000 (hay una prueba).
+- Regex de plural: `elevaciones?` o `laterales?` NO casan con «elevación» ni «lateral» (la `?` solo afecta a la última letra).
+  Escribir `elevaci(?:on|ones)`, `lateral(?:es)?`. Lo mismo pasó con «escaladores?» en 6A.
 - Árboles y vocabulario de consulta: el motor compara RAÍCES del stemmer, no palabras. Una palabra que nombre un
   equipamiento o un nivel no puede compartir raíz con otra que ya nombre un músculo o un tema («rodillo»/«rodilla»,
   «correas»/«correr», «banco»/«banca»; «ejercicio» es palabra de intención y se descarta). `test_arboles_n.py` revisa todas

@@ -80,6 +80,7 @@ if ($accion === 'cruce') {
         }
     }
     responder(['status' => 'success', 'nodos' => nodos_de_descubrimiento($r['nodos'] ?? []),
+               'aproximado' => (bool)array_intersect([$a, $b], ARBOLES_APROXIMADOS),
                'total_articulos' => count($porOrigen['articulos']), 'total_ejercicios' => count($porOrigen['ejercicios']),
                'ejercicios_del_musculo' => !$hayEjercicios,   // los ejercicios son los del músculo, no del cruce
                'articulos' => $articulos, 'ejercicios' => $ejercicios]);

@@ -895,8 +895,7 @@ D:\Tools\SHAMP\mysql\bin\mysql.exe -uroot gym_buscador -e "SELECT origen_conteni
 # Fase 6B — Árboles de Equipamiento y Nivel y motor de N árboles
 
 **Fecha:** 18 de noviembre de 2026. **Rama:** `fase-6b-arboles`, creada sobre `fase-6a-corpus` (que sigue sin fusionar:
-6B necesita los 2 000 artículos y sus etiquetas). **Estado:** completa, salvo el árbol de Patrón de movimiento, que no se
-construyó (se decidió dejarlo para después). Sin push.
+6B necesita los 2 000 artículos y sus etiquetas). **Estado:** completa; el árbol de Patrón de movimiento se añadió después (ver la sección siguiente). Sin push.
 
 **Objetivo:** que el motor deje de estar pensado para dos árboles (Anatomía y Temas) y pueda combinar cualquier par,
 sumando los árboles de Equipamiento y Nivel, sin cambiar lo que ya respondía para un músculo y un tema.
@@ -1062,12 +1061,188 @@ D:\Tools\SHAMP\php\php.exe tests\test_arboles_n.php
 
 ## 9. Pendientes
 
-- **Árbol de Patrón de movimiento:** no se construyó. El esquema ya lo admite (`patron` en el ENUM) y añadirlo es registrar un
-  constructor y su pertenencia en `bosque.py` más su vocabulario; sería una clasificación aproximada por palabras clave sobre
-  `nombre_es`, con la lista de ejercicios que no pudo clasificar.
+- **Árbol de Patrón de movimiento:** construido después (ver la sección siguiente).
 - Quien escriba «rodillo», «correas» o «banco» no obtiene esos equipamientos como concepto de consulta (ver 6.1); sí están en los menús.
 - Nivel está casi todo en Intermedio; sus cruces con Avanzado tienen 13 ejercicios y 2 artículos.
 - La búsqueda TF-IDF no usa los árboles nuevos: solo el descubrimiento y los menús. Las 18 consultas de referencia dan el mismo
   resultado de búsqueda que antes de esta fase.
 - Los lotes de la fase 6A siguen sin fusionar y sin push (esta rama depende de ellos).
 - La latencia de 7,6 s por consulta (NLTK) sigue pendiente.
+
+
+---
+
+# Fase 6B (continuación) — Árbol de Patrón de movimiento
+
+**Fecha:** 19 de noviembre de 2026. **Rama:** `fase-6b-arboles`. **Estado:** completo. Sin push.
+
+**Objetivo (opcional, que confirmaste):** un árbol de Patrón de movimiento por reglas de palabras clave sobre `nombre_es`,
+avisando en la interfaz y en el reporte que es una **clasificación aproximada**, con la lista de ejercicios que no pudo clasificar.
+
+## 1. Qué se hizo
+
+| Pieza | Para qué |
+|---|---|
+| `arboles/patrones.py` | Los 22 patrones en 7 grupos, las 22 reglas ordenadas, la tabla de etiquetas de artículo a patrón y el vocabulario de consulta |
+| `construir_arbol_patron` | Patrón de movimiento > Grupo > Patrón > Ejercicio; «Sin clasificar» cuelga de la raíz |
+| `bosque.py`, `motor.py`, `catalogo.py` | Quinto árbol: 10 pares de árboles, el motor lo nombra y el catálogo lo marca `aproximado` |
+| `generar_etiquetas.py` | Una ruta de patrón por ejercicio (13 392 rutas en total en la BD real) |
+| `menus.php`, `buscar.php`, `detalle.php`, `index.html` | El cruce acepta `patron`; las respuestas marcan `aproximado`; la interfaz avisa |
+| `patron_sin_clasificar.py` y [docs/patron_sin_clasificar.md](patron_sin_clasificar.md) | El reporte, con la lista completa de ejercicios sin clasificar |
+
+## 2. La clasificación (aproximada)
+
+Se evalúan las reglas **en orden** sobre el nombre normalizado y gana la primera que coincide (lo específico antes de lo general:
+«remo al mentón» antes que «remo», «curl de muñeca» antes que «curl», «sentadilla a una pierna» antes que «sentadilla», «salto en
+sentadilla» antes que «sentadilla», «abdominales con giro» antes que «abdominales», tronco antes que balístico). No se mira el
+músculo, la modalidad ni el equipamiento. **Lo que ninguna regla reconoce no se adivina**: cuelga de «Sin clasificar».
+
+- **Clasificados: 2291 de 2848 (80.4 %). Sin clasificar: 557 (19.6 %).**
+- Los nombres son traducciones automáticas, a menudo con marcas o apellidos («Holman», «Gethin», «FYR2», «Metaburn») y algunos no
+  dicen qué movimiento es («Extensión», «Plato giratorio», «Salsa TBS»): por eso no se clasifican.
+- **Precisión:** leí a ojo 60 ejercicios clasificados al azar y unos 5 estaban en un patrón discutible o equivocado (casos mixtos como
+  «zancada inversa a peso muerto», o «remo vertical», que ahora va a hombros). Es una estimación mía, no una medida: la clasificación
+  no tiene una verdad de referencia con la que compararla.
+- Árbol: altura 3, 2 879 nodos (1 raíz, 7 grupos, 22 patrones, «Sin clasificar» y 2 848 hojas).
+
+| Grupo | Patrón | Ejercicios | ¿Se puede nombrar en una consulta? |
+|---|---|---|---|
+| Empuje | Empuje horizontal | 241 | no |
+| Empuje | Empuje vertical | 56 | sí: press militar, press arnold |
+| Empuje | Extensión de codo | 94 | sí: fondos, fondo |
+| Tirón | Tirón horizontal | 108 | sí: tiron horizontal |
+| Tirón | Tirón vertical | 80 | sí: tiron vertical, jalon, jalones |
+| Tirón | Flexión de codo | 150 | no |
+| Aislamiento del tren superior | Aperturas y cruces | 29 | sí: aperturas, apertura, mosca |
+| Aislamiento del tren superior | Elevaciones de hombro | 108 | sí: elevaciones laterales, elevacion lateral, pajaros |
+| Aislamiento del tren superior | Encogimientos | 6 | sí: encogimientos, encogimiento |
+| Aislamiento del tren superior | Muñeca y antebrazo | 23 | no |
+| Piernas | Sentadilla | 205 | no |
+| Piernas | Bisagra de cadera | 148 | sí: bisagra |
+| Piernas | Zancada y unilateral | 98 | sí: zancada, zancadas, estocada, estocadas |
+| Piernas | Flexión y extensión de rodilla | 26 | no |
+| Piernas | Pantorrilla | 36 | no |
+| Core | Estabilización del tronco | 148 | no |
+| Core | Flexión de tronco | 177 | no |
+| Core | Rotación del tronco | 36 | sí: giro ruso, lenador |
+| Cuerpo completo | Olímpico y balístico | 89 | sí: arrancada, envion, snatch |
+| Cuerpo completo | Saltos y pliometría | 198 | sí: salto, saltos, burpee, burpees |
+| Cuerpo completo | Cardio y locomoción | 134 | sí: boxeo, eliptica, trote |
+| Movilidad | Estiramiento y movilidad | 101 | no |
+| (raíz) | Sin clasificar | 557 | no |
+
+Los artículos se enlazan por unas etiquetas concretas (`sentadilla`, `remo`, `curl`, `plancha`, `peso muerto`, `bisagra`, `dominadas`,
+`press banca`, `estiramiento`, `pliometria`...), igual que a Equipamiento y Nivel: ninguna etiqueta ambigua (como `empuje`) enlaza.
+
+## 3. Qué se puede nombrar en una consulta
+
+El vocabulario de consulta de un patrón no puede compartir raíz con una palabra que ya nombra un músculo o un tema, o cambiaría
+consultas que ya se resuelven (hay una prueba que revisa las frases de los cinco árboles entre sí). Por eso **9 de los 22 patrones existen en el árbol y en
+los menús pero no se pueden nombrar en una consulta**: Empuje horizontal, Flexión de codo, Muñeca y antebrazo, Sentadilla, Flexión y extensión de rodilla, Pantorrilla, Estabilización del tronco, Flexión de tronco, Estiramiento y movilidad. Se nombran por palabras como `jalon`, `bisagra`,
+`zancada`, `fondos`, `salto`, `press militar`, `arrancada`, `tiron horizontal`, `aperturas`, `elevaciones laterales`. Quedaron fuera
+«cargada» (raíz de «carga») y «estiramiento» (ya es sinónimo de un tema).
+
+## 4. La interfaz avisa que es aproximado
+
+- **Menús A+B:** al elegir Patrón de movimiento en cualquiera de los dos árboles aparece un aviso («Patrón de movimiento es una
+  clasificación aproximada...», con el número de ejercicios sin clasificar), que se repite en el resultado y marca el árbol como
+  «(aproximado)». «Sin clasificar» es una opción más del menú: elegirla con otro árbol lista esos ejercicios.
+- **Tarjeta «Relacionado con tu búsqueda»:** el nodo de patrón lleva «(aproximado)» y una nota.
+- **Detalle de un ejercicio:** «Ubicación en Patrón de movimiento (aproximado)».
+- **API:** `aproximado` en los nodos del descubrimiento, en `rutas` y en el cruce.
+
+## 5. Aristas por par de árboles (BD real)
+
+| Par de árboles | Aristas | Documentos | Ejercicios | Artículos |
+|---|---|---|---|---|
+| Anatomía x Temas | 81 | 930 | 0 | 930 |
+| Anatomía x Equipamiento | 134 | 3371 | 2848 | 523 |
+| Anatomía x Nivel | 25 | 2885 | 2848 | 37 |
+| Anatomía x Patrón de movimiento | 148 | 3124 | 2848 | 276 |
+| Temas x Equipamiento | 58 | 562 | 0 | 562 |
+| Temas x Nivel | 13 | 237 | 0 | 237 |
+| Temas x Patrón de movimiento | 53 | 289 | 0 | 289 |
+| Equipamiento x Nivel | 34 | 2882 | 2848 | 34 |
+| Equipamiento x Patrón de movimiento | 195 | 3005 | 2848 | 157 |
+| Nivel x Patrón de movimiento | 53 | 2859 | 2848 | 11 |
+
+## 6. Medición
+
+Las 18 consultas de referencia **no cambian** con cinco árboles: concepto 14, concepto_local 2, interseccion 2; 2 en fallback (las mismas dos
+`concepto_local`), 9 destinos distintos y 16 documentos distintos, idénticos a los de dos árboles. Ninguna palabra de patrón aparece en ellas
+(«sentadilla», «plancha», «dominadas», «peso muerto», «extension» ya nombran un músculo y no nombran patrón).
+
+Las 20 consultas nuevas (12 de equipamiento y nivel de antes más 8 de patrón): con dos árboles, concepto 15, recuperacion 5
+(5 en fallback, 8 destinos); con cinco, concepto 1, interseccion 18, interseccion_parcial 1 (0 en fallback,
+15 destinos distintos, 20 documentos distintos). Las 8 de patrón:
+
+| Consulta | Vía con 2 árboles | Vía con 5 árboles | Destino | Árboles que participan |
+|---|---|---|---|---|
+| jalon espalda polea | concepto | interseccion | Equipamiento: Polea | Anatomía, Equipamiento, Patrón de movimiento |
+| bisagra gluteo | concepto | interseccion | Patrón de movimiento: Bisagra de cadera | Anatomía, Patrón de movimiento |
+| fondos triceps | concepto | interseccion | Patrón de movimiento: Extensión de codo | Anatomía, Patrón de movimiento |
+| zancada cuadriceps mancuernas | concepto | interseccion | Equipamiento: Mancuernas | Anatomía, Equipamiento, Patrón de movimiento |
+| tiron horizontal principiante | recuperacion | interseccion | Patrón de movimiento: Tirón horizontal | Nivel, Patrón de movimiento |
+| press militar barra | recuperacion | interseccion | Patrón de movimiento: Empuje vertical | Equipamiento, Patrón de movimiento |
+| arrancada barra avanzado | recuperacion | interseccion | Nivel: Avanzado | Equipamiento, Nivel, Patrón de movimiento |
+| saltos principiante | recuperacion | interseccion | Patrón de movimiento: Saltos y pliometría | Nivel, Patrón de movimiento |
+
+## 7. Qué falló o hubo que corregir
+
+1. **Mis reglas tenían el mismo fallo de plural que la regex de «escalador» de la fase 6A.** `elevaciones?` no casa con «elevación»
+   (es `elevacione` más una `s` opcional) y `laterales?` tampoco casa con «lateral»: «Elevación lateral con mancuernas» quedaba sin
+   clasificar. Se corrigieron a `elevaci(?:on|ones)`, `lateral(?:es)?`, `extensi(?:on|ones)`... y hay pruebas con el singular y el plural
+   de cada una. Sin esa corrección el porcentaje clasificado era el 71,7 % y no el 80,4 %.
+2. **`elevaciones? de piernas` no casaba con «elevación de pierna»** (singular) y mandaba «elevación de pierna con lanzamiento» a
+   balístico: se corrigió y el tronco pasó a ir antes que lo balístico.
+3. **El segundo árbol que no se puede insertar de una vez.** `generar_etiquetas.py` falló con «Lost connection to MySQL server during
+   query»: con las rutas de patrón había 13 392 filas y un solo `INSERT` superó `max_allowed_packet` (1 MB en este MariaDB), así que el
+   servidor cortó la conexión. La transacción se deshizo y no se perdió nada. Ahora inserta en bloques de 2 000 dentro de la misma
+   transacción, con una prueba. (Con 10 544 filas, antes de este árbol, había pasado por muy poco.)
+4. **Dos palabras chocaban con otro árbol** («cargada» con «carga» y «estiramiento» con el sinónimo del tema): se quitaron del
+   vocabulario de consulta.
+5. **Error mío en las pruebas:** corrí pytest a la vez que la suite PHP y recreó la BD de pruebas; `test_estadisticas.php` dio 9 falsos
+   fallos (401). Repetida sola, pasa. Las suites no se pueden correr a la vez (ya estaba escrito en `CLAUDE.md`).
+6. **Un fallo suelto de `test_arboles_n.php`** (`pecho` solo no trajo descubrimiento una vez) que no se repitió en dos corridas; el motor
+   respondió bien a la misma consulta ejecutado a mano. No tengo la causa.
+7. **Pruebas que se adaptaron, no se debilitaron:** los conteos de árboles y pares (cuatro y 6, ahora cinco y 10), la ruta de un ejercicio
+   (ahora hay cuatro) y la de un cruce que daba por inexistente a `patron`.
+
+## 8. Pruebas
+
+```
+pytest (scripts_py/tests)  263 passed (con CSV_EJERCICIOS y CSV_ARTICULOS; 97 nuevas en test_patron.py y 1 en test_etiquetas.py)
+test_autorizacion.php      24 comprobaciones, 0 fallos
+test_estadisticas.php      49 comprobaciones, 0 fallos (repetida sola: la primera vez coincidió con mi pytest)
+test_etiquetas.php         34 comprobaciones, 0 fallos
+test_arboles_n.php         34 comprobaciones, 0 fallos (6 nuevas)
+test_admin.php             77 comprobaciones, 0 fallos
+test_ilustraciones.php     85 + 12 comprobaciones, 0 fallos
+test_admin_interfaz.php    73 + 1 comprobaciones, 0 fallos
+test_interfaz.php          96 + 3 comprobaciones, 0 fallos (4 nuevas)
+```
+
+Nuevas: `scripts_py/tests/test_patron.py` (97 casos: reglas y prioridades, que lo ilegible no se adivine, estructura, hojas,
+recorridos y posorden, pertenencia de artículos, que los pares de antes no cambien al añadir el árbol, catálogo, cruce, consultas, que
+`sentadilla`/`plancha`/`curl`/`remo`/`dominadas` no nombren patrón, el vocabulario sin choques entre los cinco árboles y, con datos
+reales, la cobertura y que nada se pierda), una de bloques en `test_etiquetas.py` y comprobaciones nuevas en `test_arboles_n.php` e `interfaz.mjs`.
+
+## 9. Cómo probarlo
+
+```
+python scripts_py/generar_etiquetas.py                                   # rutas de los cinco árboles
+python scripts_py/patron_sin_clasificar.py --escribir docs/patron_sin_clasificar.md
+python scripts_py/medir_arboles.py
+python scripts_py/motor_arboles.py "jalon espalda polea"
+cd scripts_py && python -m pytest tests -v
+```
+
+## 10. Pendientes
+
+- La clasificación es aproximada y 557 ejercicios quedan sin clasificar; mejorarla pasa por afinar reglas con la lista de
+  [docs/patron_sin_clasificar.md](patron_sin_clasificar.md) (muchos son marcas o nombres sin pista del movimiento) o por añadir una
+  clasificación manual de los más usados. No hay verdad de referencia para medir su exactitud.
+- 9 patrones no se pueden nombrar en una consulta (ver 3); se eligen en los menús.
+- Los artículos solo se enlazan a los patrones por 36 etiquetas; Temas x Patrón tiene 53 aristas y Nivel x Patrón 11 artículos.
+- `max_allowed_packet` sigue en 1 MB: otros `INSERT` masivos futuros tendrían el mismo límite.
+- La latencia de 7,6 s por consulta (NLTK) sigue pendiente, y los lotes de la fase 6A siguen sin fusionar y sin push.
