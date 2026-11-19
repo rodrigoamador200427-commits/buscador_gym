@@ -160,3 +160,15 @@ def construir_rutas(arbol_anatomia, arbol_temas):
             texto = " > ".join(n.nombre for n in hoja.ruta()[:-1])
             rutas[(origen, int(did))] = (arbol.nombre, texto[:MAX_RUTA])
     return rutas
+
+
+def construir_rutas_arboles(arboles):
+    """{(origen, doc_id, arbol): ruta} para cualquier lista de árboles (fase 6B).
+
+    Un documento tiene UNA ruta por árbol en el que es hoja: un ejercicio, en anatomía,
+    equipamiento y nivel; un artículo, en temas. La ruta va de la raíz al padre de la hoja."""
+    rutas = {}
+    for arbol in arboles:
+        for (origen, did), hoja in arbol.doc_a_nodo.items():
+            rutas[(origen, int(did), arbol.nombre)] = " > ".join(n.nombre for n in hoja.ruta()[:-1])[:MAX_RUTA]
+    return rutas

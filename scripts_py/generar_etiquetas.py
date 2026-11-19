@@ -3,7 +3,7 @@
     python scripts_py/generar_etiquetas.py                              (BD real)
     BUSCADOR_ENTORNO=pruebas python scripts_py/generar_etiquetas.py     (gym_buscador_test)
 
-Requiere sql/esquema_etiquetas.sql. Todo va en UNA transacción: si algo falla, las
+Requiere sql/esquema_etiquetas.sql y sql/esquema_rutas_arboles.sql (una ruta por árbol). Todo va en UNA transacción: si algo falla, las
 tablas quedan como estaban. Los id de las etiquetas que siguen existiendo se conservan
 (INSERT ... ON DUPLICATE KEY UPDATE); las que ya no aparecen se borran.
 Solo consultas con parámetros (%s); los nombres de tabla son fijos.
@@ -14,8 +14,9 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from arboles import construir_arbol_anatomia, construir_arbol_temas  # noqa: E402
-from etiquetado import construir_etiquetas, construir_rutas  # noqa: E402
+from arboles import (construir_arbol_anatomia, construir_arbol_equipamiento, construir_arbol_nivel,  # noqa: E402
+                     construir_arbol_temas)
+from etiquetado import construir_etiquetas, construir_rutas_arboles  # noqa: E402
 
 
 def leer_contenido(conn):
@@ -34,7 +35,8 @@ def generar(conn):
     textos = [a["titulo"] for a in articulos] + [a["contenido"] for a in articulos] \
         + [e["nombre_es"] for e in ejercicios] + [e["descripcion_es"] for e in ejercicios]
     etiquetas, asignaciones = construir_etiquetas(ejercicios, articulos, textos)
-    rutas = construir_rutas(construir_arbol_anatomia(ejercicios), construir_arbol_temas(articulos))
+    rutas = construir_rutas_arboles([construir_arbol_anatomia(ejercicios), construir_arbol_temas(articulos),
+                                     construir_arbol_equipamiento(ejercicios), construir_arbol_nivel(ejercicios)])
 
     conn.autocommit = False            # todo lo de abajo es una sola transacción
     cur = conn.cursor()
@@ -65,7 +67,7 @@ def generar(conn):
         if rutas:
             cur.executemany(
                 "INSERT INTO documento_rutas (origen, doc_id, arbol, ruta) VALUES (%s, %s, %s, %s)",
-                sorted((o, d, a, r) for (o, d), (a, r) in rutas.items()),
+                sorted((o, d, a, r) for (o, d, a), r in rutas.items()),
             )
         conn.commit()
     except Exception:

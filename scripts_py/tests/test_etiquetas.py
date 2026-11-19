@@ -154,8 +154,15 @@ def test_generar_llena_las_tablas_con_el_contenido_sintetico(conn):
                                        "WHERE d.origen = 'ejercicios' AND d.doc_id = %s", (101,))}
     assert de101 == {"pecho", "barra", "principiante", "fuerza"}
     rutas = filas(conn, "SELECT origen, doc_id, ruta FROM documento_rutas ORDER BY origen, doc_id")
-    assert len(rutas) == 12
     assert ("ejercicios", 201, "Cuerpo humano > Tren inferior > Cuádriceps > Barra") in rutas
+    # Fase 6B: una ruta POR ÁRBOL. 10 ejercicios x 3 árboles (anatomía, equipamiento, nivel) y 2 artículos x temas
+    por_arbol = dict(filas(conn, "SELECT arbol, COUNT(*) FROM documento_rutas GROUP BY arbol"))
+    assert por_arbol == {"anatomia": 10, "equipamiento": 10, "nivel": 10, "temas": 2}
+    assert len(rutas) == 32
+    de101 = {r[0]: r[1] for r in filas(conn, "SELECT arbol, ruta FROM documento_rutas WHERE origen = 'ejercicios' AND doc_id = %s", (101,))}
+    assert de101 == {"anatomia": "Cuerpo humano > Tren superior > Pecho > Barra",
+                     "equipamiento": "Equipamiento > Pesas libres > Barra",
+                     "nivel": "Nivel de experiencia > Principiante"}
 
 
 def test_generar_es_idempotente_y_conserva_los_ids(conn):
