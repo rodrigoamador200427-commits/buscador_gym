@@ -6,7 +6,8 @@ documentadas abajo.
 """
 from .nodo import Arbol
 from .taxonomia import (
-    MUSCULOS, REGIONES, TEMAS, SIN_CLASIFICAR,
+    CATEGORIA_DE_EQUIPAMIENTO_DESCONOCIDO, CATEGORIAS_EQUIPAMIENTO, MUSCULOS, NIVELES,
+    NIVELES_ORDEN, REGIONES, SIN_CLASIFICAR, SIN_EQUIPAMIENTO, TEMAS,
     nombre_equipamiento, separar_etiquetas, temas_del_articulo,
 )
 
@@ -44,6 +45,7 @@ def construir_arbol_anatomia(ejercicios):
     for nodo in musculos.values():
         arbol.ordenar_hijos(nodo)       # equipamiento en orden alfabético, estable
     arbol.meta["musculos"] = musculos   # grupo_id -> Nodo
+    arbol.meta["conceptos"] = musculos  # lo que una consulta o un menú puede nombrar
     arbol.meta["descartados"] = descartados
     return arbol
 
@@ -77,5 +79,70 @@ def construir_arbol_temas(articulos):
         arbol.doc_a_nodo[("articulos", int(fila["id"]))] = hoja
 
     arbol.meta["temas"] = temas         # nombre del tema -> Nodo
+    arbol.meta["conceptos"] = temas
     arbol.meta["sin_clasificar"] = sin_clasificar
+    return arbol
+
+
+def construir_arbol_equipamiento(ejercicios):
+    """Equipamiento > Categoría > Equipamiento > Ejercicio (hoja). Altura 3.
+
+    ejercicios: filas con id, nombre_es, equipamiento (y opcionalmente grupo_id, nivel, modalidad).
+    La estructura sale de taxonomia.CATEGORIAS_EQUIPAMIENTO y existe aunque no haya ejercicios
+    (Banco, Paralelas y Correas solo los nombran los artículos). Un valor de la columna que la
+    taxonomía no conoce crea su propio nodo al final de la categoría «Otros»; un valor vacío va a
+    «Sin especificar». Los artículos no son hojas: se enlazan por etiquetas (ver bosque.py).
+    """
+    arbol = Arbol("equipamiento", "Equipamiento")
+    categorias, equipos = {}, {}
+    for categoria, nombres in CATEGORIAS_EQUIPAMIENTO:
+        categorias[categoria] = arbol.agregar(categoria, arbol.raiz)
+        for nombre in nombres:
+            equipos[nombre] = arbol.agregar(nombre, categorias[categoria], {"equipamiento": nombre})
+
+    for fila in sorted(ejercicios, key=lambda f: int(f["id"])):
+        nombre = nombre_equipamiento(fila.get("equipamiento"))
+        if nombre not in equipos:
+            equipos[nombre] = arbol.agregar(nombre, categorias[CATEGORIA_DE_EQUIPAMIENTO_DESCONOCIDO],
+                                            {"equipamiento": nombre})
+        hoja = arbol.agregar(fila["nombre_es"], equipos[nombre], {
+            "doc_id": int(fila["id"]), "origen": "ejercicios",
+            "modalidad": fila.get("modalidad"), "nivel": fila.get("nivel"),
+        })
+        arbol.doc_a_nodo[("ejercicios", int(fila["id"]))] = hoja
+
+    arbol.meta["categorias"] = categorias
+    arbol.meta["equipamientos"] = equipos   # nombre -> Nodo
+    arbol.meta["conceptos"] = equipos
+    return arbol
+
+
+def construir_arbol_nivel(ejercicios):
+    """Nivel de experiencia > Nivel > Ejercicio (hoja). Altura 2.
+
+    Los tres niveles existen siempre (Principiante, Intermedio, Avanzado, en ese orden); los
+    ejercicios sin nivel reconocible cuelgan de «Sin especificar», que solo se crea si hace falta.
+    Está muy desbalanceado en los datos reales (casi todo es Intermedio): el reporte lo dice.
+    """
+    arbol = Arbol("nivel", "Nivel de experiencia")
+    niveles = {n: arbol.agregar(n, arbol.raiz, {"nivel": n}) for n in NIVELES_ORDEN}
+    sin_nivel = None
+    for fila in sorted(ejercicios, key=lambda f: int(f["id"])):
+        valor = fila.get("nivel")
+        nombre = NIVELES.get(valor.strip()) if isinstance(valor, str) else None
+        if nombre is None:
+            if sin_nivel is None:
+                sin_nivel = arbol.agregar(SIN_EQUIPAMIENTO, arbol.raiz, {"nivel": SIN_EQUIPAMIENTO})
+            padre = sin_nivel
+        else:
+            padre = niveles[nombre]
+        hoja = arbol.agregar(fila["nombre_es"], padre, {
+            "doc_id": int(fila["id"]), "origen": "ejercicios",
+            "modalidad": fila.get("modalidad"), "nivel": fila.get("nivel"),
+        })
+        arbol.doc_a_nodo[("ejercicios", int(fila["id"]))] = hoja
+
+    arbol.meta["niveles"] = niveles         # nombre -> Nodo
+    arbol.meta["conceptos"] = niveles
+    arbol.meta["sin_nivel"] = sin_nivel
     return arbol

@@ -253,3 +253,78 @@ VOCABULARIO_EXTRA = {
     "fibra", "digestion", "micronutrientes", "coordinacion", "perdida de grasa",
     "mitocondrias", "articulaciones", "rutina nocturna",
 }
+
+
+# ---------------------------------------------------------------------------
+# ÁRBOLES 3 y 4 — EQUIPAMIENTO y NIVEL (fase 6B; para ejercicios y, por etiquetas, artículos)
+#   Equipamiento > Categoría > Equipamiento > Ejercicio (hoja)
+#   Nivel de experiencia > Nivel > Ejercicio (hoja)
+# ---------------------------------------------------------------------------
+# (categoría, [equipamientos]). El orden es el de los menús y desempata de forma determinista.
+# Los nombres de los equipamientos con columna salen de EQUIPAMIENTO; Banco, Paralelas y
+# Correas solo existen como etiquetas de artículos (ningún ejercicio los trae): 0 ejercicios.
+CATEGORIAS_EQUIPAMIENTO = [
+    ("Pesas libres", ["Barra", "Barra Z", "Mancuernas", "Kettlebell"]),
+    ("Máquinas y poleas", ["Máquina", "Polea"]),
+    ("Peso corporal y bandas", ["Peso corporal", "Bandas", "Rodillo"]),
+    ("Balones", ["Balón medicinal", "Pelota de ejercicio"]),
+    ("Accesorios", ["Banco", "Paralelas", "Correas"]),
+    ("Otros", ["Otro", SIN_EQUIPAMIENTO]),
+]
+CATEGORIA_DE_EQUIPAMIENTO_DESCONOCIDO = "Otros"
+
+# Etiqueta de artículo (normalizada) -> nodo de Equipamiento.
+TERMINO_A_EQUIPAMIENTO = {
+    "barra": "Barra", "barra hexagonal": "Barra", "barra z": "Barra Z", "barra ez": "Barra Z",
+    "mancuerna": "Mancuernas", "mancuernas": "Mancuernas",
+    "maquina": "Máquina", "polea": "Polea",
+    "kettlebell": "Kettlebell", "kettlebells": "Kettlebell",
+    "banda": "Bandas", "bandas": "Bandas", "banda elastica": "Bandas",
+    "peso corporal": "Peso corporal", "rodillo": "Rodillo",
+    "balon medicinal": "Balón medicinal", "pelota de ejercicio": "Pelota de ejercicio",
+    "banco": "Banco", "paralelas": "Paralelas", "correas": "Correas",
+}
+
+# Vocabulario del USUARIO que nombra un equipamiento (consultas). «banco» NO está: su raíz es la
+# de «banca» y «press de banca» no habla del banco. «Otro» y «Sin especificar» no se pueden nombrar.
+CONSULTA_EQUIPAMIENTO = {
+    "Barra": ["barra", "barra hexagonal"], "Barra Z": ["barra ez", "barra zeta"],
+    "Mancuernas": ["mancuerna", "mancuernas"], "Máquina": ["maquina", "maquinas"],
+    "Polea": ["polea", "poleas", "cable"], "Kettlebell": ["kettlebell", "pesa rusa"],
+    "Bandas": ["banda", "bandas", "banda elastica"],
+    "Peso corporal": ["peso corporal", "sin material", "sin equipo"],
+    "Rodillo": ["rodillo", "foam roller"], "Balón medicinal": ["balon medicinal"],
+    "Pelota de ejercicio": ["pelota de ejercicio", "fitball"],
+    "Paralelas": ["paralelas"], "Correas": ["correas"],
+}
+
+NIVELES_ORDEN = ["Principiante", "Intermedio", "Avanzado"]    # = valores de NIVELES, de menor a mayor
+TERMINO_A_NIVEL = {
+    "principiante": "Principiante", "principiantes": "Principiante", "novato": "Principiante",
+    "intermedio": "Intermedio", "avanzado": "Avanzado", "experto": "Avanzado",
+}
+CONSULTA_NIVEL = {
+    "Principiante": ["principiante", "principiantes", "novato"],
+    "Intermedio": ["intermedio"],
+    "Avanzado": ["avanzado", "experto"],
+}
+
+# --- Los árboles juntos (orden = prioridad: desempata cualquier elección entre árboles) ---
+ORDEN_ARBOLES = ["anatomia", "temas", "equipamiento", "nivel"]
+TITULO_ARBOL = {"anatomia": "Anatomía", "temas": "Temas", "equipamiento": "Equipamiento", "nivel": "Nivel"}
+# Árbol al que salta una consulta que nombra UN solo concepto (conserva el comportamiento de la fase 1:
+# músculo <-> tema; los demás saltan a Anatomía).
+ARBOL_COMPANERO = {"anatomia": "temas", "temas": "anatomia", "equipamiento": "anatomia", "nivel": "anatomia"}
+# La recuperación TF-IDF sin conceptos solo compara estos árboles (los de la fase 1).
+ARBOLES_RECUPERACION = ("anatomia", "temas")
+
+
+def equipamientos_de_etiquetas(etiquetas):
+    """Nombres de nodos de Equipamiento que mencionan las etiquetas (orden estable)."""
+    return sorted({TERMINO_A_EQUIPAMIENTO[t] for t in etiquetas if t in TERMINO_A_EQUIPAMIENTO})
+
+
+def niveles_de_etiquetas(etiquetas):
+    """Niveles que mencionan las etiquetas, de menor a mayor."""
+    hallados = {TERMINO_A_NIVEL[t] for t in etiquetas if t in TERMINO_A_NIVEL}
+    return [n for n in NIVELES_ORDEN if n in hallados]
