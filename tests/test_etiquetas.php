@@ -26,7 +26,7 @@ $nombres = fn(array $etiquetas) => array_column($etiquetas, 'nombre');
 
 // ----------------------------------------------------------------------------- etiquetas.php
 echo "\n[etiquetas.php: catálogo con conteo]\n";
-[$cod, $r] = $anon->pedir('etiquetas.php');
+[$cod, $r] = $A->pedir('etiquetas.php');
 $porNombre = array_column($r['etiquetas'] ?? [], null, 'nombre');
 comprobar('GET etiquetas.php -> 200', $cod === 200 && ($r['status'] ?? '') === 'success', "obtuvo $cod");
 comprobar('cada etiqueta trae id, nombre, tipo y n',
@@ -40,10 +40,15 @@ comprobar('tipos: Pecho músculo, Barra equipamiento, Intermedio nivel, Fuerza m
     && ($porNombre['Intermedio']['tipo'] ?? '') === 'nivel' && ($porNombre['Fuerza']['tipo'] ?? '') === 'modalidad'
     && ($porNombre['Pierna']['tipo'] ?? '') === 'tema');
 comprobar('nombres visibles con acento (Cuádriceps, Máquina)', isset($porNombre['Cuádriceps'], $porNombre['Máquina']));
-[$cod, $r] = $anon->pedir('etiquetas.php?tipo=nivel');
+comprobar('etiquetas.php sin sesión -> 401 (fase 7: ya no es público)', $anon->pedir('etiquetas.php')[0] === 401);
+comprobar('menus.php sin sesión -> 401, también el cruce que lanza Python',
+    $anon->pedir('menus.php?accion=docs&m=1&ids=301')[0] === 401
+    && $anon->pedir('menus.php?accion=cruce&a=anatomia&x=1&b=equipamiento&y=barra')[0] === 401
+    && $anon->pedir('menus.php?accion=catalogo')[0] === 401);
+[$cod, $r] = $A->pedir('etiquetas.php?tipo=nivel');
 comprobar('?tipo=nivel devuelve solo niveles',
     $cod === 200 && $r['etiquetas'] && !array_filter($r['etiquetas'], fn($e) => $e['tipo'] !== 'nivel'), json_encode($r));
-[$cod] = $anon->pedir('etiquetas.php?tipo=' . rawurlencode("nivel' OR '1'='1"));
+[$cod] = $A->pedir('etiquetas.php?tipo=' . rawurlencode("nivel' OR '1'='1"));
 comprobar('tipo fuera de la lista -> 422', $cod === 422, "obtuvo $cod");
 
 // ----------------------------------------------------------------------------- tarjetas
@@ -59,7 +64,7 @@ comprobar('meta del ejercicio 101: Pecho, Barra, Principiante',
 comprobar('etiquetas del ejercicio 101 en orden de tipo', $nombres($t101['etiquetas'] ?? []) === ['Pecho', 'Barra', 'Principiante', 'Fuerza'],
     json_encode($nombres($t101['etiquetas'] ?? [])));
 comprobar('tipo en singular: Ejercicio', ($t101['tipo'] ?? '') === 'Ejercicio');
-[, $ab] = $anon->pedir('menus.php?accion=docs&m=1&ids=301');
+[, $ab] = $A->pedir('menus.php?accion=docs&m=1&ids=301');
 comprobar('menus.php devuelve las mismas tarjetas',
     ($ab['articulos'][0]['tipo'] ?? '') === 'Artículo' && isset($ab['articulos'][0]['etiquetas'], $ab['ejercicios'][0]['meta'])
     && count($ab['ejercicios']) === 5, json_encode([$ab['articulos'][0] ?? null, count($ab['ejercicios'] ?? [])]));

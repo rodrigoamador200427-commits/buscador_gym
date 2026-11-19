@@ -21,7 +21,10 @@ $A->pedir('seleccionar_perfil.php', ['perfil_id' => $perfil]);
 
 // ----------------------------------------------------------------------------- catálogo
 echo "\n[menus.php?accion=catalogo: cinco árboles]\n";
-[$cod, $cat] = $anon->pedir('menus.php?accion=catalogo');
+comprobar('catálogo y cruce sin sesión -> 401 (no se lanza Python para un anónimo)',
+    $anon->pedir('menus.php?accion=catalogo')[0] === 401
+    && $anon->pedir('menus.php?accion=cruce&a=anatomia&x=1&b=equipamiento&y=barra')[0] === 401);
+[$cod, $cat] = $A->pedir('menus.php?accion=catalogo');
 comprobar('catálogo -> 200 con los cinco árboles en orden', $cod === 200 && array_column($cat['arboles'] ?? [], 'id') === ['anatomia', 'temas', 'equipamiento', 'nivel', 'patron'],
     json_encode(array_column($cat['arboles'] ?? [], 'id')));
 comprobar('un par por cada combinación de dos árboles (10)', count($cat['pares'] ?? []) === 10, json_encode(array_keys($cat['pares'] ?? [])));
@@ -43,15 +46,15 @@ comprobar('anatomia|temas solo tiene artículos (los ejercicios no entran en Tem
 
 // ----------------------------------------------------------------------------- cruce
 echo "\n[menus.php?accion=cruce]\n";
-[$cod, $c] = $anon->pedir('menus.php?accion=cruce&a=anatomia&x=1&b=equipamiento&y=barra');
+[$cod, $c] = $A->pedir('menus.php?accion=cruce&a=anatomia&x=1&b=equipamiento&y=barra');
 comprobar('pecho x barra -> 200 con ejercicios y las rutas de los dos nodos',
     $cod === 200 && ($c['status'] ?? '') === 'success' && count($c['ejercicios'] ?? []) >= 1
     && array_column($c['nodos'] ?? [], 'arbol') === ['anatomia', 'equipamiento'], json_encode([$cod, array_column($c['nodos'] ?? [], 'arbol'), count($c['ejercicios'] ?? [])]));
 comprobar('los ejercicios devueltos son de pecho y de barra',
     !array_filter($c['ejercicios'] ?? [], fn($t) => ($t['meta']['musculo'] ?? '') !== 'Pecho' || ($t['meta']['equipamiento'] ?? '') !== 'Barra'),
     json_encode(array_map(fn($t) => $t['meta'], $c['ejercicios'] ?? [])));
-comprobar('el cruce no depende del orden de los árboles', json_encode($anon->pedir('menus.php?accion=cruce&a=equipamiento&x=barra&b=anatomia&y=1')[1]['ejercicios'] ?? null) === json_encode($c['ejercicios'] ?? 0));
-[, $m] = $anon->pedir('menus.php?accion=cruce&a=anatomia&x=1&b=temas&y=fuerza');
+comprobar('el cruce no depende del orden de los árboles', json_encode($A->pedir('menus.php?accion=cruce&a=equipamiento&x=barra&b=anatomia&y=1')[1]['ejercicios'] ?? null) === json_encode($c['ejercicios'] ?? 0));
+[, $m] = $A->pedir('menus.php?accion=cruce&a=anatomia&x=1&b=temas&y=fuerza');
 comprobar('músculo x tema sigue mostrando los ejercicios del músculo', ($m['ejercicios_del_musculo'] ?? null) === true && count($m['articulos'] ?? []) >= 1, json_encode($m['ejercicios_del_musculo'] ?? null));
 comprobar('misma estructura de tarjeta que la búsqueda', !array_diff(['doc_id', 'origen', 'tipo', 'titulo', 'resumen', 'meta', 'etiquetas'], array_keys($c['ejercicios'][0] ?? [])));
 foreach (['a=inventado&x=1&b=nivel&y=principiante' => 'árbol fuera de la lista',
@@ -59,16 +62,16 @@ foreach (['a=inventado&x=1&b=nivel&y=principiante' => 'árbol fuera de la lista'
           'a=anatomia&x=1&b=equipamiento&y=Barra' => 'clave con mayúsculas',
           "a=anatomia&x=1&b=nivel&y=" . rawurlencode("principiante' OR 1=1") => 'inyección en la clave',
           'a=anatomia&x=1&b=nivel' => 'falta una clave'] as $url => $que) {
-    comprobar("422: $que", $anon->pedir("menus.php?accion=cruce&$url")[0] === 422);
+    comprobar("422: $que", $A->pedir("menus.php?accion=cruce&$url")[0] === 422);
 }
-comprobar('concepto que no existe -> 404 (no se interpreta)', $anon->pedir('menus.php?accion=cruce&a=anatomia&x=99&b=nivel&y=principiante')[0] === 404);
+comprobar('concepto que no existe -> 404 (no se interpreta)', $A->pedir('menus.php?accion=cruce&a=anatomia&x=99&b=nivel&y=principiante')[0] === 404);
 
-[$cod, $p] = $anon->pedir('menus.php?accion=cruce&a=anatomia&x=1&b=patron&y=empuje%20horizontal');
+[$cod, $p] = $A->pedir('menus.php?accion=cruce&a=anatomia&x=1&b=patron&y=empuje%20horizontal');
 comprobar('pecho x empuje horizontal -> 200, ejercicios de pecho y aviso de aproximado', $cod === 200 && count($p['ejercicios'] ?? []) >= 1
     && ($p['aproximado'] ?? null) === true && array_column($p['nodos'] ?? [], 'aproximado') === [false, true], json_encode([$cod, $p['aproximado'] ?? null]));
-[, $p2] = $anon->pedir('menus.php?accion=cruce&a=anatomia&x=1&b=equipamiento&y=barra');
+[, $p2] = $A->pedir('menus.php?accion=cruce&a=anatomia&x=1&b=equipamiento&y=barra');
 comprobar('un cruce sin patrón no se marca como aproximado', ($p2['aproximado'] ?? null) === false);
-comprobar('«sin clasificar» se puede pedir como cualquier concepto', $anon->pedir('menus.php?accion=cruce&a=patron&x=sin%20clasificar&b=nivel&y=principiante')[0] === 200);
+comprobar('«sin clasificar» se puede pedir como cualquier concepto', $A->pedir('menus.php?accion=cruce&a=patron&x=sin%20clasificar&b=nivel&y=principiante')[0] === 200);
 
 // ----------------------------------------------------------------------------- buscar.php
 echo "\n[buscar.php: descubrimiento con la ruta de cada árbol]\n";

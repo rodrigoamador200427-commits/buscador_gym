@@ -1,5 +1,6 @@
 <?php
-// menus.php — datos para los menús A+B (contenido público, no usa perfil)
+// menus.php — datos para los menús A+B. Exige sesión (cualquier cuenta; no usa perfil): cada llamada
+// lanza un proceso de Python y no debe poder dispararla un anónimo.
 //   ?accion=catalogo                       -> músculos, temas y puentes (Python)
 //   ?accion=docs&m=<grupo_id>&ids=1,2,3    -> artículos puente + ejercicios del músculo (MySQL)
 //   ?accion=cruce&a=<árbol>&x=<clave>&b=<árbol>&y=<clave>
@@ -9,7 +10,10 @@ require_once __DIR__ . '/lib/bootstrap.php';
 require_once __DIR__ . '/lib/python.php';
 require_once __DIR__ . '/lib/documentos.php';
 
-$accion = $_GET['accion'] ?? 'catalogo';
+requerir_cuenta();          // 401 sin sesión
+session_write_close();      // Python tarda: no retener el bloqueo de la sesión mientras corre
+
+$accion =$_GET['accion'] ?? 'catalogo';
 
 if ($accion === 'catalogo') {
     $datos = ejecutar_python('catalogo_arboles.py');

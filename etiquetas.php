@@ -1,8 +1,11 @@
 <?php
 // etiquetas.php — GET [?tipo=musculo|equipamiento|nivel|modalidad|tema].
-// Catálogo de etiquetas con su conteo de documentos. Contenido público: no usa perfil.
+// Catálogo de etiquetas con su conteo de documentos. Exige sesión (cualquier cuenta); no usa perfil.
 declare(strict_types=1);
 require_once __DIR__ . '/lib/bootstrap.php';
+
+requerir_cuenta();          // 401 sin sesión
+session_write_close();
 
 const TIPOS_ETIQUETA = ['musculo', 'equipamiento', 'nivel', 'modalidad', 'tema'];
 

@@ -1,0 +1,12 @@
+# Raíz del proyecto: solo se sirven index.html, los endpoints .php y assets/.
+# Lo demás (código fuente, datos, documentación, el repositorio Git y las copias de la BD) no debe
+# poder leerse por HTTP. Las carpetas internas tienen además su propio .htaccess.
+Options -Indexes
+
+# Carpetas internas y el repositorio (404: no se confirma que existan)
+RedirectMatch 404 /(\.git|scripts_py|backups|unirdataset|docs|corpus|sql|tests|herramientas|config|lib)(/|$)
+
+# Archivos sueltos de la raíz que no son páginas ni endpoints
+<FilesMatch "^(\..*|.*\.(md|csv|docx|txt|py|sql|log|bak|ini|json|yml|yaml))$">
+    Require all denied
+</FilesMatch>
