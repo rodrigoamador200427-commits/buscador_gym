@@ -300,7 +300,7 @@ CONSULTA_EQUIPAMIENTO = {
     "Bandas": ["banda", "bandas", "banda elastica"],
     "Peso corporal": ["peso corporal", "sin material", "sin equipo"],
     "Rodillo": ["foam roller"], "Balón medicinal": ["balon medicinal"],
-    "Pelota de ejercicio": ["pelota de ejercicio", "fitball"],
+    "Pelota de ejercicio": ["pelota", "fitball"],    # «ejercicio» es palabra de intención: se descarta de la consulta
     "Paralelas": ["paralelas"],
 }
 

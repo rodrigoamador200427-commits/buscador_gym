@@ -887,19 +887,19 @@
     ]
    },
    "cuatro_arboles": {
-    "via": "concepto",
+    "via": "interseccion",
     "origen": "Anatomía: Abdomen",
-    "destino": "Temas: Resistencia",
+    "destino": "Equipamiento: Pelota de ejercicio",
     "arboles": [
      "Anatomía",
-     "Temas"
+     "Equipamiento"
     ],
     "documento": [
      "articulos",
-     1675
+     859
     ]
    },
-   "cambia": false
+   "cambia": true
   }
  ],
  "pares": [
@@ -984,8 +984,8 @@
   "cuatro_arboles": {
    "consultas": 12,
    "por_via": {
-    "concepto": 2,
-    "interseccion": 9,
+    "concepto": 1,
+    "interseccion": 10,
     "interseccion_parcial": 1
    },
    "fallback": 0,

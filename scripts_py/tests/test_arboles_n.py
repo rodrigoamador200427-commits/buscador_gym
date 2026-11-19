@@ -102,6 +102,13 @@ def test_rodilla_y_correr_no_nombran_equipamiento(motor):
     assert motor.descubrir(raices("foam roller"))["traza"]["conceptos"] == {"equipamiento": ["Rodillo"]}
 
 
+def test_pelota_se_nombra_sin_la_palabra_ejercicio(motor):
+    """«ejercicio» es palabra de intención y se descarta de la consulta: «pelota de ejercicio» no puede
+    depender de ella."""
+    assert motor.descubrir(raices("abdomen pelota"))["traza"]["conceptos"]["equipamiento"] == ["Pelota de ejercicio"]
+    assert motor.descubrir(raices("fitball"))["traza"]["conceptos"] == {"equipamiento": ["Pelota de ejercicio"]}
+
+
 def test_equipamiento_nombres_salen_de_la_taxonomia():
     nombres = {n for _, l in CATEGORIAS_EQUIPAMIENTO for n in l}
     assert set(EQUIPAMIENTO.values()) <= nombres                                 # todo valor de la columna tiene nodo
