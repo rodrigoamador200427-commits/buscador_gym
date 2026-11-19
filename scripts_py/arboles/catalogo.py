@@ -4,7 +4,7 @@ Menú A = músculos (árbol de Anatomía). Menú B = temas (árbol de Temas).
 `puentes["gid|Tema"]` = ids de los artículos que conectan ambos nodos (el "World War Z").
 """
 from .recorridos import preorden
-from .taxonomia import TITULO_ARBOL
+from .taxonomia import TITULO_ARBOL, normalizar
 
 
 def catalogo(anatomia, temas, aristas):
@@ -24,6 +24,13 @@ def catalogo(anatomia, temas, aristas):
 
 
 # ------------------------------------------------------------------ N árboles (fase 6B)
+def clave_externa(arbol, clave, nodo):
+    """Clave de un concepto fuera de Python (URLs, JSON): el grupo_id en anatomía y el nombre sin
+    acentos ni mayúsculas en los demás. Sin acentos a propósito: viajan como argumento de línea de
+    comandos y en Windows un acento puede llegar deformado."""
+    return str(clave) if arbol == "anatomia" else normalizar(nodo.nombre)
+
+
 def _conteo(bosque, nodo):
     docs = bosque.docs_de_nodo(nodo)
     ej = sum(1 for d in docs if d[0] == "ejercicios")
@@ -34,7 +41,8 @@ def catalogo_general(bosque):
     """Catálogo para los menús de dos árboles cualesquiera.
 
     {"arboles": [{"id", "titulo", "conceptos": [{"clave", "nombre", "grupo", "ruta", "n": [ejercicios, artículos]}]}],
-     "pares": {"anatomia|temas": {"1|Fuerza": [ejercicios, artículos], ...}}}
+     "pares": {"anatomia|temas": {"1|fuerza": [ejercicios, artículos], ...}}}
+    clave: el grupo_id (texto) en anatomía; en los demás árboles el nombre sin acentos ni mayúsculas.
     Solo salen las combinaciones que tienen documentos (las demás no se inventan). `n` cuenta los
     documentos del nodo; en `pares`, los documentos que pertenecen a los dos nodos.
     """
@@ -43,12 +51,13 @@ def catalogo_general(bosque):
         arbol = bosque.arbol(nombre)
         conceptos = []
         for clave, nodo in bosque.conceptos(nombre).items():
-            conceptos.append({"clave": str(clave), "nombre": nodo.nombre,
+            conceptos.append({"clave": clave_externa(nombre, clave, nodo), "nombre": nodo.nombre,
                               "grupo": nodo.padre.nombre if nodo.padre and nodo.padre is not arbol.raiz else "",
                               "ruta": [n.nombre for n in nodo.ruta()], "n": _conteo(bosque, nodo)})
         arboles.append({"id": nombre, "titulo": TITULO_ARBOL[nombre], "conceptos": conceptos})
 
-    claves = {nombre: {n.id: str(c) for c, n in bosque.conceptos(nombre).items()} for nombre in bosque.nombres}
+    claves = {nombre: {n.id: clave_externa(nombre, c, n) for c, n in bosque.conceptos(nombre).items()}
+              for nombre in bosque.nombres}
     pares = {}
     for (a, b), par in bosque.pares():
         filas = {}
@@ -67,7 +76,7 @@ def docs_del_cruce(bosque, arbol_a, clave_a, arbol_b, clave_b):
         return None
     nodos = []
     for arbol, clave in ((arbol_a, clave_a), (arbol_b, clave_b)):
-        por_clave = {str(c): n for c, n in bosque.conceptos(arbol).items()}
+        por_clave = {clave_externa(arbol, c, n): n for c, n in bosque.conceptos(arbol).items()}
         if str(clave) not in por_clave:
             return None
         nodos.append(por_clave[str(clave)])

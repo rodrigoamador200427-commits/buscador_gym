@@ -80,6 +80,28 @@ def test_equipamiento_estructura_y_altura():
     assert len(hojas) == len(EJERCICIOS) and all(h.nivel == 3 for h in hojas)
 
 
+def test_el_vocabulario_de_consulta_no_choca_con_el_de_otros_arboles():
+    """Una palabra de equipamiento o nivel no puede tener la misma raíz que una que ya nombra un
+    músculo o un tema («rodillo»/«rodilla», «correas»/«correr»): cambiaría consultas de la fase 1."""
+    from arboles.taxonomia import (ALIAS_MUSCULO, CONSULTA_NIVEL, ETIQUETA_A_MUSCULO, SINONIMOS_TEMA, TEMAS, normalizar)
+
+    def raices_de_frase(f):
+        return frozenset(st.stem(p) for p in normalizar(f).split() if p)
+
+    previos = [raices_de_frase(f) for f in list(ETIQUETA_A_MUSCULO) + list(ALIAS_MUSCULO)]
+    previos += [raices_de_frase(t) for _, _, tags in TEMAS for t in tags]
+    previos += [raices_de_frase(f) for fs in SINONIMOS_TEMA.values() for f in fs]
+    nuevos = [(n, f) for vocab in (CONSULTA_EQUIPAMIENTO, CONSULTA_NIVEL) for n, fs in vocab.items() for f in fs]
+    choques = [(n, f) for n, f in nuevos for p in previos if p and (p <= raices_de_frase(f) or raices_de_frase(f) <= p)]
+    assert not choques, choques
+
+
+def test_rodilla_y_correr_no_nombran_equipamiento(motor):
+    assert "equipamiento" not in motor.descubrir(raices("dolor de rodilla sentadilla"))["traza"]["conceptos"]
+    assert "equipamiento" not in motor.descubrir(raices("correr resistencia cardio"))["traza"]["conceptos"]
+    assert motor.descubrir(raices("foam roller"))["traza"]["conceptos"] == {"equipamiento": ["Rodillo"]}
+
+
 def test_equipamiento_nombres_salen_de_la_taxonomia():
     nombres = {n for _, l in CATEGORIAS_EQUIPAMIENTO for n in l}
     assert set(EQUIPAMIENTO.values()) <= nombres                                 # todo valor de la columna tiene nodo
@@ -280,14 +302,14 @@ def test_catalogo_general_arboles_conceptos_y_pares(bosque):
     assert [a["titulo"] for a in c["arboles"]] == ["Anatomía", "Temas", "Equipamiento", "Nivel"]
     eq = next(a for a in c["arboles"] if a["id"] == "equipamiento")["conceptos"]
     mancuernas = next(x for x in eq if x["nombre"] == "Mancuernas")
-    assert mancuernas["clave"] == "Mancuernas" and mancuernas["grupo"] == "Pesas libres" and mancuernas["n"] == [2, 2]
+    assert mancuernas["clave"] == "mancuernas" and mancuernas["grupo"] == "Pesas libres" and mancuernas["n"] == [2, 2]
     assert mancuernas["ruta"] == ["Equipamiento", "Pesas libres", "Mancuernas"]
     pecho = next(x for x in next(a for a in c["arboles"] if a["id"] == "anatomia")["conceptos"] if x["clave"] == "1")
     assert pecho["nombre"] == "Pecho" and pecho["grupo"] == "Tren superior"
     assert len(c["pares"]) == 6
-    assert c["pares"]["anatomia|equipamiento"]["1|Mancuernas"] == [2, 2]          # [ejercicios, artículos]
-    assert c["pares"]["anatomia|temas"]["1|Fuerza"] == [0, 1]                    # los ejercicios no entran en Temas
-    assert "1|Kettlebell" not in c["pares"]["anatomia|equipamiento"]              # sin documentos: no se inventa
+    assert c["pares"]["anatomia|equipamiento"]["1|mancuernas"] == [2, 2]          # [ejercicios, artículos]
+    assert c["pares"]["anatomia|temas"]["1|fuerza"] == [0, 1]                    # los ejercicios no entran en Temas
+    assert "1|kettlebell" not in c["pares"]["anatomia|equipamiento"]              # sin documentos: no se inventa
     assert json.dumps(c)                                                          # serializable
 
 
@@ -300,14 +322,14 @@ def test_el_catalogo_clasico_sigue_igual(bosque):
 
 def test_docs_del_cruce_valida_y_ordena(bosque):
     from arboles.catalogo import docs_del_cruce
-    nodos, docs = docs_del_cruce(bosque, "anatomia", "1", "equipamiento", "Mancuernas")
+    nodos, docs = docs_del_cruce(bosque, "anatomia", "1", "equipamiento", "mancuernas")
     assert [n.nombre for n in nodos] == ["Pecho", "Mancuernas"]
     assert docs == [("articulos", 10), ("articulos", 11), ("ejercicios", 1), ("ejercicios", 2)]   # artículos primero
-    assert docs_del_cruce(bosque, "equipamiento", "Mancuernas", "anatomia", "1")[1] == [("articulos", 10), ("articulos", 11), ("ejercicios", 1), ("ejercicios", 2)]
-    for malo in (("anatomia", "1", "anatomia", "2"), ("anatomia", "99", "nivel", "Principiante"),
-                 ("anatomia", "1", "patron", "x"), ("anatomia", "1; DROP", "nivel", "Principiante")):
+    assert docs_del_cruce(bosque, "equipamiento", "mancuernas", "anatomia", "1")[1] == [("articulos", 10), ("articulos", 11), ("ejercicios", 1), ("ejercicios", 2)]
+    for malo in (("anatomia", "1", "anatomia", "2"), ("anatomia", "99", "nivel", "principiante"),
+                 ("anatomia", "1", "patron", "x"), ("anatomia", "1; DROP", "nivel", "principiante"), ("anatomia", "1", "equipamiento", "Mancuernas")):
         assert docs_del_cruce(bosque, *malo) is None
-    assert docs_del_cruce(bosque, "anatomia", "1", "equipamiento", "Kettlebell")[1] == []         # existe el cruce, sin documentos
+    assert docs_del_cruce(bosque, "anatomia", "1", "equipamiento", "kettlebell")[1] == []         # existe el cruce, sin documentos
 
 
 # ============================================================= datos reales (opcionales)

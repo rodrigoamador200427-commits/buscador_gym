@@ -40,8 +40,11 @@ if (($motor['status'] ?? '') !== 'success') {
     $d = $motor['descubrimiento'] ?? [];
     $doc = $d['documentos'][0] ?? null;   // ya viene ordenado y es determinista
 
-    if ($doc && ($doc['origen'] ?? '') === 'articulos') {
-        $tarjeta = hidratar_documentos($db, [['doc_id' => (int)$doc['doc_id'], 'origen' => 'articulos']]);
+    $nodos = nodos_de_descubrimiento($d['nodos'] ?? []);   // la ruta del nodo en CADA árbol que participa
+
+    // El documento descubierto puede ser un artículo o un ejercicio (con equipamiento o nivel salen ejercicios)
+    if ($doc && in_array($doc['origen'] ?? '', ORIGENES_VALIDOS, true)) {
+        $tarjeta = hidratar_documentos($db, [['doc_id' => (int)$doc['doc_id'], 'origen' => $doc['origen']]]);
         $a = reset($tarjeta);
         if ($a) {
             $articulo_serendipia = $a + [
@@ -52,6 +55,7 @@ if (($motor['status'] ?? '') !== 'success') {
                 'destino_ruta' => $d['destino']['ruta'] ?? [],
                 'origen_arbol' => $d['origen']['arbol'] ?? '',
                 'destino_arbol' => $d['destino']['arbol'] ?? '',
+                'nodos' => $nodos,
                 'lift' => $d['lift'] ?? null,
                 'razon_algoritmica' => $d['razon'] ?? '',
             ];
@@ -60,7 +64,8 @@ if (($motor['status'] ?? '') !== 'success') {
 
     // Sin documento que recomendar (sin_interseccion / ninguno): se muestra solo la explicación
     if ($articulo_serendipia === null && !empty($d['razon'])) {
-        $articulo_serendipia = ['via' => $d['via'] ?? null, 'razon_algoritmica' => $d['razon'], 'sin_documento' => true];
+        $articulo_serendipia = ['via' => $d['via'] ?? null, 'razon_algoritmica' => $d['razon'], 'nodos' => $nodos,
+                                'sin_documento' => true];
     }
 }
 

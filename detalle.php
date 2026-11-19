@@ -1,6 +1,6 @@
 <?php
 // detalle.php — GET ?origen=ejercicios|articulos&doc_id=N. Detalle de una tarjeta:
-// texto completo, todas las etiquetas, ruta en el árbol, si el PERFIL ACTIVO le dio
+// texto completo, todas las etiquetas, su ruta en cada árbol, si el PERFIL ACTIVO le dio
 // "me gusta" y hasta 4 documentos relacionados (por etiquetas en común).
 // El perfil sale solo de la sesión. La apertura se registra aparte (registrar_evento.php).
 declare(strict_types=1);
@@ -21,7 +21,8 @@ if ($doc === null) {
 $s = $db->prepare("SELECT 1 FROM interacciones WHERE perfil_id = ? AND origen = ? AND doc_id = ? AND interaccion = 'like'");
 $s->execute([$perfilId, $origen, $docId]);
 $doc['liked'] = (bool)$s->fetchColumn();
-$doc['ruta'] = ruta_documento($db, $origen, $docId);
+$doc['ruta'] = ruta_documento($db, $origen, $docId);          // la principal (compatibilidad)
+$doc['rutas'] = rutas_documento($db, $origen, $docId);        // una por árbol
 
 $rel = documentos_relacionados($db, $origen, $docId, 4);
 $tarjetas = hidratar_documentos($db, $rel);

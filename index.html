@@ -117,11 +117,13 @@
         <main class="contenedor arboles" id="vistaArboles" hidden>
             <div class="panel">
                 <h1 class="cabecera-seccion" style="font-size:var(--texto-xl)">Explorar por árboles</h1>
-                <p>Elige un músculo y un tema para ver los artículos que tratan los dos.</p>
+                <p>Elige dos árboles y un concepto de cada uno para ver los documentos que pertenecen a los dos.</p>
                 <form class="arboles-form" id="formAB">
-                    <label class="campo">Músculo <select id="menuA"></select></label>
-                    <label class="campo">Tema <select id="menuB"></select></label>
-                    <button class="btn btn-primario" type="submit">Ver artículos</button>
+                    <label class="campo">Árbol A <select id="arbolA"></select></label>
+                    <label class="campo"><span id="etiquetaA">Músculo</span> <select id="menuA"></select></label>
+                    <label class="campo">Árbol B <select id="arbolB"></select></label>
+                    <label class="campo"><span id="etiquetaB">Tema</span> <select id="menuB"></select></label>
+                    <button class="btn btn-primario" type="submit">Ver documentos</button>
                 </form>
                 <div id="resultadoAB" class="arboles-resultado"></div>
             </div>
@@ -436,7 +438,14 @@
         return `<ul class="ruta" aria-label="${esc(nombreArbol)}">${nodos.map(n => `<li>${esc(n)}</li>`).join('')}</ul>`;
     }
 
-    // Artículo que el sistema relaciona con la búsqueda a través de los árboles.
+    // Ruta del nodo en CADA árbol que participa (el servidor manda `nodos`; sin ellos, origen y destino).
+    function rutasNodosHTML(d) {
+        const nodos = (d.nodos || []).filter(n => n && n.ruta && n.ruta.length);
+        if (!nodos.length) return `${rutaHTML(d.origen_ruta, 'Ruta de origen')}${rutaHTML(d.destino_ruta, 'Ruta de destino')}`;
+        return nodos.map(n => `<div class="ruta-arbol"><h3>${esc(n.titulo || n.arbol)}</h3>${rutaHTML(n.ruta, 'Ruta en ' + (n.titulo || n.arbol))}</div>`).join('');
+    }
+
+    // Documento que el sistema relaciona con la búsqueda a través de los árboles.
     function pintarDescubrimiento(d) {
         const zona = $('discoveryZone');
         if (!d || d.sin_documento || !d.doc_id) { zona.innerHTML = ''; return; }
@@ -444,7 +453,7 @@
             <section class="panel relacionado-busqueda" aria-labelledby="tituloRelacionado">
                 <h2 id="tituloRelacionado">Relacionado con tu búsqueda</h2>
                 <p class="porque"><strong>Por qué aparece esto:</strong> ${esc(d.razon_algoritmica)}</p>
-                <div class="rutas">${rutaHTML(d.origen_ruta, 'Ruta de origen')}${rutaHTML(d.destino_ruta, 'Ruta de destino')}</div>
+                <div class="rutas">${rutasNodosHTML(d)}</div>
                 <div class="cuadricula">${tarjetaHTML(d)}</div>
             </section>`;
     }
@@ -524,7 +533,9 @@
                     <div class="detalle-acciones">
                         <button type="button" class="btn btn-gusta-texto" id="detalleGusta" aria-pressed="false"></button>
                     </div>
-                    ${d.ruta ? `<div><h3>Ubicación en el árbol</h3>${rutaHTML(d.ruta.nodos, 'Ubicación en el árbol')}</div>` : ''}
+                    ${(d.rutas && d.rutas.length)
+                        ? d.rutas.map(r => `<div><h3>Ubicación en ${esc(r.titulo)}</h3>${rutaHTML(r.nodos, 'Ubicación en ' + r.titulo)}</div>`).join('')
+                        : (d.ruta ? `<div><h3>Ubicación en el árbol</h3>${rutaHTML(d.ruta.nodos, 'Ubicación en el árbol')}</div>` : '')}
                     ${metaFilas ? `<dl class="tarjeta-meta" style="border-top:0; padding-top:0">${metaFilas}</dl>` : ''}
                     <p class="detalle-texto">${esc(d.texto)}</p>
                 </div>
@@ -737,16 +748,46 @@
     });
 
     // ------------------------------------------------------------------ explorar por árboles
+    // Dos árboles cualesquiera. Catálogo: {arboles: [{id, titulo, conceptos: [{clave, nombre, grupo, ruta, n: [ejercicios, artículos]}]}],
+    // pares: {"anatomia|temas": {"1|fuerza": [ejercicios, artículos]}}}. Las claves de los pares siguen el orden de `arboles`.
     let catalogoAB = null;
-    const menuA = $('menuA'), menuB = $('menuB');
+    const menuA = $('menuA'), menuB = $('menuB'), arbolA = $('arbolA'), arbolB = $('arbolB');
+    const ETIQUETA_CONCEPTO = { anatomia: 'Músculo', temas: 'Tema', equipamiento: 'Equipamiento', nivel: 'Nivel' };
 
+    const arbolDe = id => catalogoAB.arboles.find(a => a.id === id);
+    const conceptoDe = (arbolId, clave) => arbolDe(arbolId).conceptos.find(c => c.clave === clave);
+    function cuenta(n) {
+        const [ej, ar] = n || [0, 0];
+        if (ej && ar) return `${plural(ej, 'ejercicio', 'ejercicios')} y ${plural(ar, 'artículo', 'artículos')}`;
+        if (ej) return plural(ej, 'ejercicio', 'ejercicios');
+        return ar ? plural(ar, 'artículo', 'artículos') : '0 documentos';
+    }
+    // documentos que unen el concepto ca del árbol a con el concepto cb del árbol b: [ejercicios, artículos]
+    function cruce(a, ca, b, cb) {
+        const orden = catalogoAB.arboles.map(x => x.id);
+        return orden.indexOf(a) < orden.indexOf(b)
+            ? ((catalogoAB.pares[`${a}|${b}`] || {})[`${ca}|${cb}`] || [0, 0])
+            : ((catalogoAB.pares[`${b}|${a}`] || {})[`${cb}|${ca}`] || [0, 0]);
+    }
+    const llenar = (sel, filas, previo) => {
+        sel.innerHTML = filas.map(f => `<option value="${esc(f[0])}">${esc(f[1])}</option>`).join('');
+        if (previo && filas.some(f => f[0] === previo)) sel.value = previo;
+    };
+
+    function opcionesA() {
+        llenar(menuA, arbolDe(arbolA.value).conceptos.map(c => [c.clave, `${c.nombre} (${cuenta(c.n)})`]), menuA.value);
+        $('etiquetaA').textContent = ETIQUETA_CONCEPTO[arbolA.value] || 'Concepto';
+    }
     function opcionesB() {
-        const previo = menuB.value;
-        menuB.innerHTML = catalogoAB.temas.map(t => {
-            const n = (catalogoAB.puentes[`${menuA.value}|${t.nombre}`] || []).length;
-            return `<option value="${esc(t.nombre)}">${esc(t.nombre)} (${plural(n, 'artículo', 'artículos')})</option>`;
-        }).join('');
-        if (previo) menuB.value = previo;
+        const a = arbolA.value, b = arbolB.value;
+        llenar(menuB, arbolDe(b).conceptos.map(c => [c.clave, `${c.nombre} (${cuenta(cruce(a, menuA.value, b, c.clave))})`]), menuB.value);
+        $('etiquetaB').textContent = ETIQUETA_CONCEPTO[b] || 'Concepto';
+    }
+    function opcionesArboles() {
+        const previoB = arbolB.value;
+        llenar(arbolA, catalogoAB.arboles.map(a => [a.id, a.titulo]), arbolA.value);
+        // B no puede ser el mismo árbol que A
+        llenar(arbolB, catalogoAB.arboles.filter(a => a.id !== arbolA.value).map(a => [a.id, a.titulo]), previoB);
     }
 
     function cargarCatalogos() {
@@ -759,48 +800,56 @@
         }).catch(() => {});
         if (catalogoAB) return;
         api('menus.php?accion=catalogo').then(c => {
-            if (c.status !== 'success') throw new Error();
+            if (c.status !== 'success' || !c.arboles) throw new Error();
             catalogoAB = c;
-            menuA.innerHTML = c.musculos.map(m =>
-                `<option value="${Number(m.gid)}">${esc(m.nombre)} (${plural(Number(m.n_ejercicios), 'ejercicio', 'ejercicios')})</option>`).join('');
+            llenar(arbolA, c.arboles.map(a => [a.id, a.titulo]), 'anatomia');
+            opcionesArboles();
+            if (c.arboles.some(a => a.id === 'temas')) arbolB.value = 'temas';
+            opcionesA();
             opcionesB();
         }).catch(e => {
             if (!(e instanceof SesionRequerida)) {
-                $('resultadoAB').innerHTML = '<p class="msg-error">No se pudieron cargar los músculos y temas. Recarga la página.</p>';
+                $('resultadoAB').innerHTML = '<p class="msg-error">No se pudieron cargar los árboles. Recarga la página.</p>';
             }
         });
     }
+    arbolA.addEventListener('change', () => { if (catalogoAB) { opcionesArboles(); opcionesA(); opcionesB(); } });
+    arbolB.addEventListener('change', () => { if (catalogoAB) opcionesB(); });
     menuA.addEventListener('change', () => { if (catalogoAB) opcionesB(); });
 
     $('formAB').addEventListener('submit', e => {
         e.preventDefault();
         if (!catalogoAB) return;
         const out = $('resultadoAB');
-        const m = catalogoAB.musculos.find(x => String(x.gid) === menuA.value);
-        const t = catalogoAB.temas.find(x => x.nombre === menuB.value);
-        if (!m || !t) return;
-        const ids = catalogoAB.puentes[`${m.gid}|${t.nombre}`] || [];
-        const rutas = `<div class="rutas">${rutaHTML(['Cuerpo humano', m.region, m.nombre], 'Árbol de anatomía')}${rutaHTML(['Conocimiento', t.rama, t.nombre], 'Árbol de temas')}</div>`;
+        const a = arbolA.value, b = arbolB.value;
+        const ca = conceptoDe(a, menuA.value), cb = conceptoDe(b, menuB.value);
+        if (!ca || !cb) return;
+        const rutas = `<div class="rutas">${[[a, ca], [b, cb]].map(([id, c]) =>
+            `<div class="ruta-arbol"><h3>${esc(arbolDe(id).titulo)}</h3>${rutaHTML(c.ruta, 'Ruta en ' + arbolDe(id).titulo)}</div>`).join('')}</div>`;
+        const n = cruce(a, ca.clave, b, cb.clave);
 
-        if (!ids.length) {
-            const alt = catalogoAB.temas
-                .map(x => [x.nombre, (catalogoAB.puentes[`${m.gid}|${x.nombre}`] || []).length])
-                .filter(a => a[1]).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'es')).slice(0, 3)
-                .map(a => `${esc(a[0])} (${a[1]})`).join(', ');
-            out.innerHTML = rutas + `<div class="estado"><p>Ningún artículo trata «${esc(m.nombre)}» y «${esc(t.nombre)}» a la vez.${
-                alt ? ` Temas que sí tienen artículos sobre ese músculo: ${alt}.` : ' Elige otro músculo.'}</p></div>`;
+        if (!n[0] && !n[1]) {
+            const alt = arbolDe(b).conceptos
+                .map(x => [x.nombre, cruce(a, ca.clave, b, x.clave)]).filter(x => x[1][0] + x[1][1])
+                .sort((p, q) => (q[1][0] + q[1][1]) - (p[1][0] + p[1][1]) || p[0].localeCompare(q[0], 'es')).slice(0, 3)
+                .map(x => `${esc(x[0])} (${cuenta(x[1])})`).join(', ');
+            out.innerHTML = rutas + `<div class="estado"><p>Ningún documento pertenece a «${esc(ca.nombre)}» y «${esc(cb.nombre)}» a la vez.${
+                alt ? ` En ${esc(arbolDe(b).titulo)} sí se relacionan con «${esc(ca.nombre)}»: ${alt}.` : ' Elige otro concepto.'}</p></div>`;
             return;
         }
         out.innerHTML = rutas + '<div class="estado"><p>Cargando…</p></div>';
         const gen = generacion;
-        api(`menus.php?accion=docs&m=${Number(m.gid)}&ids=${ids.map(Number).join(',')}`).then(d => {
+        api(`menus.php?accion=cruce&a=${encodeURIComponent(a)}&x=${encodeURIComponent(ca.clave)}&b=${encodeURIComponent(b)}&y=${encodeURIComponent(cb.clave)}`).then(d => {
             if (gen !== generacion) return;
             if (d.status !== 'success') throw new Error();
+            const muestra = (lista, total) => lista.length < total ? `<p class="conteo">Mostrando ${lista.length} de ${total}.</p>` : '';
+            const musculo = a === 'anatomia' ? ca.nombre : (b === 'anatomia' ? cb.nombre : '');
+            const tituloEj = d.ejercicios_del_musculo ? `Ejercicios de «${esc(musculo)}»` : `Ejercicios de «${esc(ca.nombre)}» y «${esc(cb.nombre)}»`;
             out.innerHTML = rutas
-                + `<h2>Artículos sobre «${esc(m.nombre)}» y «${esc(t.nombre)}»</h2><div class="cuadricula">${d.articulos.map(tarjetaHTML).join('')}</div>`
-                + (d.ejercicios.length ? `<h2>Ejercicios de «${esc(m.nombre)}»</h2><div class="cuadricula">${d.ejercicios.map(tarjetaHTML).join('')}</div>` : '');
+                + (d.articulos.length ? `<h2>Artículos sobre «${esc(ca.nombre)}» y «${esc(cb.nombre)}»</h2>${muestra(d.articulos, d.total_articulos)}<div class="cuadricula">${d.articulos.map(tarjetaHTML).join('')}</div>` : '')
+                + (d.ejercicios.length ? `<h2>${tituloEj}</h2>${d.ejercicios_del_musculo ? '' : muestra(d.ejercicios, d.total_ejercicios)}<div class="cuadricula">${d.ejercicios.map(tarjetaHTML).join('')}</div>` : '');
         }).catch(e => {
-            if (!(e instanceof SesionRequerida)) out.innerHTML = rutas + '<div class="estado estado-error"><p>No se pudo cargar. Vuelve a pulsar «Ver artículos».</p></div>';
+            if (!(e instanceof SesionRequerida)) out.innerHTML = rutas + '<div class="estado estado-error"><p>No se pudo cargar. Vuelve a pulsar «Ver documentos».</p></div>';
         });
     });
 

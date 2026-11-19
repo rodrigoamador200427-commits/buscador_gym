@@ -1,0 +1,996 @@
+{
+ "referencia": [
+  {
+   "consulta": "press de banca pecho",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Pecho",
+    "destino": "Temas: Planificación",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     1556
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Pecho",
+    "destino": "Temas: Planificación",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     1556
+    ]
+   },
+   "cambia": false
+  },
+  {
+   "consulta": "sentadilla profundidad",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Cuádriceps",
+    "destino": "Temas: Resistencia",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     1476
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Cuádriceps",
+    "destino": "Temas: Resistencia",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     1476
+    ]
+   },
+   "cambia": false
+  },
+  {
+   "consulta": "dominadas espalda",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Espalda",
+    "destino": "Temas: Planificación",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     1551
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Espalda",
+    "destino": "Temas: Planificación",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     1551
+    ]
+   },
+   "cambia": false
+  },
+  {
+   "consulta": "peso muerto cadera",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Glúteo",
+    "destino": "Temas: Resistencia",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     113
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Glúteo",
+    "destino": "Temas: Resistencia",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     113
+    ]
+   },
+   "cambia": false
+  },
+  {
+   "consulta": "hipertrofia biceps",
+   "dos_arboles": {
+    "via": "interseccion",
+    "origen": "Anatomía: Bíceps",
+    "destino": "Temas: Hipertrofia",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     256
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "interseccion",
+    "origen": "Anatomía: Bíceps",
+    "destino": "Temas: Hipertrofia",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     256
+    ]
+   },
+   "cambia": false
+  },
+  {
+   "consulta": "proteina despues de entrenar",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Temas: Alimentación",
+    "destino": "Anatomía: Antebrazos",
+    "arboles": [
+     "Temas",
+     "Anatomía"
+    ],
+    "documento": [
+     "articulos",
+     1827
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "concepto",
+    "origen": "Temas: Alimentación",
+    "destino": "Anatomía: Antebrazos",
+    "arboles": [
+     "Temas",
+     "Anatomía"
+    ],
+    "documento": [
+     "articulos",
+     1827
+    ]
+   },
+   "cambia": false
+  },
+  {
+   "consulta": "dormir recuperacion muscular",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Temas: Recuperación",
+    "destino": "Anatomía: Antebrazos",
+    "arboles": [
+     "Temas",
+     "Anatomía"
+    ],
+    "documento": [
+     "articulos",
+     1201
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "concepto",
+    "origen": "Temas: Recuperación",
+    "destino": "Anatomía: Antebrazos",
+    "arboles": [
+     "Temas",
+     "Anatomía"
+    ],
+    "documento": [
+     "articulos",
+     1201
+    ]
+   },
+   "cambia": false
+  },
+  {
+   "consulta": "creatina",
+   "dos_arboles": {
+    "via": "concepto_local",
+    "origen": "Temas: Suplementación",
+    "destino": "Temas: Suplementación",
+    "arboles": [
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     841
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "concepto_local",
+    "origen": "Temas: Suplementación",
+    "destino": "Temas: Suplementación",
+    "arboles": [
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     841
+    ]
+   },
+   "cambia": false
+  },
+  {
+   "consulta": "calentamiento antes de entrenar",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Temas: Prevención y movilidad",
+    "destino": "Anatomía: Pantorrilla",
+    "arboles": [
+     "Temas",
+     "Anatomía"
+    ],
+    "documento": [
+     "articulos",
+     1223
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "concepto",
+    "origen": "Temas: Prevención y movilidad",
+    "destino": "Anatomía: Pantorrilla",
+    "arboles": [
+     "Temas",
+     "Anatomía"
+    ],
+    "documento": [
+     "articulos",
+     1223
+    ]
+   },
+   "cambia": false
+  },
+  {
+   "consulta": "movilidad de hombro",
+   "dos_arboles": {
+    "via": "interseccion",
+    "origen": "Anatomía: Hombro",
+    "destino": "Temas: Prevención y movilidad",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     1115
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "interseccion",
+    "origen": "Anatomía: Hombro",
+    "destino": "Temas: Prevención y movilidad",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     1115
+    ]
+   },
+   "cambia": false
+  },
+  {
+   "consulta": "periodizacion del entrenamiento",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Temas: Planificación",
+    "destino": "Anatomía: Isquiotibiales",
+    "arboles": [
+     "Temas",
+     "Anatomía"
+    ],
+    "documento": [
+     "articulos",
+     1894
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "concepto",
+    "origen": "Temas: Planificación",
+    "destino": "Anatomía: Isquiotibiales",
+    "arboles": [
+     "Temas",
+     "Anatomía"
+    ],
+    "documento": [
+     "articulos",
+     1894
+    ]
+   },
+   "cambia": false
+  },
+  {
+   "consulta": "correr resistencia cardio",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Temas: Resistencia",
+    "destino": "Anatomía: Pantorrilla",
+    "arboles": [
+     "Temas",
+     "Anatomía"
+    ],
+    "documento": [
+     "articulos",
+     1477
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "concepto",
+    "origen": "Temas: Resistencia",
+    "destino": "Anatomía: Pantorrilla",
+    "arboles": [
+     "Temas",
+     "Anatomía"
+    ],
+    "documento": [
+     "articulos",
+     1477
+    ]
+   },
+   "cambia": false
+  },
+  {
+   "consulta": "gluteo puente",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Glúteo",
+    "destino": "Temas: Resistencia",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     113
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Glúteo",
+    "destino": "Temas: Resistencia",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     113
+    ]
+   },
+   "cambia": false
+  },
+  {
+   "consulta": "abdomen plancha",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Abdomen",
+    "destino": "Temas: Resistencia",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     1962
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Abdomen",
+    "destino": "Temas: Resistencia",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     1962
+    ]
+   },
+   "cambia": false
+  },
+  {
+   "consulta": "dolor de rodilla sentadilla",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Cuádriceps",
+    "destino": "Temas: Resistencia",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     1476
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Cuádriceps",
+    "destino": "Temas: Resistencia",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     1476
+    ]
+   },
+   "cambia": false
+  },
+  {
+   "consulta": "cafeina antes de entrenar",
+   "dos_arboles": {
+    "via": "concepto_local",
+    "origen": "Temas: Suplementación",
+    "destino": "Temas: Suplementación",
+    "arboles": [
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     539
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "concepto_local",
+    "origen": "Temas: Suplementación",
+    "destino": "Temas: Suplementación",
+    "arboles": [
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     539
+    ]
+   },
+   "cambia": false
+  },
+  {
+   "consulta": "hidratacion sudor",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Temas: Alimentación",
+    "destino": "Anatomía: Antebrazos",
+    "arboles": [
+     "Temas",
+     "Anatomía"
+    ],
+    "documento": [
+     "articulos",
+     1332
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "concepto",
+    "origen": "Temas: Alimentación",
+    "destino": "Anatomía: Antebrazos",
+    "arboles": [
+     "Temas",
+     "Anatomía"
+    ],
+    "documento": [
+     "articulos",
+     1332
+    ]
+   },
+   "cambia": false
+  },
+  {
+   "consulta": "triceps extension",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Tríceps",
+    "destino": "Temas: Fuerza",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     1557
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Tríceps",
+    "destino": "Temas: Fuerza",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     1557
+    ]
+   },
+   "cambia": false
+  }
+ ],
+ "nuevas": [
+  {
+   "consulta": "pecho mancuernas principiante",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Pecho",
+    "destino": "Temas: Planificación",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     111
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "interseccion",
+    "origen": "Anatomía: Pecho",
+    "destino": "Equipamiento: Mancuernas",
+    "arboles": [
+     "Anatomía",
+     "Equipamiento",
+     "Nivel"
+    ],
+    "documento": [
+     "ejercicios",
+     1718
+    ]
+   },
+   "cambia": true
+  },
+  {
+   "consulta": "press de banca con barra",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Pecho",
+    "destino": "Temas: Planificación",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     111
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "interseccion",
+    "origen": "Anatomía: Pecho",
+    "destino": "Equipamiento: Barra",
+    "arboles": [
+     "Anatomía",
+     "Equipamiento"
+    ],
+    "documento": [
+     "articulos",
+     589
+    ]
+   },
+   "cambia": true
+  },
+  {
+   "consulta": "espalda polea",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Espalda",
+    "destino": "Temas: Planificación",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     66
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "interseccion",
+    "origen": "Anatomía: Espalda",
+    "destino": "Equipamiento: Polea",
+    "arboles": [
+     "Anatomía",
+     "Equipamiento"
+    ],
+    "documento": [
+     "articulos",
+     464
+    ]
+   },
+   "cambia": true
+  },
+  {
+   "consulta": "triceps kettlebell avanzado",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Tríceps",
+    "destino": "Temas: Fuerza",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     1949
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "interseccion_parcial",
+    "origen": "Equipamiento: Kettlebell",
+    "destino": "Nivel: Avanzado",
+    "arboles": [
+     "Equipamiento",
+     "Nivel"
+    ],
+    "documento": [
+     "ejercicios",
+     2446
+    ]
+   },
+   "cambia": true
+  },
+  {
+   "consulta": "sentadilla maquina principiante",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Cuádriceps",
+    "destino": "Temas: Resistencia",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     1476
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "interseccion",
+    "origen": "Anatomía: Cuádriceps",
+    "destino": "Equipamiento: Máquina",
+    "arboles": [
+     "Anatomía",
+     "Equipamiento",
+     "Nivel"
+    ],
+    "documento": [
+     "ejercicios",
+     2640
+    ]
+   },
+   "cambia": true
+  },
+  {
+   "consulta": "abdomen peso corporal",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Abdomen",
+    "destino": "Temas: Resistencia",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     1675
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "interseccion",
+    "origen": "Anatomía: Abdomen",
+    "destino": "Equipamiento: Peso corporal",
+    "arboles": [
+     "Anatomía",
+     "Equipamiento"
+    ],
+    "documento": [
+     "articulos",
+     1658
+    ]
+   },
+   "cambia": true
+  },
+  {
+   "consulta": "ejercicios con bandas",
+   "dos_arboles": {
+    "via": "recuperacion",
+    "origen": "Temas: Fuerza",
+    "destino": "Anatomía: Tríceps",
+    "arboles": [
+     "Temas",
+     "Anatomía"
+    ],
+    "documento": [
+     "articulos",
+     756
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "concepto",
+    "origen": "Equipamiento: Bandas",
+    "destino": "Anatomía: Glúteo",
+    "arboles": [
+     "Equipamiento",
+     "Anatomía"
+    ],
+    "documento": [
+     "articulos",
+     586
+    ]
+   },
+   "cambia": true
+  },
+  {
+   "consulta": "biceps mancuernas",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Bíceps",
+    "destino": "Temas: Hipertrofia",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     763
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "interseccion",
+    "origen": "Anatomía: Bíceps",
+    "destino": "Equipamiento: Mancuernas",
+    "arboles": [
+     "Anatomía",
+     "Equipamiento"
+    ],
+    "documento": [
+     "ejercicios",
+     1372
+    ]
+   },
+   "cambia": true
+  },
+  {
+   "consulta": "ganar fuerza con barra",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Temas: Fuerza",
+    "destino": "Anatomía: Tríceps",
+    "arboles": [
+     "Temas",
+     "Anatomía"
+    ],
+    "documento": [
+     "articulos",
+     456
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "interseccion",
+    "origen": "Temas: Fuerza",
+    "destino": "Equipamiento: Barra",
+    "arboles": [
+     "Temas",
+     "Equipamiento"
+    ],
+    "documento": [
+     "articulos",
+     1554
+    ]
+   },
+   "cambia": true
+  },
+  {
+   "consulta": "dieta para principiantes",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Temas: Alimentación",
+    "destino": "Anatomía: Antebrazos",
+    "arboles": [
+     "Temas",
+     "Anatomía"
+    ],
+    "documento": [
+     "articulos",
+     1128
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "interseccion",
+    "origen": "Temas: Alimentación",
+    "destino": "Nivel: Principiante",
+    "arboles": [
+     "Temas",
+     "Nivel"
+    ],
+    "documento": [
+     "articulos",
+     281
+    ]
+   },
+   "cambia": true
+  },
+  {
+   "consulta": "pecho kettlebell principiante",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Pecho",
+    "destino": "Temas: Planificación",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     111
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "interseccion",
+    "origen": "Anatomía: Pecho",
+    "destino": "Equipamiento: Kettlebell",
+    "arboles": [
+     "Anatomía",
+     "Equipamiento",
+     "Nivel"
+    ],
+    "documento": [
+     "ejercicios",
+     1557
+    ]
+   },
+   "cambia": true
+  },
+  {
+   "consulta": "pelota de ejercicio abdomen",
+   "dos_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Abdomen",
+    "destino": "Temas: Resistencia",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     1675
+    ]
+   },
+   "cuatro_arboles": {
+    "via": "concepto",
+    "origen": "Anatomía: Abdomen",
+    "destino": "Temas: Resistencia",
+    "arboles": [
+     "Anatomía",
+     "Temas"
+    ],
+    "documento": [
+     "articulos",
+     1675
+    ]
+   },
+   "cambia": false
+  }
+ ],
+ "pares": [
+  {
+   "par": "Anatomía x Temas",
+   "aristas": 81,
+   "documentos": 930,
+   "ejercicios": 0,
+   "articulos": 930
+  },
+  {
+   "par": "Anatomía x Equipamiento",
+   "aristas": 134,
+   "documentos": 3371,
+   "ejercicios": 2848,
+   "articulos": 523
+  },
+  {
+   "par": "Anatomía x Nivel",
+   "aristas": 25,
+   "documentos": 2885,
+   "ejercicios": 2848,
+   "articulos": 37
+  },
+  {
+   "par": "Temas x Equipamiento",
+   "aristas": 58,
+   "documentos": 562,
+   "ejercicios": 0,
+   "articulos": 562
+  },
+  {
+   "par": "Temas x Nivel",
+   "aristas": 13,
+   "documentos": 237,
+   "ejercicios": 0,
+   "articulos": 237
+  },
+  {
+   "par": "Equipamiento x Nivel",
+   "aristas": 34,
+   "documentos": 2882,
+   "ejercicios": 2848,
+   "articulos": 34
+  }
+ ],
+ "metricas_referencia": {
+  "dos_arboles": {
+   "consultas": 18,
+   "por_via": {
+    "concepto": 14,
+    "concepto_local": 2,
+    "interseccion": 2
+   },
+   "fallback": 2,
+   "destinos_distintos": 9,
+   "documentos_distintos": 16
+  },
+  "cuatro_arboles": {
+   "consultas": 18,
+   "por_via": {
+    "concepto": 14,
+    "concepto_local": 2,
+    "interseccion": 2
+   },
+   "fallback": 2,
+   "destinos_distintos": 9,
+   "documentos_distintos": 16
+  }
+ },
+ "metricas_nuevas": {
+  "dos_arboles": {
+   "consultas": 12,
+   "por_via": {
+    "concepto": 11,
+    "recuperacion": 1
+   },
+   "fallback": 1,
+   "destinos_distintos": 6,
+   "documentos_distintos": 9
+  },
+  "cuatro_arboles": {
+   "consultas": 12,
+   "por_via": {
+    "concepto": 2,
+    "interseccion": 9,
+    "interseccion_parcial": 1
+   },
+   "fallback": 0,
+   "destinos_distintos": 10,
+   "documentos_distintos": 12
+  }
+ }
+}

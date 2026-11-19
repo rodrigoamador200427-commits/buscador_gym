@@ -178,7 +178,8 @@ try {
         modal: document.getElementById('detalle').matches(':modal'),
         titulo: document.getElementById('detalleTitulo').textContent,
         texto: c.querySelector('.detalle-texto').textContent,
-        ruta: [...c.querySelectorAll('.ruta li')].map(l => l.textContent),
+        ruta: [...c.querySelector('.ruta').querySelectorAll('li')].map(l => l.textContent),
+        rutas: [...c.querySelectorAll('.detalle-info h3')].filter(h => h.textContent.startsWith('Ubicación en')).map(h => h.textContent),
         etiquetas: [...c.querySelectorAll('[data-etiqueta]')].map(b => b.textContent.trim()),
         relacionados: [...c.querySelectorAll('[data-relacionado]')].map(b => b.dataset.relacionado),
         gusta: document.getElementById('detalleGusta').textContent,
@@ -186,6 +187,8 @@ try {
     comprobar('es una ventana modal (<dialog> con showModal)', d.modal);
     comprobar('muestra el texto completo', d.titulo === 'Press de banca plano' && d.texto === 'Press de pecho en banco plano', d);
     comprobar('muestra la ruta en el árbol', JSON.stringify(d.ruta) === '["Cuerpo humano","Tren superior","Pecho","Barra"]', d.ruta);
+    comprobar('muestra una ubicación por árbol (anatomía, equipamiento y nivel)',
+        JSON.stringify(d.rutas) === '["Ubicación en Anatomía","Ubicación en Equipamiento","Ubicación en Nivel"]', d.rutas);
     comprobar('muestra todas las etiquetas', JSON.stringify(d.etiquetas) === '["Pecho","Barra","Principiante","Fuerza"]', d.etiquetas);
     comprobar('muestra hasta 4 relacionados, sin el propio documento',
         d.relacionados.length > 0 && d.relacionados.length <= 4 && !d.relacionados.includes('ejercicios:101'), d.relacionados);
@@ -291,6 +294,26 @@ try {
     comprobar('muestra tarjetas o dice que no hay artículos', await esperar(`document.querySelector('#resultadoAB .tarjeta, #resultadoAB .estado p')`));
     await comprobarTexto('árboles');
     await captura('6-arboles');
+
+    // Dos árboles cualesquiera (fase 6B): Anatomía x Equipamiento
+    await js(`(() => { const a = document.getElementById('arbolB'); a.value = 'equipamiento'; a.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+    comprobar('al cambiar el árbol B, el menú B lista equipamientos y la etiqueta cambia',
+        await esperar(`document.getElementById('etiquetaB').textContent === 'Equipamiento' && [...document.querySelectorAll('#menuB option')].some(o => o.textContent.startsWith('Barra'))`));
+    comprobar('el árbol B no ofrece el mismo árbol que A', await esperar(`![...document.querySelectorAll('#arbolB option')].some(o => o.value === document.getElementById('arbolA').value)`));
+    await js(`(() => { const b = document.getElementById('menuB'); b.value = [...b.options].find(o => o.textContent.startsWith('Barra (')).value; document.getElementById('formAB').requestSubmit(); })()`);
+    comprobar('pecho x barra: tarjetas de ejercicios y las rutas de los dos árboles',
+        await esperar(`document.querySelectorAll('#resultadoAB .tarjeta').length > 0 && [...document.querySelectorAll('#resultadoAB .ruta-arbol h3')].map(h => h.textContent).join() === 'Anatomía,Equipamiento'`));
+    const rutasAB = await js(`[...document.querySelectorAll('#resultadoAB .ruta-arbol')].map(r => r.querySelector('h3').textContent + ': ' + [...r.querySelectorAll('li')].map(l => l.textContent).join(' > '))`);
+    comprobar('las rutas llevan el nombre del árbol', JSON.stringify(rutasAB) === '["Anatomía: Cuerpo humano > Tren superior > Pecho","Equipamiento: Equipamiento > Pesas libres > Barra"]', rutasAB);
+    await js(`(() => { const a = document.getElementById('arbolB'); a.value = 'temas'; a.dispatchEvent(new Event('change', { bubbles: true })); })()`);   // dejar el valor de siempre
+
+    // La tarjeta «Relacionado con tu búsqueda» muestra la ruta del nodo en CADA árbol que participa (fase 6B)
+    await js(`document.querySelector('[data-vista="vistaBusqueda"]').click()`);
+    await js(`__t.buscar('pecho barra principiante')`);
+    comprobar('pecho barra principiante: la tarjeta muestra una ruta por árbol (tres)',
+        await esperar(`[...document.querySelectorAll('#discoveryZone .ruta-arbol h3')].map(h => h.textContent).join() === 'Anatomía,Equipamiento,Nivel'`));
+    const rutasTarjeta = await js(`[...document.querySelectorAll('#discoveryZone .ruta-arbol')].map(r => [...r.querySelectorAll('li')].map(l => l.textContent).join(' > '))`);
+    comprobar('con la ruta completa de cada nodo', JSON.stringify(rutasTarjeta) === '["Cuerpo humano > Tren superior > Pecho","Equipamiento > Pesas libres > Barra","Nivel de experiencia > Principiante"]', rutasTarjeta);
 
     // ========================================================================= modo oscuro
     // Cada texto se mide contra su fondo real, en claro y en oscuro (WCAG: 4.5 normal, 7 reforzado)

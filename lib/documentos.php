@@ -149,13 +149,48 @@ function documentos_relacionados(PDO $db, string $origen, int $docId, int $limit
     ], $s->fetchAll());
 }
 
-/** Ruta del documento en su árbol: {arbol, nodos: [...]} o null. */
+// ORDEN_ARBOLES: los que admite la tabla documento_rutas; ARBOLES_ACTIVOS: los que el motor construye hoy
+// ('patron' está previsto en el esquema pero todavía no existe como árbol).
+const ORDEN_ARBOLES = ['anatomia', 'temas', 'equipamiento', 'nivel', 'patron'];
+const ARBOLES_ACTIVOS = ['anatomia', 'temas', 'equipamiento', 'nivel'];
+const TITULO_ARBOL = ['anatomia' => 'Anatomía', 'temas' => 'Temas', 'equipamiento' => 'Equipamiento',
+                      'nivel' => 'Nivel', 'patron' => 'Patrón de movimiento'];
+
+/** Todas las rutas del documento, una por árbol: [{arbol, titulo, nodos: [...]}] en el orden fijo de los árboles. */
+function rutas_documento(PDO $db, string $origen, int $docId): array
+{
+    $s = $db->prepare("SELECT arbol, ruta FROM documento_rutas WHERE origen = ? AND doc_id = ?
+        ORDER BY FIELD(arbol, 'anatomia', 'temas', 'equipamiento', 'nivel', 'patron')");
+    $s->execute([$origen, $docId]);
+    return array_map(fn($f) => ['arbol' => $f['arbol'], 'titulo' => TITULO_ARBOL[$f['arbol']] ?? $f['arbol'],
+                                'nodos' => explode(' > ', (string)$f['ruta'])], $s->fetchAll());
+}
+
+/**
+ * Nodos que el motor reconoció (uno por árbol que participa) listos para la tarjeta:
+ * [{arbol, titulo, nombre, ruta: [...]}]. Lo que viene de Python se filtra: árbol de la lista
+ * blanca, solo cadenas y largos acotados; lo que no encaja se descarta.
+ */
+function nodos_de_descubrimiento($nodos): array
+{
+    $res = [];
+    foreach (is_array($nodos) ? array_slice($nodos, 0, 6) : [] as $n) {
+        if (!is_array($n) || !in_array($n['arbol'] ?? '', ORDEN_ARBOLES, true)
+            || !is_string($n['nombre'] ?? null) || !is_array($n['ruta'] ?? null)) {
+            continue;
+        }
+        $ruta = array_values(array_map(fn($x) => mb_substr($x, 0, 120, 'UTF-8'), array_filter($n['ruta'], 'is_string')));
+        $res[] = ['arbol' => $n['arbol'], 'titulo' => TITULO_ARBOL[$n['arbol']], 'nombre' => mb_substr($n['nombre'], 0, 120, 'UTF-8'),
+                  'ruta' => array_slice($ruta, 0, 6)];
+    }
+    return $res;
+}
+
+/** Ruta principal del documento (la de anatomía en un ejercicio, la de temas en un artículo): {arbol, nodos} o null. */
 function ruta_documento(PDO $db, string $origen, int $docId): ?array
 {
-    $s = $db->prepare('SELECT arbol, ruta FROM documento_rutas WHERE origen = ? AND doc_id = ?');
-    $s->execute([$origen, $docId]);
-    $f = $s->fetch();
-    return $f ? ['arbol' => $f['arbol'], 'nodos' => explode(' > ', (string)$f['ruta'])] : null;
+    $r = rutas_documento($db, $origen, $docId)[0] ?? null;
+    return $r ? ['arbol' => $r['arbol'], 'nodos' => $r['nodos']] : null;
 }
 
 /**

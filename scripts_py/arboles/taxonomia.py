@@ -285,17 +285,23 @@ TERMINO_A_EQUIPAMIENTO = {
     "banco": "Banco", "paralelas": "Paralelas", "correas": "Correas",
 }
 
-# Vocabulario del USUARIO que nombra un equipamiento (consultas). «banco» NO está: su raíz es la
-# de «banca» y «press de banca» no habla del banco. «Otro» y «Sin especificar» no se pueden nombrar.
+# Vocabulario del USUARIO que nombra un equipamiento (consultas). Quedan fuera los que comparten raíz
+# (la del stemmer, que es lo que compara el motor) con otra palabra que ya nombra un concepto de otro árbol:
+#   «banco»   (raíz de «banca»: «press de banca» no habla del banco),
+#   «correas» (raíz de «correr», un sinónimo del tema Resistencia),
+#   «rodillo» (raíz de «rodilla», un músculo; ni siquiera «rodillo de espuma» sirve, porque contiene la raíz
+#             de «rodilla»): solo se nombra con «foam roller».
+# Banco y Correas siguen siendo nodos (los artículos los enlazan por etiquetas) y salen en los menús.
+# «Otro» y «Sin especificar» no se pueden nombrar. tests/test_arboles_n.py comprueba que no haya choques.
 CONSULTA_EQUIPAMIENTO = {
     "Barra": ["barra", "barra hexagonal"], "Barra Z": ["barra ez", "barra zeta"],
     "Mancuernas": ["mancuerna", "mancuernas"], "Máquina": ["maquina", "maquinas"],
     "Polea": ["polea", "poleas", "cable"], "Kettlebell": ["kettlebell", "pesa rusa"],
     "Bandas": ["banda", "bandas", "banda elastica"],
     "Peso corporal": ["peso corporal", "sin material", "sin equipo"],
-    "Rodillo": ["rodillo", "foam roller"], "Balón medicinal": ["balon medicinal"],
+    "Rodillo": ["foam roller"], "Balón medicinal": ["balon medicinal"],
     "Pelota de ejercicio": ["pelota de ejercicio", "fitball"],
-    "Paralelas": ["paralelas"], "Correas": ["correas"],
+    "Paralelas": ["paralelas"],
 }
 
 NIVELES_ORDEN = ["Principiante", "Intermedio", "Avanzado"]    # = valores de NIVELES, de menor a mayor

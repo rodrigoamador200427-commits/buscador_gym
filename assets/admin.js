@@ -27,8 +27,8 @@
     const PERIODOS = [7, 30, 90];
     const TIPO = { ejercicios: 'Ejercicio', articulos: 'Artículo' };
     const VIA = {
-        interseccion: 'Cruce de dos árboles', concepto: 'Salto entre árboles', recuperacion: 'Salto desde los resultados',
-        concepto_local: 'Recomendación dentro del tema', sin_interseccion: 'Sin relación entre ambos conceptos',
+        interseccion: 'Cruce de árboles', concepto: 'Salto entre árboles', recuperacion: 'Salto desde los resultados',
+        concepto_local: 'Recomendación dentro del tema', interseccion_parcial: 'Cruce de dos de los árboles nombrados', sin_interseccion: 'Sin relación entre ambos conceptos',
         ninguno: 'Sin relación', 'sin descubrimiento': 'Sin descubrimiento',
     };
 
