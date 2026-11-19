@@ -233,8 +233,8 @@ php herramientas/crear_demo.php        # imprime la contraseña demo una sola ve
    guardar los árboles ya construidos) en `docs/rendimiento.md`. NO está aplicada.
 2. **Los artículos `generado` desplazan a los originales** en TF-IDF en varias consultas de referencia (fase 6A). Decidir: ordenar por
    `origen_contenido`, darles menos peso o reemplazarlos por contenido real.
-3. **Ramas sin fusionar:** `fase-6a-corpus`, `fase-6b-arboles` y `fase-7-revision` están apiladas sobre `fase-5-admin` y no se han
-   subido (el usuario pidió no hacer push). `main` (y `origin/main`) llegan hasta la fase 5 (PR #5).
+3. **Ramas sin fusionar:** `fase-6a-corpus`, `fase-6b-arboles` y `fase-7-revision` están apiladas sobre `fase-5-admin`. Se subieron a
+   GitHub el 19 de noviembre de 2026 pero no tienen pull request ni están en `main` (que llega hasta la fase 5, PR #5).
 4. `registro.php` responde 409 a un correo ya registrado (revela que existe) y no limita las altas por origen.
 5. Patrón de movimiento: 19,6 % sin clasificar, unos 5 de cada 60 clasificados a ojo están mal y 9 patrones no se pueden nombrar en
    una consulta (comparten raíz con un músculo o un tema).

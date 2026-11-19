@@ -10,9 +10,9 @@ Las pruebas de cada fase son las de ese momento; el recuento completo y actual e
 | 3 | Interfaz, etiquetas y detalle de tarjeta | `fase-3-interfaz` (en `main`) |
 | 4 | Ilustraciones por músculo y por tema | `fase-4-ilustraciones` (en `main`) |
 | 5 | Panel de administrador | `fase-5-admin` (en `main`) |
-| 6A | Corpus de 341 a 2 000 artículos | `fase-6a-corpus` (sin fusionar, sin push) |
-| 6B | Árboles de Equipamiento, Nivel y Patrón de movimiento; motor de N árboles | `fase-6b-arboles` (sin fusionar, sin push) |
-| 7 | Revisión final: pruebas, seguridad, interfaz, rendimiento y documentación | `fase-7-revision` (sin fusionar, sin push) |
+| 6A | Corpus de 341 a 2 000 artículos | `fase-6a-corpus` (subida a GitHub, sin fusionar) |
+| 6B | Árboles de Equipamiento, Nivel y Patrón de movimiento; motor de N árboles | `fase-6b-arboles` (subida a GitHub, sin fusionar) |
+| 7 | Revisión final: pruebas, seguridad, interfaz, rendimiento y documentación | `fase-7-revision` (subida a GitHub, sin fusionar) |
 
 Otros documentos: [DEMO.md](DEMO.md) (guion para mostrarlo), [rendimiento.md](rendimiento.md) (medición y propuesta),
 [patron_sin_clasificar.md](patron_sin_clasificar.md) (reporte del árbol de patrones) y `../CLAUDE.md` (estructura y reglas).
@@ -916,7 +916,7 @@ D:\Tools\SHAMP\mysql\bin\mysql.exe -uroot gym_buscador -e "SELECT origen_conteni
 # Fase 6B — Árboles de Equipamiento y Nivel y motor de N árboles
 
 **Fecha:** 18 de noviembre de 2026. **Rama:** `fase-6b-arboles`, creada sobre `fase-6a-corpus` (que sigue sin fusionar:
-6B necesita los 2 000 artículos y sus etiquetas). **Estado:** completa; el árbol de Patrón de movimiento se añadió después (ver la sección siguiente). Sin push.
+6B necesita los 2 000 artículos y sus etiquetas). **Estado:** completa; el árbol de Patrón de movimiento se añadió después (ver la sección siguiente). Subida a GitHub, sin fusionar.
 
 **Objetivo:** que el motor deje de estar pensado para dos árboles (Anatomía y Temas) y pueda combinar cualquier par,
 sumando los árboles de Equipamiento y Nivel, sin cambiar lo que ya respondía para un músculo y un tema.
@@ -1095,7 +1095,7 @@ D:\Tools\SHAMP\php\php.exe tests\test_arboles_n.php
 
 # Fase 6B (continuación) — Árbol de Patrón de movimiento
 
-**Fecha:** 19 de noviembre de 2026. **Rama:** `fase-6b-arboles`. **Estado:** completo. Sin push.
+**Fecha:** 19 de noviembre de 2026. **Rama:** `fase-6b-arboles`. **Estado:** completo. Subida a GitHub, sin fusionar.
 
 **Objetivo (opcional, que confirmaste):** un árbol de Patrón de movimiento por reglas de palabras clave sobre `nombre_es`,
 avisando en la interfaz y en el reporte que es una **clasificación aproximada**, con la lista de ejercicios que no pudo clasificar.
@@ -1272,7 +1272,7 @@ cd scripts_py && python -m pytest tests -v
 
 # Fase 7 — Revisión final, pruebas y documentación
 
-**Fecha:** 19 de noviembre de 2026. Rama `fase-7-revision` (sobre `fase-6b-arboles`). Sin push.
+**Fecha:** 19 de noviembre de 2026. Rama `fase-7-revision` (sobre `fase-6b-arboles`). Subida a GitHub, sin fusionar.
 
 ## 1. Qué se hizo
 
@@ -1392,4 +1392,4 @@ El guion para mostrarlo está en [DEMO.md](DEMO.md).
 ## 8. Pendientes
 
 Los de `CLAUDE.md`, sección «Pendientes». Los tres más importantes: **el rendimiento** (propuesta lista, sin aplicar), **los
-artículos generados que desplazan a los originales** (decisión del usuario) y **las ramas 6A, 6B y 7 sin fusionar y sin push**.
+artículos generados que desplazan a los originales** (decisión del usuario) y **las ramas 6A, 6B y 7 subidas pero sin fusionar**.
