@@ -15,7 +15,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from arboles import (construir_arbol_anatomia, construir_arbol_equipamiento, construir_arbol_nivel,  # noqa: E402
-                     construir_arbol_temas)
+                     construir_arbol_patron, construir_arbol_temas)
 from etiquetado import construir_etiquetas, construir_rutas_arboles  # noqa: E402
 
 
@@ -36,7 +36,8 @@ def generar(conn):
         + [e["nombre_es"] for e in ejercicios] + [e["descripcion_es"] for e in ejercicios]
     etiquetas, asignaciones = construir_etiquetas(ejercicios, articulos, textos)
     rutas = construir_rutas_arboles([construir_arbol_anatomia(ejercicios), construir_arbol_temas(articulos),
-                                     construir_arbol_equipamiento(ejercicios), construir_arbol_nivel(ejercicios)])
+                                     construir_arbol_equipamiento(ejercicios), construir_arbol_nivel(ejercicios),
+                                     construir_arbol_patron(ejercicios)])
 
     conn.autocommit = False            # todo lo de abajo es una sola transacción
     cur = conn.cursor()

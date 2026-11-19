@@ -179,8 +179,11 @@ def test_los_articulos_se_enlazan_por_etiquetas(bosque):
 
 def test_hay_una_arista_por_cada_par_de_arboles(bosque):
     assert [k for k, _ in bosque.pares()] == [("anatomia", "temas"), ("anatomia", "equipamiento"), ("anatomia", "nivel"),
-                                              ("temas", "equipamiento"), ("temas", "nivel"), ("equipamiento", "nivel")]
-    assert all(p.total() > 0 for _, p in bosque.pares())
+                                              ("anatomia", "patron"), ("temas", "equipamiento"), ("temas", "nivel"),
+                                              ("temas", "patron"), ("equipamiento", "nivel"), ("equipamiento", "patron"),
+                                              ("nivel", "patron")]
+    sin_aristas = [k for k, p in bosque.pares() if p.total() == 0]
+    assert sin_aristas == [("temas", "patron")]      # en este contenido de prueba ningún artículo trae una etiqueta de patrón
     assert bosque.par("nivel", "anatomia") is bosque.par("anatomia", "nivel")     # se pide en cualquier orden
 
 
@@ -305,15 +308,15 @@ def test_recuperacion_sigue_usando_solo_anatomia_y_temas(motor):
 def test_catalogo_general_arboles_conceptos_y_pares(bosque):
     from arboles.catalogo import catalogo_general
     c = catalogo_general(bosque)
-    assert [a["id"] for a in c["arboles"]] == ["anatomia", "temas", "equipamiento", "nivel"]
-    assert [a["titulo"] for a in c["arboles"]] == ["Anatomía", "Temas", "Equipamiento", "Nivel"]
+    assert [a["id"] for a in c["arboles"]] == ["anatomia", "temas", "equipamiento", "nivel", "patron"]
+    assert [a["titulo"] for a in c["arboles"]] == ["Anatomía", "Temas", "Equipamiento", "Nivel", "Patrón de movimiento"]
     eq = next(a for a in c["arboles"] if a["id"] == "equipamiento")["conceptos"]
     mancuernas = next(x for x in eq if x["nombre"] == "Mancuernas")
     assert mancuernas["clave"] == "mancuernas" and mancuernas["grupo"] == "Pesas libres" and mancuernas["n"] == [2, 2]
     assert mancuernas["ruta"] == ["Equipamiento", "Pesas libres", "Mancuernas"]
     pecho = next(x for x in next(a for a in c["arboles"] if a["id"] == "anatomia")["conceptos"] if x["clave"] == "1")
     assert pecho["nombre"] == "Pecho" and pecho["grupo"] == "Tren superior"
-    assert len(c["pares"]) == 6
+    assert len(c["pares"]) == 10
     assert c["pares"]["anatomia|equipamiento"]["1|mancuernas"] == [2, 2]          # [ejercicios, artículos]
     assert c["pares"]["anatomia|temas"]["1|fuerza"] == [0, 1]                    # los ejercicios no entran en Temas
     assert "1|kettlebell" not in c["pares"]["anatomia|equipamiento"]              # sin documentos: no se inventa

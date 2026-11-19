@@ -316,11 +316,15 @@ CONSULTA_NIVEL = {
 }
 
 # --- Los árboles juntos (orden = prioridad: desempata cualquier elección entre árboles) ---
-ORDEN_ARBOLES = ["anatomia", "temas", "equipamiento", "nivel"]
-TITULO_ARBOL = {"anatomia": "Anatomía", "temas": "Temas", "equipamiento": "Equipamiento", "nivel": "Nivel"}
+ORDEN_ARBOLES = ["anatomia", "temas", "equipamiento", "nivel", "patron"]
+TITULO_ARBOL = {"anatomia": "Anatomía", "temas": "Temas", "equipamiento": "Equipamiento", "nivel": "Nivel",
+                "patron": "Patrón de movimiento"}
+# Árboles cuya clasificación es una aproximación (la interfaz y los reportes lo dicen).
+ARBOLES_APROXIMADOS = {"patron"}
 # Árbol al que salta una consulta que nombra UN solo concepto (conserva el comportamiento de la fase 1:
 # músculo <-> tema; los demás saltan a Anatomía).
-ARBOL_COMPANERO = {"anatomia": "temas", "temas": "anatomia", "equipamiento": "anatomia", "nivel": "anatomia"}
+ARBOL_COMPANERO = {"anatomia": "temas", "temas": "anatomia", "equipamiento": "anatomia", "nivel": "anatomia",
+                   "patron": "anatomia"}
 # La recuperación TF-IDF sin conceptos solo compara estos árboles (los de la fase 1).
 ARBOLES_RECUPERACION = ("anatomia", "temas")
 

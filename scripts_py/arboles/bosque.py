@@ -7,6 +7,7 @@ Un DOCUMENTO (ejercicio o artículo) pertenece a uno o más nodos-concepto de ca
   temas         (ninguno)                        temas de sus etiquetas
   equipamiento  columna `equipamiento`           equipamientos de sus etiquetas
   nivel         columna `nivel`                  niveles de sus etiquetas
+  patrón        reglas sobre `nombre_es` (APROX.) patrones de sus etiquetas
 
 Una ARISTA entre el nodo x del árbol X y el nodo y del árbol Y existe si algún documento
 pertenece a los dos. Se derivan de los datos (nada se teclea), se guardan en memoria, uno
@@ -23,7 +24,8 @@ from collections import defaultdict
 from itertools import combinations
 
 from .constructor import (construir_arbol_anatomia, construir_arbol_equipamiento,
-                          construir_arbol_nivel, construir_arbol_temas)
+                          construir_arbol_nivel, construir_arbol_patron, construir_arbol_temas)
+from .patrones import patron_de_nombre, patrones_de_etiquetas
 from .taxonomia import (ORDEN_ARBOLES, equipamientos_de_etiquetas, musculos_de_etiquetas,
                         nombre_equipamiento, niveles_de_etiquetas, NIVELES, separar_etiquetas,
                         temas_del_articulo)
@@ -137,11 +139,24 @@ def _pertenencia_nivel(arbol, ejercicios, articulos):
     return docs
 
 
+def _pertenencia_patron(arbol, ejercicios, articulos):
+    patrones, docs = arbol.meta["patrones"], {}
+    for e in ejercicios:
+        nombre = patron_de_nombre(e["nombre_es"])
+        docs[("ejercicios", int(e["id"]))] = [(patrones[nombre] if nombre else arbol.meta["sin_clasificar"]).id]
+    for a in articulos:
+        ids = [patrones[n].id for n in patrones_de_etiquetas(separar_etiquetas(a["etiquetas"]))]
+        if ids:
+            docs[("articulos", int(a["id"]))] = ids
+    return docs
+
+
 _CONSTRUCTORES = {
     "anatomia": (lambda ej, ar: construir_arbol_anatomia(ej), _pertenencia_anatomia),
     "temas": (lambda ej, ar: construir_arbol_temas(ar), _pertenencia_temas),
     "equipamiento": (lambda ej, ar: construir_arbol_equipamiento(ej), _pertenencia_equipamiento),
     "nivel": (lambda ej, ar: construir_arbol_nivel(ej), _pertenencia_nivel),
+    "patron": (lambda ej, ar: construir_arbol_patron(ej), _pertenencia_patron),
 }
 
 

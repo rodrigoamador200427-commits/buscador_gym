@@ -28,10 +28,11 @@ que participa (`origen` y `destino` son los dos primeros, como siempre).
 from collections import Counter
 
 from .bosque import Bosque
+from .patrones import CONSULTA_PATRON
 from .recorridos import acumular_posorden, preorden
 from .taxonomia import (ALIAS_MUSCULO, ARBOL_COMPANERO, ARBOLES_RECUPERACION, CONSULTA_EQUIPAMIENTO,
                         CONSULTA_NIVEL, EXPANSION_TEMA, ETIQUETA_A_MUSCULO, SINONIMOS_TEMA, TEMAS,
-                        TITULO_ARBOL, normalizar)
+                        TITULO_ARBOL, ARBOLES_APROXIMADOS, normalizar)
 
 
 def _frase_a_raices(frase, stem):
@@ -71,7 +72,8 @@ class MotorArboles:
             for tema, frases in SINONIMOS_TEMA.items():
                 self._idx_sinonimo += [(tema, _frase_a_raices(f, stem)) for f in frases]
             self._idx["temas"] = self._idx_tema_etiquetas + self._idx_sinonimo
-        for arbol, vocabulario in (("equipamiento", CONSULTA_EQUIPAMIENTO), ("nivel", CONSULTA_NIVEL)):
+        for arbol, vocabulario in (("equipamiento", CONSULTA_EQUIPAMIENTO), ("nivel", CONSULTA_NIVEL),
+                                   ("patron", CONSULTA_PATRON)):
             if arbol in bosque.arboles:
                 existentes = bosque.conceptos(arbol)
                 self._idx[arbol] = [(n, _frase_a_raices(f, stem))
@@ -90,7 +92,7 @@ class MotorArboles:
         consulta = set(raices)
         protegidas = set()
         conceptos = self._idx.get("anatomia", []) + self._idx_tema_etiquetas \
-            + self._idx.get("equipamiento", []) + self._idx.get("nivel", [])
+            + self._idx.get("equipamiento", []) + self._idx.get("nivel", []) + self._idx.get("patron", [])
         for _, r in conceptos:
             if r and r <= consulta:
                 protegidas |= r
@@ -297,6 +299,7 @@ class MotorArboles:
     @staticmethod
     def _ruta(nodo):
         return {"arbol": nodo.arbol, "titulo_arbol": TITULO_ARBOL.get(nodo.arbol, nodo.arbol),
+                "aproximado": nodo.arbol in ARBOLES_APROXIMADOS,
                 "nodo_id": nodo.id, "nombre": nodo.nombre,
                 "ruta": [n.nombre for n in nodo.ruta()], "ruta_texto": nodo.ruta_texto()}
 

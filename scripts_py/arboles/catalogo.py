@@ -4,7 +4,7 @@ Menú A = músculos (árbol de Anatomía). Menú B = temas (árbol de Temas).
 `puentes["gid|Tema"]` = ids de los artículos que conectan ambos nodos (el "World War Z").
 """
 from .recorridos import preorden
-from .taxonomia import TITULO_ARBOL, normalizar
+from .taxonomia import ARBOLES_APROXIMADOS, TITULO_ARBOL, normalizar
 
 
 def catalogo(anatomia, temas, aristas):
@@ -54,7 +54,11 @@ def catalogo_general(bosque):
             conceptos.append({"clave": clave_externa(nombre, clave, nodo), "nombre": nodo.nombre,
                               "grupo": nodo.padre.nombre if nodo.padre and nodo.padre is not arbol.raiz else "",
                               "ruta": [n.nombre for n in nodo.ruta()], "n": _conteo(bosque, nodo)})
-        arboles.append({"id": nombre, "titulo": TITULO_ARBOL[nombre], "conceptos": conceptos})
+        entrada = {"id": nombre, "titulo": TITULO_ARBOL[nombre], "conceptos": conceptos}
+        if nombre in ARBOLES_APROXIMADOS:   # la interfaz lo avisa; sin_clasificar = ejercicios que no se pudieron ubicar
+            entrada["aproximado"] = True
+            entrada["sin_clasificar"] = len(arbol.meta.get("sin_clasificar_ids", []))
+        arboles.append(entrada)
 
     claves = {nombre: {n.id: clave_externa(nombre, c, n) for c, n in bosque.conceptos(nombre).items()}
               for nombre in bosque.nombres}

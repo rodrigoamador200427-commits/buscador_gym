@@ -5,6 +5,7 @@ Las filas pueden venir de MySQL (producción, con los IDs reales) o de los CSV
 documentadas abajo.
 """
 from .nodo import Arbol
+from .patrones import GRUPOS_PATRON, NOMBRE_RAIZ as RAIZ_PATRON, patron_de_nombre
 from .taxonomia import (
     CATEGORIA_DE_EQUIPAMIENTO_DESCONOCIDO, CATEGORIAS_EQUIPAMIENTO, MUSCULOS, NIVELES,
     NIVELES_ORDEN, REGIONES, SIN_CLASIFICAR, SIN_EQUIPAMIENTO, TEMAS,
@@ -147,4 +148,41 @@ def construir_arbol_nivel(ejercicios):
     # muestran), aunque las consultas no lo pueden nombrar.
     arbol.meta["conceptos"] = {**niveles, SIN_EQUIPAMIENTO: sin_nivel} if sin_nivel else niveles
     arbol.meta["sin_nivel"] = sin_nivel
+    return arbol
+
+
+def construir_arbol_patron(ejercicios):
+    """Patrón de movimiento > Grupo > Patrón > Ejercicio (hoja). Altura 3. CLASIFICACIÓN APROXIMADA.
+
+    El patrón sale de reglas de palabras clave sobre `nombre_es` (ver arboles/patrones.py). Todos los
+    grupos y patrones existen siempre; lo que ninguna regla reconoce cuelga de «Sin clasificar» (hijo
+    de la raíz) y NO se adivina. meta['aproximado'] = True; meta['sin_clasificar_ids'] lista esos ejercicios.
+    """
+    arbol = Arbol("patron", RAIZ_PATRON)
+    grupos, patrones = {}, {}
+    for grupo, nombres in GRUPOS_PATRON:
+        grupos[grupo] = arbol.agregar(grupo, arbol.raiz)
+        for nombre in nombres:
+            patrones[nombre] = arbol.agregar(nombre, grupos[grupo], {"patron": nombre})
+    sin_clasificar = arbol.agregar(SIN_CLASIFICAR, arbol.raiz, {"patron": SIN_CLASIFICAR})
+
+    sin_ids = []
+    for fila in sorted(ejercicios, key=lambda f: int(f["id"])):
+        patron = patron_de_nombre(fila["nombre_es"])
+        padre = patrones[patron] if patron else sin_clasificar
+        if not patron:
+            sin_ids.append(int(fila["id"]))
+        hoja = arbol.agregar(fila["nombre_es"], padre, {
+            "doc_id": int(fila["id"]), "origen": "ejercicios",
+            "modalidad": fila.get("modalidad"), "nivel": fila.get("nivel"),
+        })
+        arbol.doc_a_nodo[("ejercicios", int(fila["id"]))] = hoja
+
+    arbol.meta["grupos"] = grupos
+    arbol.meta["patrones"] = patrones                 # nombre -> Nodo (los patrones reales)
+    arbol.meta["sin_clasificar"] = sin_clasificar
+    arbol.meta["sin_clasificar_ids"] = sin_ids
+    # «Sin clasificar» también es un nodo con aristas y los menús lo muestran; las consultas no lo nombran
+    arbol.meta["conceptos"] = {**patrones, SIN_CLASIFICAR: sin_clasificar}
+    arbol.meta["aproximado"] = True
     return arbol
