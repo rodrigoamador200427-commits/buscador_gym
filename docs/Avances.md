@@ -888,3 +888,186 @@ D:\Tools\SHAMP\mysql\bin\mysql.exe -uroot gym_buscador -e "SELECT origen_conteni
 - `origen_contenido` todavía no se usa en la interfaz ni en el panel.
 - El push y el pull request de `fase-6a-corpus` (19 commits propios) siguen sin hacerse. `backups/` (fuera de Git)
   tiene la copia previa a la fase; no se actualizó con cada lote.
+
+
+---
+
+# Fase 6B — Árboles de Equipamiento y Nivel y motor de N árboles
+
+**Fecha:** 18 de noviembre de 2026. **Rama:** `fase-6b-arboles`, creada sobre `fase-6a-corpus` (que sigue sin fusionar:
+6B necesita los 2 000 artículos y sus etiquetas). **Estado:** completa, salvo el árbol de Patrón de movimiento, que no se
+construyó (se decidió dejarlo para después). Sin push.
+
+**Objetivo:** que el motor deje de estar pensado para dos árboles (Anatomía y Temas) y pueda combinar cualquier par,
+sumando los árboles de Equipamiento y Nivel, sin cambiar lo que ya respondía para un músculo y un tema.
+
+## 1. Qué se hizo
+
+| Pieza | Para qué |
+|---|---|
+| `sql/esquema_rutas_arboles.sql` | `documento_rutas` pasa a tener una ruta POR ÁRBOL (clave `origen, doc_id, arbol`) y el ENUM acepta `equipamiento`, `nivel` y `patron`. Idempotente; aplicado dos veces a `gym_buscador` (se conservaron las 4 848 filas) |
+| `arboles/taxonomia.py` | Categorías de equipamiento, tabla etiqueta-de-artículo a nodo, vocabulario de consulta, orden y títulos de los árboles, árbol compañero de cada uno |
+| `arboles/constructor.py` | `construir_arbol_equipamiento` y `construir_arbol_nivel`; los árboles previos exponen `meta["conceptos"]` |
+| `arboles/bosque.py` | `Bosque`: los árboles, la pertenencia de cada documento a nodos y una `AristasPar` por cada par de árboles |
+| `arboles/motor.py` | `MotorArboles` con N árboles (`desde_bosque`); el constructor de dos árboles se conserva |
+| `arboles/catalogo.py`, `catalogo_arboles.py`, `puente_arboles.py` | Catálogo de todos los árboles con el conteo de cada cruce, y los documentos que unen dos nodos |
+| `generar_etiquetas.py`, `etiquetado.construir_rutas_arboles` | Una ruta por árbol y documento (10 544 filas en la BD real) |
+| `menus.php`, `buscar.php`, `detalle.php`, `lib/documentos.php`, `index.html` | `accion=cruce` para cualquier par; el descubrimiento puede ser un ejercicio y trae la ruta de cada árbol; el detalle trae `rutas`; los menús A y B eligen árbol y concepto |
+| `medir_arboles.py` | La medición final (solo lee la BD) |
+
+## 2. Cómo decide el motor (aprobado en el Paso 0)
+
+- **Pertenencia.** Un documento pertenece a nodos de cada árbol: un ejercicio, por sus columnas (músculo, equipamiento,
+  nivel); un artículo, por sus etiquetas. Los ejercicios no pertenecen a Temas.
+- **Aristas.** Hay una por cada par de nodos de dos árboles con al menos un documento en común (peso = documentos; lift como
+  en la fase 1, con N = documentos que tienen alguna arista en ese par). Se guardan en memoria, derivadas, sin tablas nuevas.
+  Como los ejercicios no entran en Temas, **Anatomía x Temas sale solo de artículos y es idéntico al de la fase 1**.
+- **Cero árboles nombrados:** recuperación TF-IDF sobre Anatomía y Temas, como antes.
+- **Uno:** salta al árbol compañero (músculo con tema y tema con músculo, como antes; Equipamiento y Nivel saltan a Anatomía).
+- **Dos o más:** el mejor nodo de cada árbol nombrado y (1) `interseccion` si hay documentos en todos; (2) si no, y hay tres
+  árboles, `interseccion_parcial` con el par de mayor lift (luego peso, luego orden fijo de árboles; primero con 2 o más
+  documentos y si no con 1), indicando en la traza qué árbol quedó fuera; (3) si ningún par se relaciona,
+  `sin_interseccion` (se dice, no se inventa).
+- **JSON.** Se conservan `via`, `origen`, `destino`, `documentos`, `lift`, `razon`, `traza` y `alternativa`. Se añade `nodos`
+  (la ruta del nodo en cada árbol que participa) y la vía `interseccion_parcial` (cabe en `consultas.via VARCHAR(30)`).
+- **Documentos.** Se ordenan por puntaje TF-IDF, artículos antes que ejercicios en empate y luego por id. Sin azar.
+
+## 3. Los árboles nuevos
+
+| Árbol | Estructura | Altura | Nodos | Hojas (ejercicios) |
+|---|---|---|---|---|
+| Equipamiento | Equipamiento > categoría > equipamiento > ejercicio | 3 | 2 871 (1 raíz, 6 categorías, 16 equipamientos) | 2 848 |
+| Nivel | Nivel de experiencia > nivel > ejercicio | 2 | 2 852 (1 raíz, 3 niveles) | 2 848 |
+
+Categorías de equipamiento: Pesas libres (Barra, Barra Z, Mancuernas, Kettlebell), Máquinas y poleas, Peso corporal y bandas
+(Peso corporal, Bandas, Rodillo), Balones, Accesorios (Banco, Paralelas, Correas: solo los nombran artículos, 0 ejercicios) y
+Otros (Otro y Sin especificar: los 29 ejercicios sin equipamiento). Los artículos no son hojas: se enlazan por etiquetas.
+**Nivel está muy desbalanceado:** 438 ejercicios Principiante, 2 397 Intermedio y 13 Avanzado; solo 2 artículos Avanzado,
+así que cualquier lift con Avanzado es ruidoso.
+
+## 4. Aristas por par de árboles (BD real, 2 000 artículos y 2 848 ejercicios)
+
+| Par de árboles | Aristas | Documentos | Ejercicios | Artículos |
+|---|---|---|---|---|
+| Anatomía x Temas | 81 | 930 | 0 | 930 |
+| Anatomía x Equipamiento | 134 | 3371 | 2848 | 523 |
+| Anatomía x Nivel | 25 | 2885 | 2848 | 37 |
+| Temas x Equipamiento | 58 | 562 | 0 | 562 |
+| Temas x Nivel | 13 | 237 | 0 | 237 |
+| Equipamiento x Nivel | 34 | 2882 | 2848 | 34 |
+
+## 5. Medición final
+
+Las 18 consultas de referencia dan **lo mismo con dos árboles que con cuatro** (ninguna cambia de vía ni de destino):
+concepto 14, concepto_local 2, interseccion 2; **2 caen en fallback** (las dos son `concepto_local`: «creatina» y «cafeina antes de entrenar»,
+que ya lo eran), **9 destinos distintos** y 16 documentos distintos. «Fallback» = vía `ninguno`,
+`sin_interseccion`, `concepto_local` o `recuperacion`. Ninguna de las 18 nombra un equipamiento ni un nivel, así que no podía
+mejorar: lo que se comprueba es que no empeora.
+
+| # | Consulta | Vía con 2 árboles | Vía con 4 árboles | Destino (4 árboles) | Árboles que participan |
+|---|---|---|---|---|---|
+| 1 | press de banca pecho | concepto | concepto | Temas: Planificación | Anatomía, Temas |
+| 2 | sentadilla profundidad | concepto | concepto | Temas: Resistencia | Anatomía, Temas |
+| 3 | dominadas espalda | concepto | concepto | Temas: Planificación | Anatomía, Temas |
+| 4 | peso muerto cadera | concepto | concepto | Temas: Resistencia | Anatomía, Temas |
+| 5 | hipertrofia biceps | interseccion | interseccion | Temas: Hipertrofia | Anatomía, Temas |
+| 6 | proteina despues de entrenar | concepto | concepto | Anatomía: Antebrazos | Temas, Anatomía |
+| 7 | dormir recuperacion muscular | concepto | concepto | Anatomía: Antebrazos | Temas, Anatomía |
+| 8 | creatina | concepto_local | concepto_local | Temas: Suplementación | Temas |
+| 9 | calentamiento antes de entrenar | concepto | concepto | Anatomía: Pantorrilla | Temas, Anatomía |
+| 10 | movilidad de hombro | interseccion | interseccion | Temas: Prevención y movilidad | Anatomía, Temas |
+| 11 | periodizacion del entrenamiento | concepto | concepto | Anatomía: Isquiotibiales | Temas, Anatomía |
+| 12 | correr resistencia cardio | concepto | concepto | Anatomía: Pantorrilla | Temas, Anatomía |
+| 13 | gluteo puente | concepto | concepto | Temas: Resistencia | Anatomía, Temas |
+| 14 | abdomen plancha | concepto | concepto | Temas: Resistencia | Anatomía, Temas |
+| 15 | dolor de rodilla sentadilla | concepto | concepto | Temas: Resistencia | Anatomía, Temas |
+| 16 | cafeina antes de entrenar | concepto_local | concepto_local | Temas: Suplementación | Temas |
+| 17 | hidratacion sudor | concepto | concepto | Anatomía: Antebrazos | Temas, Anatomía |
+| 18 | triceps extension | concepto | concepto | Temas: Fuerza | Anatomía, Temas |
+
+Para ver el efecto de los árboles nuevos se añadieron 12 consultas que no estaban en las 18
+(`scripts_py/medir_arboles.py`): con dos árboles, concepto 11, recuperacion 1 (1 en fallback, 6 destinos);
+con cuatro, concepto 1, interseccion 10, interseccion_parcial 1 (0 en fallback, 10 destinos distintos, 12 documentos distintos).
+
+| # | Consulta | Vía con 2 árboles | Vía con 4 árboles | Destino (4 árboles) | Árboles que participan |
+|---|---|---|---|---|---|
+| 1 | pecho mancuernas principiante | concepto | interseccion | Equipamiento: Mancuernas | Anatomía, Equipamiento, Nivel |
+| 2 | press de banca con barra | concepto | interseccion | Equipamiento: Barra | Anatomía, Equipamiento |
+| 3 | espalda polea | concepto | interseccion | Equipamiento: Polea | Anatomía, Equipamiento |
+| 4 | triceps kettlebell avanzado | concepto | interseccion_parcial | Nivel: Avanzado | Equipamiento, Nivel |
+| 5 | sentadilla maquina principiante | concepto | interseccion | Equipamiento: Máquina | Anatomía, Equipamiento, Nivel |
+| 6 | abdomen peso corporal | concepto | interseccion | Equipamiento: Peso corporal | Anatomía, Equipamiento |
+| 7 | ejercicios con bandas | recuperacion | concepto | Anatomía: Glúteo | Equipamiento, Anatomía |
+| 8 | biceps mancuernas | concepto | interseccion | Equipamiento: Mancuernas | Anatomía, Equipamiento |
+| 9 | ganar fuerza con barra | concepto | interseccion | Equipamiento: Barra | Temas, Equipamiento |
+| 10 | dieta para principiantes | concepto | interseccion | Nivel: Principiante | Temas, Nivel |
+| 11 | pecho kettlebell principiante | concepto | interseccion | Equipamiento: Kettlebell | Anatomía, Equipamiento, Nivel |
+| 12 | pelota de ejercicio abdomen | concepto | interseccion | Equipamiento: Pelota de ejercicio | Anatomía, Equipamiento |
+
+## 6. Qué falló o hubo que corregir
+
+1. **Dos palabras de equipamiento cambiaban consultas de la fase 1.** La primera medición mostró que 2 de las 18 consultas
+   cambiaban: «dolor de **rodilla** sentadilla» nombraba el equipamiento «Rodillo» y «**correr** resistencia cardio» nombraba
+   «Correas», porque el stemmer da la misma raíz (`rodill`, `corr`). Se quitaron «rodillo» (queda «foam roller») y «correas» del
+   vocabulario de consulta (siguen siendo nodos y salen en los menús) y se añadió una prueba que revisa todas las
+   frases de equipamiento y nivel contra las de músculos y temas. Tampoco sirve «rodillo de espuma», porque contiene la raíz de
+   «rodilla»; y «banco» queda fuera por su choque con «banca». Una consecuencia: quien escriba «rodillo» no obtiene ese equipamiento.
+2. **«Pelota de ejercicio» no se reconocía.** «ejercicio» es una palabra de intención que el motor descarta de la consulta,
+   así que la frase completa nunca coincidía. Se nombra con «pelota» o «fitball».
+3. **«Sin especificar» en Nivel tenía aristas pero no era concepto**, y el catálogo fallaba con un `KeyError`. Ahora es un concepto
+   (los menús lo muestran; las consultas no lo pueden nombrar).
+4. **Los argumentos de línea de comandos con acento no son fiables en Windows**, así que las claves de los conceptos que viajan a
+   `puente_arboles.py` van sin acentos ni mayúsculas (`maquina`, `balon medicinal`) y el grupo_id en Anatomía.
+5. **Pruebas que se adaptaron, no se debilitaron.** `test_etiquetas.py` esperaba 12 rutas (una por documento) y ahora espera una por
+   árbol (32 en el contenido de prueba); `interfaz.mjs` esperaba una sola ruta en el detalle y ahora comprueba que la primera sea la
+   de anatomía y que haya una ubicación por árbol.
+6. **Dos errores míos en las pruebas nuevas:** un conteo mal calculado a mano (2 y no 3 artículos) y una espera del navegador que
+   daba por buena una pantalla anterior. Se corrigieron.
+7. **Una suite de navegador falló por tiempo una vez** (`test_interfaz.php`, antes de mis bloques) y pasó al repetirla, como ya
+   estaba documentado.
+8. **Rendimiento:** el motor sigue tardando unos 7,6 s por consulta. De eso, 6,6 s son el `import` de NLTK (anterior a esta fase);
+   construir los cuatro árboles y las aristas cuesta menos de 2 s. No se tocó.
+
+## 7. Pruebas
+
+```
+pytest (scripts_py/tests)  165 passed (con CSV_EJERCICIOS y CSV_ARTICULOS; 30 de ellas, nuevas)
+test_autorizacion.php      24 comprobaciones, 0 fallos
+test_estadisticas.php      49 comprobaciones, 0 fallos
+test_etiquetas.php         34 comprobaciones, 0 fallos
+test_arboles_n.php         28 comprobaciones, 0 fallos (nueva)
+test_admin.php             77 comprobaciones, 0 fallos
+test_ilustraciones.php     85 + 12 comprobaciones, 0 fallos
+test_admin_interfaz.php    73 + 1 comprobaciones, 0 fallos
+test_interfaz.php          92 + 3 comprobaciones, 0 fallos (7 nuevas)
+```
+
+Las 43 pruebas anteriores de árboles y motor pasan sin cambios (con `CSV_EJERCICIOS` y `CSV_ARTICULOS` las 8 de datos reales
+también). Nuevas: `scripts_py/tests/test_arboles_n.py` (altura, hojas, recorridos y posorden de Equipamiento y Nivel; pertenencia
+por etiquetas; las aristas Anatomía x Temas idénticas a las de la fase 1; «pecho mancuernas principiante»; un par sin
+intersección; tres árboles sin intersección total que eligen el mejor par; un solo concepto sin cambios; la misma respuesta con dos
+y con cuatro árboles para músculo y tema; el vocabulario sin choques; catálogo y cruce), `tests/test_arboles_n.php` (HTTP) y nuevas
+comprobaciones en `tests/interfaz.mjs`.
+
+## 8. Cómo probarlo
+
+```
+mysql -uroot gym_buscador < sql/esquema_rutas_arboles.sql
+python scripts_py/generar_etiquetas.py            # una ruta por árbol
+python scripts_py/medir_arboles.py                # la medición
+python scripts_py/motor_arboles.py "pecho mancuernas principiante"
+cd scripts_py && python -m pytest tests -v
+D:\Tools\SHAMP\php\php.exe tests\test_arboles_n.php
+```
+
+## 9. Pendientes
+
+- **Árbol de Patrón de movimiento:** no se construyó. El esquema ya lo admite (`patron` en el ENUM) y añadirlo es registrar un
+  constructor y su pertenencia en `bosque.py` más su vocabulario; sería una clasificación aproximada por palabras clave sobre
+  `nombre_es`, con la lista de ejercicios que no pudo clasificar.
+- Quien escriba «rodillo», «correas» o «banco» no obtiene esos equipamientos como concepto de consulta (ver 6.1); sí están en los menús.
+- Nivel está casi todo en Intermedio; sus cruces con Avanzado tienen 13 ejercicios y 2 artículos.
+- La búsqueda TF-IDF no usa los árboles nuevos: solo el descubrimiento y los menús. Las 18 consultas de referencia dan el mismo
+  resultado de búsqueda que antes de esta fase.
+- Los lotes de la fase 6A siguen sin fusionar y sin push (esta rama depende de ellos).
+- La latencia de 7,6 s por consulta (NLTK) sigue pendiente.

@@ -36,12 +36,21 @@ PHP no está en el PATH: usar `D:\Tools\SHAMP\php\php.exe` y `D:\Tools\SHAMP\mys
   - `estadisticas.php` (`registrar_consulta`, `registrar_eventos`, `registrar_sin_fallar`)
   - `admin_estadisticas.php`: las consultas del panel (una función por sección). `sesion.php` trae
     `requerir_admin()`
-- `scripts_py/`: motor TF-IDF, árboles (`arboles/`), `recommender.py` (centroide + coseno por
+- `scripts_py/arboles/`: cuatro árboles (anatomía, temas, equipamiento, nivel; `taxonomia.py` es la fuente única de
+  nombres y vocabulario). `bosque.py`: `Bosque` = árboles + pertenencia de cada documento a nodos + una `AristasPar` por
+  cada par de árboles (aristas derivadas, en memoria, con lift). `motor.py`: `MotorArboles`; la consulta «nombra» cero, uno o
+  varios árboles (cero: recuperación en anatomía y temas; uno: salta al compañero; varios: intersección total, mejor par
+  `interseccion_parcial` o `sin_interseccion`). El constructor de dos árboles se conserva. `catalogo.py`: catálogo y cruce
+  de cualquier par. El árbol de Patrón de movimiento NO existe todavía (el esquema ya lo admite).
+- `scripts_py/`: motor TF-IDF, `motor_arboles.py` (entrada de PHP), `catalogo_arboles.py` y `puente_arboles.py` (menús
+  A+B de dos árboles cualesquiera), `medir_arboles.py` (medición de la fase 6B), `recommender.py` (centroide + coseno por
   perfil), `db_config.py` (lee la misma config que PHP), `etiquetado.py` (lógica pura) y
   `generar_etiquetas.py` (llena las tablas de etiquetas y rutas; hay que volver a correrlo si
   cambia el contenido).
 - `sql/esquema_cuentas.sql`: cuentas, perfiles, interacciones (por perfil), intentos_login.
   Es idempotente y no tiene `USE`: se aplica a la BD elegida.
+- `sql/esquema_rutas_arboles.sql`: `documento_rutas` con una ruta POR ÁRBOL (clave `origen, doc_id, arbol`; ENUM con
+  `patron` ya incluido). Se aplica después de `esquema_etiquetas.sql`. Idempotente.
 - `sql/esquema_estadisticas.sql`: `eventos` (impresion/apertura/like; `perfil_id` NULL con
   `ON DELETE SET NULL`) y `consultas` (solo raíces; sin perfil ni texto original). Mismo estilo.
 - `sql/esquema_etiquetas.sql`: `etiquetas`, `documento_etiquetas` y `documento_rutas`. Son
@@ -108,6 +117,7 @@ cd scripts_py && python -m pytest tests -v                  # incluye test_aisla
 D:\Tools\SHAMP\php\php.exe tests\test_autorizacion.php       # HTTP: 403, sesión, aislamiento
 D:\Tools\SHAMP\php\php.exe tests\test_estadisticas.php       # HTTP: eventos, consultas, purga
 D:\Tools\SHAMP\php\php.exe tests\test_etiquetas.php          # HTTP: etiquetas, detalle, gráfica
+D:\Tools\SHAMP\php\php.exe tests\test_arboles_n.php          # HTTP: catálogo de 4 árboles, cruce, descubrimiento, rutas
 D:\Tools\SHAMP\php\php.exe tests\test_interfaz.php           # navegador: teclado, filtros, XSS, 375 px, contraste claro/oscuro
 D:\Tools\SHAMP\php\php.exe tests\test_ilustraciones.php      # navegador: captura cada ilustración y cuenta píxeles
 D:\Tools\SHAMP\php\php.exe tests\test_admin.php               # HTTP: panel, 401/403, sin datos personales, totales a mano
@@ -133,6 +143,7 @@ después de responder: una prueba que lea la BD tras buscar debe esperar con otr
 mysql -uroot gym_buscador < sql/esquema_cuentas.sql
 mysql -uroot gym_buscador < sql/esquema_estadisticas.sql
 mysql -uroot gym_buscador < sql/esquema_etiquetas.sql
+mysql -uroot gym_buscador < sql/esquema_rutas_arboles.sql   # una ruta por árbol (fase 6B)
 mysql -uroot gym_buscador < sql/esquema_admin.sql
 php herramientas/crear_admin.php correo@dominio.com   # pide la contraseña; luego abrir admin.php
 python scripts_py/generar_etiquetas.py # etiquetas y rutas; repetir si cambia el contenido
@@ -162,6 +173,10 @@ php herramientas/crear_demo.php        # imprime la contraseña demo una sola ve
   en la BD: un script que encadene los pasos debe abortar si falla uno (en el lote 15 no lo hizo). Los artículos
   `generado` son cortos y genéricos y, con TF-IDF, desplazan a originales más específicos en varias consultas de
   referencia (ver `docs/Avances.md`, fase 6A).
+- Árboles y vocabulario de consulta: el motor compara RAÍCES del stemmer, no palabras. Una palabra que nombre un
+  equipamiento o un nivel no puede compartir raíz con otra que ya nombre un músculo o un tema («rodillo»/«rodilla»,
+  «correas»/«correr», «banco»/«banca»; «ejercicio» es palabra de intención y se descarta). `test_arboles_n.py` revisa todas
+  las frases. Los argumentos de línea de comandos con acento no son fiables en Windows: las claves de concepto van sin acentos.
 - Colores: ninguno va fijo fuera de las variables de `:root` en `assets/estilos.css`, ni dentro
   de los SVG (usan variables o `currentColor`). De eso dependen el modo oscuro y las
   ilustraciones; `tests/test_ilustraciones.php` lo comprueba contando píxeles.
