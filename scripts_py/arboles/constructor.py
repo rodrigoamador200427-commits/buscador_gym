@@ -142,7 +142,9 @@ def construir_arbol_nivel(ejercicios):
         })
         arbol.doc_a_nodo[("ejercicios", int(fila["id"]))] = hoja
 
-    arbol.meta["niveles"] = niveles         # nombre -> Nodo
-    arbol.meta["conceptos"] = niveles
+    arbol.meta["niveles"] = niveles         # nombre -> Nodo (solo los tres niveles reales)
+    # «Sin especificar» también es un nodo con aristas, así que cuenta como concepto (los menús lo
+    # muestran), aunque las consultas no lo pueden nombrar.
+    arbol.meta["conceptos"] = {**niveles, SIN_EQUIPAMIENTO: sin_nivel} if sin_nivel else niveles
     arbol.meta["sin_nivel"] = sin_nivel
     return arbol

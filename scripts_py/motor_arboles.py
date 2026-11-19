@@ -18,7 +18,7 @@ def main():
     from db_config import get_connection
     from nlp_processor import stemmer, stop_words
     from stem_query import THESAURUS, strip_vowels
-    from arboles import construir_aristas, construir_arbol_anatomia, construir_arbol_temas
+    from arboles import Bosque
     from arboles.consulta import raices_de, recuperar
     from arboles.fuentes import articulos_desde_mysql, ejercicios_desde_mysql
     from arboles.motor import MotorArboles
@@ -29,9 +29,9 @@ def main():
         print(json.dumps({"status": "error", "mensaje": "Sin conexión a MySQL"}))
         return
 
-    ejercicios, articulos = ejercicios_desde_mysql(con), articulos_desde_mysql(con)
-    anatomia, temas = construir_arbol_anatomia(ejercicios), construir_arbol_temas(articulos)
-    motor = MotorArboles(anatomia, temas, construir_aristas(articulos, anatomia, temas), stemmer.stem)
+    # Los cuatro árboles (anatomía, temas, equipamiento, nivel) y las aristas entre cada par
+    bosque = Bosque.construir(ejercicios_desde_mysql(con), articulos_desde_mysql(con))
+    motor = MotorArboles.desde_bosque(bosque, stemmer.stem)
 
     cur = con.cursor(dictionary=True)
     cur.execute("SELECT termino FROM diccionario")

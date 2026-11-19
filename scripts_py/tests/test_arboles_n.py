@@ -272,6 +272,44 @@ def test_recuperacion_sigue_usando_solo_anatomia_y_temas(motor):
     assert r["via"] == "recuperacion" and r["origen"]["arbol"] in ("anatomia", "temas")
 
 
+# ======================================================================== catálogo
+def test_catalogo_general_arboles_conceptos_y_pares(bosque):
+    from arboles.catalogo import catalogo_general
+    c = catalogo_general(bosque)
+    assert [a["id"] for a in c["arboles"]] == ["anatomia", "temas", "equipamiento", "nivel"]
+    assert [a["titulo"] for a in c["arboles"]] == ["Anatomía", "Temas", "Equipamiento", "Nivel"]
+    eq = next(a for a in c["arboles"] if a["id"] == "equipamiento")["conceptos"]
+    mancuernas = next(x for x in eq if x["nombre"] == "Mancuernas")
+    assert mancuernas["clave"] == "Mancuernas" and mancuernas["grupo"] == "Pesas libres" and mancuernas["n"] == [2, 2]
+    assert mancuernas["ruta"] == ["Equipamiento", "Pesas libres", "Mancuernas"]
+    pecho = next(x for x in next(a for a in c["arboles"] if a["id"] == "anatomia")["conceptos"] if x["clave"] == "1")
+    assert pecho["nombre"] == "Pecho" and pecho["grupo"] == "Tren superior"
+    assert len(c["pares"]) == 6
+    assert c["pares"]["anatomia|equipamiento"]["1|Mancuernas"] == [2, 2]          # [ejercicios, artículos]
+    assert c["pares"]["anatomia|temas"]["1|Fuerza"] == [0, 1]                    # los ejercicios no entran en Temas
+    assert "1|Kettlebell" not in c["pares"]["anatomia|equipamiento"]              # sin documentos: no se inventa
+    assert json.dumps(c)                                                          # serializable
+
+
+def test_el_catalogo_clasico_sigue_igual(bosque):
+    from arboles.catalogo import catalogo
+    A, T = bosque.arbol("anatomia"), bosque.arbol("temas")
+    c = catalogo(A, T, construir_aristas(ARTICULOS, A, T))
+    assert c["puentes"]["1|Fuerza"] == [10]
+
+
+def test_docs_del_cruce_valida_y_ordena(bosque):
+    from arboles.catalogo import docs_del_cruce
+    nodos, docs = docs_del_cruce(bosque, "anatomia", "1", "equipamiento", "Mancuernas")
+    assert [n.nombre for n in nodos] == ["Pecho", "Mancuernas"]
+    assert docs == [("articulos", 10), ("articulos", 11), ("ejercicios", 1), ("ejercicios", 2)]   # artículos primero
+    assert docs_del_cruce(bosque, "equipamiento", "Mancuernas", "anatomia", "1")[1] == [("articulos", 10), ("articulos", 11), ("ejercicios", 1), ("ejercicios", 2)]
+    for malo in (("anatomia", "1", "anatomia", "2"), ("anatomia", "99", "nivel", "Principiante"),
+                 ("anatomia", "1", "patron", "x"), ("anatomia", "1; DROP", "nivel", "Principiante")):
+        assert docs_del_cruce(bosque, *malo) is None
+    assert docs_del_cruce(bosque, "anatomia", "1", "equipamiento", "Kettlebell")[1] == []         # existe el cruce, sin documentos
+
+
 # ============================================================= datos reales (opcionales)
 CSV_E, CSV_A = os.environ.get("CSV_EJERCICIOS"), os.environ.get("CSV_ARTICULOS")
 reales = pytest.mark.skipif(not (CSV_E and CSV_A and os.path.exists(CSV_E or "") and os.path.exists(CSV_A or "")),

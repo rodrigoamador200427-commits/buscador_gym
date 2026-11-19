@@ -173,8 +173,8 @@ class MotorArboles:
                          f"{len(comunes)} artículos conectan ambos árboles.")
             else:
                 razon = (f"Tu consulta combina {self._lista_nodos(nodos)}: "
-                         f"{self._cuenta_docs(comunes)} pertenecen a {'ambos' if len(nodos) == 2 else 'todos'} "
-                         f"a la vez.")
+                         f"{self._cuenta_docs(comunes)} {'pertenece' if len(comunes) == 1 else 'pertenecen'} a "
+                         f"{'ambos' if len(nodos) == 2 else 'todos'} a la vez.")
             return self._respuesta("interseccion", nodos[0], nodos[1], comunes, scores, traza, razon, nodos=nodos)
 
         if len(arboles) >= 3:
