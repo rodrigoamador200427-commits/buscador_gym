@@ -53,7 +53,8 @@ PHP no está en el PATH: usar `D:\Tools\SHAMP\php\php.exe` y `D:\Tools\SHAMP\mys
 - `sql/esquema_corpus.sql`: `articulos.origen_contenido` ('original' o 'generado').
 - `corpus/`: lotes de artículos de la fase 6A (`lotes/lote_NN.csv`, su `.plan.csv` y `trabajo/`), `objetivos.json`
   (metas aprobadas), `consultas_referencia.json` (18 consultas) y `resultados/` (línea de base y estado tras cada
-  lote). Bloqueada por HTTP. Herramientas en `scripts_py/`: `planear_lote.py`, `ensamblar_lote.py`, `validar_lote.py`,
+  lote). La fase 6A terminó con 17 lotes: 2 000 artículos (341 `original` y 1 659 `generado`). Bloqueada por HTTP.
+  Herramientas en `scripts_py/`: `planear_lote.py`, `ensamblar_lote.py`, `validar_lote.py`,
   `importar_lote.py` y `consultas_referencia.py`.
 - `herramientas/crear_demo.php`: cuenta demo con perfiles "Pecho" y "Pierna" (solo CLI).
 - `herramientas/purgar_estadisticas.php`: borra `consultas` y `eventos` de más de 180 días (solo CLI).
@@ -157,7 +158,10 @@ php herramientas/crear_demo.php        # imprime la contraseña demo una sola ve
   tienen etiquetas ni ruta. Las etiquetas salen de `etiquetado.vocabulario_controlado()` (190); el tema y el músculo de
   un artículo los decide `taxonomia.py` con sus etiquetas, así que un artículo generado solo cae donde se quiere si sus
   etiquetas lo producen (el validador lo comprueba contra el plan). Hay que hacer copia de `articulos`, `diccionario` y
-  `postings` antes del primer lote de una tanda (`backups/` está en `.gitignore`).
+  `postings` antes del primer lote de una tanda (`backups/` está en `.gitignore`). Tras importar, comprobar el conteo
+  en la BD: un script que encadene los pasos debe abortar si falla uno (en el lote 15 no lo hizo). Los artículos
+  `generado` son cortos y genéricos y, con TF-IDF, desplazan a originales más específicos en varias consultas de
+  referencia (ver `docs/Avances.md`, fase 6A).
 - Colores: ninguno va fijo fuera de las variables de `:root` en `assets/estilos.css`, ni dentro
   de los SVG (usan variables o `currentColor`). De eso dependen el modo oscuro y las
   ilustraciones; `tests/test_ilustraciones.php` lo comprueba contando píxeles.

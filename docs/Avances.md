@@ -642,31 +642,6 @@ D:\Tools\SHAMP\php\php.exe tests\test_ilustraciones.php       85 del navegador +
 Para verlo: iniciar sesión en `http://localhost/buscador_gym/` con la cuenta de administrador y abrir
 `http://localhost/buscador_gym/admin.php`. Con `CAPTURAS=<carpeta>` la prueba del navegador guarda capturas.
 
-### Registro de lotes 2 a 17
-
-Cada lote se redactó, validó (0 errores), importó como `generado`, se reindexó y se comparó con las 18 consultas de
-referencia. Columnas: ids importados, palabras (mín-media-máx), similitud máxima con su vecino, pares entre 0,6 y 0,8,
-consultas marcadas REVISAR y notas.
-
-| Lote | Ids | Palabras | Sim. máx | Pares 0,6-0,8 | REVISAR | Notas |
-|---|---|---|---|---|---|---|
-| 02 | 443-542 | 38-42,5-49 | 0,614 | 1 | 1 (n.º 12, mejora) | Hubo que reescribir 4 por pares parecidos o por palabras; 1 por ejercicio sin registros |
-| 03 | 543-642 | 38-42,6-50 | 0,613 | 2 | 2 (n.º 6 y 12, siguen siendo relevantes) | Se corrigieron 11 errores de longitud, título largo, tema o promesa |
-| 04 | 643-742 | 38-42,5-47 | 0,660 | 6 | 5 (n.º 1, 6, 8, 12, 14; relevantes, en el 1 un artículo desplaza a un ejercicio) | Se arregló la regex de «escalador» del validador; 9 errores de longitud, título o músculo corregidos |
-| 05 | 743-842 | 38-42,5-47 | 0,693 | 8 | 4 (n.º 6, 8, 12, 14) | Los artículos de creatina empiezan a desplazar a los originales del top 5 en la consulta n.º 8 |
-| 06 | 843-942 | 38-42-47 | 0,696 | 10 | 5 (n.º 1, 6, 8, 12, 14) | 14 errores (longitud, títulos, tema, músculo, una promesa); se sustituyó un tema duplicado |
-| 07 | 943-1042 | 38-42,7-47 | 0,680 | 7 | 5 (n.º 1, 6, 8, 12, 14) | 10 errores corregidos; aparecen temas casi repetidos en banda y polea, se sustituyeron dos |
-| 08 | 1043-1142 | 38-42,4-49 | 0,679 | 7 | 5 (n.º 1, 6, 8, 12, 14) | 12 errores corregidos; muchos temas de ejercicio se repiten, los próximos lotes cambian de enfoque |
-| 09 | 1143-1242 | 38-42,3-47 | 0,692 | 5 | 5 (n.º 1, 6, 8, 12, 14) | 14 errores corregidos (títulos largos, la palabra «estudio», un tema duplicado); nuevo enfoque: errores comunes, programación y cuidados por músculo |
-| 10 | 1243-1342 | 38-42,6-48 | 0,675 | 12 | ver consultas | Se rehicieron 13 artículos: títulos largos, duplicados de tema, falta de cuota |
-| 11 | 1343-1442 | 38-42,5-48 | 0,679 | 12 | ver Avances | Aparecen pares casi duplicados (hasta 0,79) en pantorrilla, bíceps y abdomen: se rehicieron 7 |
-| 12 | 1443-1542 | 38-42,2-49 | 0,680 | 15 | ver Avances | 18 errores: títulos, longitud y músculo sin indicar en la columna del plan; 6 temas casi duplicados rehechos |
-| 13 | 1543-1642 | 38-41,8-49 | 0,678 | 10 | ver Avances | 15 errores corregidos; enfoque de mitos, preguntas frecuentes y escenarios |
-| 14 | 1643-1742 | 38-41,8-50 | 0,664 | 14 | ver Avances | 21 errores corregidos (títulos largos, longitud, tema/músculo, tres pares casi duplicados) |
-| 15 | 1743-1842 | 38-41,6-48 | 0,700 | 20 | ver Avances | 24 errores corregidos, sobre todo títulos largos; 4 temas casi duplicados rehechos |
-| 16 | 1843-1942 | 38-41,7-52 | 0,690 | 20 | ver Avances | 24 errores y 9 temas casi duplicados (hasta 0,82) rehechos; el espacio de temas por músculo está casi agotado |
-| 17 | 1943-2001 | 38-40,6-45 | 0,697 | 11 | ver Avances | Último lote (59): 11 errores corregidos; total 2 000 artículos |
-
 ## 6. Pendientes
 
 - **El esquema ya está aplicado en `gym_buscador` (17 de noviembre), pero todavía no existe ninguna cuenta
@@ -689,9 +664,9 @@ consultas marcadas REVISAR y notas.
 
 ---
 
-# Fase 6A — Ampliar el corpus de artículos de 341 a unos 2 000 (en curso)
+# Fase 6A — Ampliar el corpus de artículos de 341 a 2 000
 
-**Fecha:** 17 de noviembre de 2026. **Rama:** `fase-6a-corpus`. **Estado:** herramientas y lote 1 de 17 listos.
+**Fecha:** 17 y 18 de noviembre de 2026. **Rama:** `fase-6a-corpus`. **Estado:** completa: 2 000 artículos (341 originales y 1 659 generados) en 17 lotes. Sin push ni pull request todavía.
 
 **Objetivo:** pasar de 341 a unos 2 000 artículos sin repetir el sesgo actual (69 % sin ningún vínculo a
 un músculo; Alimentación, Recuperación y Suplementación sin ninguno), con texto original en español, etiquetas
@@ -790,13 +765,126 @@ python scripts_py\consultas_referencia.py comparar corpus\resultados\base.json -
 Antes del lote 1 se hizo una copia de `articulos`, `diccionario` y `postings` en `backups/` (carpeta fuera de Git).
 `indexer.py` vacía y recalcula todo el índice, así que cada lote cambia un poco el IDF de todos los términos.
 
-## 6. Pendientes
+## 6. Los lotes 2 a 17
 
-- Faltan los lotes 2 a 17 (1 559 artículos): 15 de 100 y uno de 59.
-- Los 45 artículos originales con cantidades en gramos, mg o ml se dejaron como están (decisión tuya); quedan sin
-  editar y contradicen las reglas que sí cumplen los generados.
-- El validador no juzga la exactitud de un consejo de ejercicio ni un tono; depende de la revisión humana de las muestras.
-- `origen_contenido` todavía no se usa en la interfaz ni en el panel (por ejemplo, para comparar el consumo de originales
-  y generados).
-- Los textos son cortos y del mismo dominio: con más lotes la similitud entre artículos subirá; hay que vigilar la banda
-  0,6 a 0,8 en cada reporte.
+Por pedido tuyo ("haz todos los lotes de corrido") los 16 lotes restantes se hicieron seguidos, **sin la revisión de
+muestras que se había acordado entre lote y lote**. Cada lote siguió el mismo ciclo: planear, redactar, ensamblar,
+validar hasta 0 errores, importar, reindexar, regenerar etiquetas y rutas, comparar las 18 consultas, correr las
+pruebas del corpus (53) y un commit. El lote 17 es el de 59 artículos que cierra los 2 000.
+
+| Lote | Ids | Palabras (mín-media-máx) | Sim. máx | Pares 0,6-0,8 | Consultas a revisar (de 18) | Notas |
+|---|---|---|---|---|---|---|
+| 02 | 443-542 | 38-42,5-49 | 0,614 | 1 | 1 | 4 reescritos por pares parecidos o longitud; 1 por un ejercicio sin registros en la tabla |
+| 03 | 543-642 | 38-42,6-50 | 0,613 | 2 | 2 | 11 errores (longitud, títulos largos, tema, una promesa) |
+| 04 | 643-742 | 38-42,5-47 | 0,660 | 6 | 5 | Se arregló la regex de «escalador» del validador (ver 7) |
+| 05 | 743-842 | 38-42,5-47 | 0,693 | 8 | 4 | Los artículos de creatina empiezan a desplazar a los originales |
+| 06 | 843-942 | 38-42,0-47 | 0,696 | 10 | 5 | 14 errores; un tema duplicado sustituido |
+| 07 | 943-1042 | 38-42,7-47 | 0,680 | 7 | 5 | Temas casi repetidos en banda y polea |
+| 08 | 1043-1142 | 38-42,4-49 | 0,679 | 7 | 5 | Los ejercicios por músculo se repiten; cambia el enfoque |
+| 09 | 1143-1242 | 38-42,3-47 | 0,692 | 5 | 6 | Nuevo enfoque: errores comunes, programación y cuidados por músculo |
+| 10 | 1243-1342 | 38-42,6-48 | 0,675 | 12 | 6 | 13 rehechos: títulos largos, duplicados de tema |
+| 11 | 1343-1442 | 38-42,5-48 | 0,679 | 12 | 7 | Pares casi duplicados (hasta 0,79) en pantorrilla, bíceps y abdomen |
+| 12 | 1443-1542 | 38-42,2-49 | 0,680 | 15 | 7 | 9 filas con el músculo sin indicar en la columna del plan |
+| 13 | 1543-1642 | 38-41,8-49 | 0,678 | 10 | 8 | Enfoque de mitos, preguntas frecuentes y escenarios |
+| 14 | 1643-1742 | 38-41,8-50 | 0,664 | 14 | 8 | 21 errores; tres pares casi duplicados rehechos |
+| 15 | 1743-1842 | 38-41,6-48 | 0,700 | 20 | 9 | Hubo un fallo de proceso (ver 7) |
+| 16 | 1843-1942 | 38-41,7-52 | 0,690 | 20 | 9 | 24 errores; 9 pares casi duplicados (hasta 0,82) rehechos |
+| 17 | 1943-2001 | 38-40,6-45 | 0,697 | 11 | 9 | 59 artículos; total 2 000 |
+
+## 7. Qué falló o hubo que corregir durante los lotes 2 a 17
+
+1. **Un fallo real del validador (lote 4).** La regex de la familia «escalador» era `escaladores?`, que no reconocía la
+   palabra en singular y rechazaba artículos que sí nombraban el ejercicio. Se corrigió a `escalador(?:es)?` y se añadió
+   una prueba que comprueba que cada familia se reconozca por su propio nombre.
+2. **El fallo de proceso del lote 15.** El script que encadenaba importación, índice y consultas seguía aunque la
+   importación fallara (el validador aún marcaba un título de 11 palabras): dejé constancia de un lote «importado» y lo
+   comprometí cuando la BD seguía en 1 400 generados. Lo detecté al ver que el reparto del lote siguiente no había
+   cambiado, corregí el título, importé de verdad y enmendé ese commit local (sin push). El script ahora aborta si
+   falla un paso. Lección: comprobar siempre el conteo en la BD, no solo la salida del script.
+3. **Corrupción de la referencia de la rama.** Al reanudar, `git` decía que la rama `fase-6a-corpus` estaba rota: su
+   archivo de referencia contenía 41 bytes nulos (probablemente por un apagado). Los objetos estaban intactos y el
+   reflog daba el último commit, así que se restauró solo ese archivo. `git fsck` quedó limpio.
+4. **Errores de forma recurrentes que el validador sí atrapó:** títulos de más de 10 palabras (el más frecuente),
+   contenidos de 35 a 37 palabras, la palabra «estudio», «garantiza», «dosis», «tratamiento» y «milagroso», etiquetas
+   de otro tema que cambiaban el tema del artículo (un empate favorece al tema que está antes en `TEMAS`) y etiquetas
+   de un segundo músculo que cambiaban el músculo del artículo.
+5. **Saturación de temas.** Con 47 palabras por artículo y 11 músculos por 9 temas, a partir del lote 7 aparecían
+   variantes casi idénticas del mismo ejercicio (banda y glúteo, extensión de tríceps en polea, flexión de muñeca,
+   pantorrilla). El validador rechaza más de 0,8 y se rehicieron todos los pares que superaban 0,7; los lotes 9 a 17
+   cambiaron de enfoque (errores comunes, mitos, preguntas, programación, cuidados) para ganar diversidad.
+6. **Memoria y estabilidad.** MariaDB siguió arrancada todo el tiempo; las pruebas del corpus tardaron entre 11 y 25 s
+   en cada lote.
+
+## 8. Resultado final
+
+| Dato | Valor |
+|---|---|
+| Artículos | 2 000: 341 `original` y 1 659 `generado` (ids 343 a 2001); ningún título repetido |
+| Longitud | generados 38 a 55 palabras (media 42,5); originales 39 a 53 (media 46,5) |
+| Índice | diccionario 3 860 términos; 126 771 postings |
+| Tablas derivadas | 931 etiquetas, 23 503 asignaciones, 4 848 rutas; ningún artículo sin etiquetas ni ruta |
+| Sin ningún músculo | 1 070 de 2 000 (53,5 %); antes eran 236 de 341 (69 %) |
+| Similitud global (coseno) | máxima 0,706; ningún par sobre 0,8; solo 2 artículos con un vecino sobre 0,7; 240 (12 %) con un vecino sobre 0,6 |
+| Similitud media con el vecino más parecido | originales 0,38; generados 0,48 |
+
+Se cumplió exactamente la matriz aprobada: los totales por tema y por músculo son los de `corpus/objetivos.json`
+(Fuerza 270, Hipertrofia 270, Resistencia 170, Técnica 280, Planificación 160, Recuperación 220, Prevención 230,
+Alimentación 280, Suplementación 120; Pecho 110, Espalda 130, Hombro 110, Bíceps 80, Tríceps 80, Cuádriceps 130,
+Isquiotibiales 70, Pantorrilla 40, Glúteo 90, Abdomen 120, Antebrazos 35).
+
+### Efecto en la búsqueda (las 18 consultas de referencia)
+
+Respecto de la línea base, el primer resultado de antes salió de los 3 primeros en 9 de las 18 consultas, y en otras 9 (no
+siempre las mismas) al menos 4 de los 5 primeros resultados son ahora artículos generados; en 5 (proteína después de entrenar, creatina, calentamiento, correr
+resistencia cardio, abdomen plancha) son los 5. En varios casos el nuevo primer resultado es pertinente (p. ej.
+«abdomen plancha» pasa de «Salida con tablones» a un artículo de plancha), pero en otros un artículo genérico y corto
+que contiene las palabras de la consulta desplaza a un original más específico: «proteína después de entrenar» pierde
+«Ventana anabólica: mito y realidad», «creatina» pierde «Creatina en vegetarianos y veganos» del primer puesto y
+«cafeína antes de entrenar» pierde «Cafeína como ayuda ergogénica». Es un efecto esperable del TF-IDF con documentos
+cortos y no se corrigió porque cambiar el ranking queda fuera de esta fase. Si importa, las opciones son ponderar o
+filtrar por `origen_contenido` al buscar, o limitar cuántos artículos genéricos de un mismo tema entran en un
+resultado. Es una decisión tuya.
+
+### Pruebas al final de la fase
+
+```
+pytest (scripts_py/tests)  127 passed, 8 skipped (una prueba nueva: familias de ejercicio del validador)
+test_autorizacion.php      24 comprobaciones, 0 fallos
+test_estadisticas.php      49 comprobaciones, 0 fallos
+test_etiquetas.php         34 comprobaciones, 0 fallos
+test_admin.php             77 comprobaciones, 0 fallos
+test_ilustraciones.php     12 comprobaciones, 0 fallos (tras repetirla)
+test_admin_interfaz.php    1 comprobación (el detalle lo imprime el script de Node), 0 fallos (tras repetirla)
+test_interfaz.php          3 comprobaciones (idem), 0 fallos (tras repetirla)
+Nota: la primera corrida de las tres pruebas de navegador falló porque MariaDB se detuvo a media suite (las dos últimas
+no pudieron conectar). Con el servidor otra vez en marcha y la BD real intacta (341 + 1 659 artículos), las tres pasan.
+Es la tercera vez que MariaDB se cae durante esta fase, sin errores en su registro.
+```
+
+### Muestra al azar de 10 artículos generados
+
+Elegidos con una semilla fija sobre los 1 659 (ver la consulta en `corpus/`, no se guardan aparte): están en la
+respuesta final de la sesión para tu revisión.
+
+## 9. Cómo probarlo
+
+```
+python scripts_py\consultas_referencia.py comparar corpus\resultados\base.json
+cd scripts_py && python -m pytest tests -q
+D:\Tools\SHAMP\mysql\bin\mysql.exe -uroot gym_buscador -e "SELECT origen_contenido, COUNT(*) FROM articulos GROUP BY 1"
+```
+
+## 10. Pendientes
+
+- **Revisión humana:** el validador no juzga si un consejo de ejercicio es exacto ni el tono. Los lotes 2 a 17 se
+  entregaron sin la revisión de muestras que se había acordado entre lotes; conviene que revises una muestra amplia
+  (al menos 5 por lote, de cualquier tema) antes de fusionar.
+- **Decisión sobre el ranking:** ver «Efecto en la búsqueda». Los artículos generados desplazan a originales más
+  específicos en varias consultas.
+- **Redundancia:** el espacio de temas por músculo está casi agotado; 240 artículos (12 %) tienen un vecino con
+  similitud mayor a 0,6. Si se quiere más corpus, conviene cambiar la matriz (menos celdas por músculo) y no solo
+  seguir generando.
+- Los 45 artículos originales con cantidades en gramos, mg o ml se dejaron como están (decisión tuya).
+- `origen_contenido` todavía no se usa en la interfaz ni en el panel.
+- El push y el pull request de `fase-6a-corpus` (19 commits propios) siguen sin hacerse. `backups/` (fuera de Git)
+  tiene la copia previa a la fase; no se actualizó con cada lote.
